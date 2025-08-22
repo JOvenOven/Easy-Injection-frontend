@@ -1,0 +1,146 @@
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--cream);
+  }
+  
+  .register-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  
+  .logo {
+    width: 75px;
+    margin-bottom: 1rem;
+  }
+  
+  h2 {
+    margin-bottom: 0.25rem;
+    color: var(--dark);
+  }
+  
+  .subtitle {
+    color: var(--text);
+    margin-bottom: 2rem;
+  }
+  
+  .form-group {
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--gray);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .form-group small {
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  
+  .generic-input {
+    display: flex;
+    align-items: center;
+  }
+  
+  .generic-input input {
+    flex: 1;
+  }
+  
+  .generic-input .toggle-password {
+    margin-left: -1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .checkbox {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.9rem;
+  }
+  
+  .checkbox input {
+    margin-right: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  
+  .checkbox a {
+    color: var(--pink);
+    text-decoration: none;
+  }
+  
+  .btn-primary {
+    background-color: var(--pink);
+    color: white;
+    border: none;
+    padding: 0.9rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--coral);
+  }
+  
+  .login-link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .login-link a {
+    color: var(--pink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .error {
+    color: var(--red)
+  }
+  
+  .submit-error {
+    color: var(--red);
+    background-color: rgba(255, 0, 0, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  
+  .submit-success {
+    color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  

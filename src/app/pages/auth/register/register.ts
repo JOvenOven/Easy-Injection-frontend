@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -54,22 +55,21 @@ export class RegisterComponent {
       };
 
       // API endpoint for registration
-      this.http.post('http://localhost:3000/api/register', registerData)
+      this.http.post(`${environment.backendUrl}api/register`, registerData)
         .subscribe({
           next: (res: any) => {
             console.log('Registro exitoso', res);
             this.submitSuccess = res.message || 'Usuario registrado exitosamente';
             this.isSubmitting = false;
             
-            // Store token in localStorage
-            if (res.token) {
-              localStorage.setItem('authToken', res.token);
-              localStorage.setItem('userData', JSON.stringify(res.user));
+            // Store user data temporarily (without token since verification is required)
+            if (res.user) {
+              localStorage.setItem('tempUserData', JSON.stringify(res.user));
             }
             
-            // Redirect to home page after 2 seconds
+            // Redirect to register-success page after 2 seconds
             setTimeout(() => {
-              this.router.navigate(['/']);
+              this.router.navigate(['/register-success']);
             }, 2000);
           },
           error: (err) => {
@@ -82,5 +82,9 @@ export class RegisterComponent {
       this.registerForm.markAllAsTouched(); // marca todos los campos como tocados para mostrar errores
       console.log('Formulario inválido');
     }
+  }
+
+  goToPage(pageName:string){
+    this.router.navigate([`${pageName}`]);
   }
 }

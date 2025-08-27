@@ -1,0 +1,54 @@
+<div class="verify-container">
+    <!-- Logo -->
+    <img src="logo.png" alt="EasyInjection logo" class="logo">
+  
+    <!-- Título -->
+    <h1>Easy Injection</h1>
+  
+    <!-- Loading state -->
+    <div *ngIf="verificationStatus === 'verifying'" class="verifying-state">
+      <div class="spinner"></div>
+      <p class="message">Verificando tu email...</p>
+    </div>
+  
+    <!-- Success state -->
+    <div *ngIf="verificationStatus === 'success'" class="success-state">
+      <div class="verify-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <p class="message">
+        ¡FELICIDADES! <br>
+        Tu cuenta ha sido verificada con éxito.
+      </p>
+      <p class="sub-message">
+      Ahora puedes disfrutar de todo lo que <strong>EasyInjection</strong> tiene para ti.
+      </p>
+      <p class="redirect-message">
+        Serás redirigido al login en unos segundos...
+      </p>
+    </div>
+  
+    <!-- Error state -->
+    <div *ngIf="verificationStatus === 'error'" class="error-state">
+      <div class="verify-icon error">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <p class="message error">
+        Error en la verificación
+      </p>
+      <p class="sub-message">
+        {{ error }}
+      </p>
+    </div>
+  
+    <!-- Action buttons -->
+    <div class="action-buttons">
+      <button *ngIf="verificationStatus === 'error'" (click)="goToRegister()" class="btn btn-secondary">
+        Volver al Registro
+      </button>
+      <button (click)="goToLogin()" class="btn btn-primary">
+        Ir a Iniciar Sesión
+      </button>
+    </div>
+  </div>
+  

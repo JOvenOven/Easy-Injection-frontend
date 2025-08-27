@@ -1,0 +1,37 @@
+<div class="success-container">
+    <!-- Logo -->
+    <img src="logo.png" alt="EasyInjection logo" class="logo">
+  
+    <!-- Título -->
+    <h1>Easy Injection</h1>
+  
+    <!-- Ícono de éxito -->
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+  
+    <!-- Mensaje -->
+    <p class="message">
+      ¡Gracias por registrarte en EasyInjection! <br>
+      Pero aún no terminamos.
+    </p>
+    <p class="sub-message">
+      Se te ha enviado un mensaje a tu correo <strong>{{ email }}</strong> para que verifiques tu cuenta.
+    </p>
+    
+    <p class="instructions">
+      Por favor revisa tu bandeja de entrada y haz clic en el enlace de verificación.
+      Si no encuentras el email, revisa tu carpeta de spam.
+    </p>
+  
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+      <button (click)="resendEmail()" class="btn btn-secondary">
+        Reenviar Email
+      </button>
+      <button (click)="goToLogin()" class="btn btn-primary">
+        Ir a Iniciar Sesión
+      </button>
+    </div>
+  </div>
+  

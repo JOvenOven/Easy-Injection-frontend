@@ -13,7 +13,7 @@
             <a href="#how">Cómo funciona</a>
             <a href="#benefits">Beneficios</a>
           </nav>
-          <button class="btn btn-outline">Iniciar sesión</button>
+          <button (click)="goToPage('login')" class="btn btn-outline">Iniciar sesión</button>
           <button (click)="goToPage('register')" class="btn btn-primary">Crear cuenta</button>
         </div>
       </div>
@@ -33,7 +33,7 @@
           <button (click)="goToPage('register')" class="btn btn-primary">
             Crear cuenta gratis
           </button>
-          <button class="btn btn-secondary">Iniciar sesión</button>
+          <button (click)="goToPage('login')" class="btn btn-secondary">Iniciar sesión</button>
         </div>
       </div>
       <img src="android-chrome-192x192.png" alt="EasyInjection ilustración" />
@@ -41,7 +41,7 @@
   </section>
 
   <!-- Features Section -->
-  <section class="features">
+  <section class="features" id="features">
     <h2>¿Por qué elegir EasyInjection?</h2>
     <p>Una plataforma completa para aprender, practicar y dominar la seguridad web</p>
 
@@ -73,7 +73,7 @@
   </section>
 
   <!-- How it works Section -->
-  <section class="how">
+  <section class="how" id="how">
     <h2>¿Cómo funciona?</h2>
     <p class="subtitle">Un proceso simple para aprender seguridad web de forma efectiva</p>
 
@@ -99,15 +99,42 @@
   </section>
 
   <!-- Benefits Section -->
-  <section class="benefits">
+  <section class="benefits" id="benefits">
     <h2>Beneficios</h2>
     <p>Lo que obtendrás al usar EasyInjection</p>
 
     <div class="benefits-grid">
-      <div class="benefit-item">✔ Conocimiento práctico <br><span>Aprende haciendo, no solo leyendo.</span></div>
-      <div class="benefit-item">✔ Herramientas profesionales <br><span>Utiliza las mismas que los expertos en seguridad.</span></div>
-      <div class="benefit-item">✔ Aprendizaje progresivo <br><span>Avanza de lo básico a lo avanzado a tu ritmo.</span></div>
-      <div class="benefit-item">✔ Comunidad de aprendizaje <br><span>Compite y compara tu progreso en el scoreboard.</span></div>
+      <div class="benefit-item">
+        <div class="icon">✔</div>
+        <div>
+          <strong>Conocimiento práctico</strong>
+          <span>Aprende haciendo, no solo leyendo. Nuestro enfoque práctico te permite aplicar lo que aprendes inmediatamente.</span>
+        </div>
+      </div>
+
+      <div class="benefit-item">
+        <div class="icon">✔</div>
+        <div>
+          <strong>Herramientas profesionales</strong>
+          <span>Utiliza las mismas herramientas que los profesionales de seguridad, como SQLmap y Dalfox.</span>
+        </div>
+      </div>
+
+      <div class="benefit-item">
+        <div class="icon">✔</div>
+        <div>
+          <strong>Aprendizaje progresivo</strong>
+          <span>Comienza con lo básico y avanza a conceptos más complejos a tu propio ritmo.</span>
+        </div>
+      </div>
+
+      <div class="benefit-item">
+        <div class="icon">✔</div>
+        <div>
+          <strong>Comunidad de aprendizaje</strong>
+          <span>Compite y compara tu progreso con otros estudiantes en el scoreboard.</span>
+        </div>
+      </div>
     </div>
   </section>
 

@@ -1,0 +1,175 @@
+/* ==== Layout del dashboard ==== */
+.home {
+  min-height: 100vh;
+  background: var(--cream);
+  padding: 32px;
+  color: var(--text);
+  font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  .hero {
+    text-align: center;
+    margin-bottom: 32px;
+
+    &__title {
+      font-weight: 800;
+      font-size: clamp(28px, 4vw, 40px);
+      margin: 0 0 6px 0;
+    }
+
+    &__subtitle {
+      color: #666;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    &__logo {
+      width: 84px;
+      height: auto;
+      margin: 0 auto 12px auto;
+      display: block;
+    }
+  }
+
+  /* ---- Tarjetas de acceso rápido ---- */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 36px;
+
+    @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 640px)  { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.05);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+
+    &__title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 6px 0 8px;
+    }
+
+    &__text {
+      font-size: 14px;
+      color: #6b7280;
+      min-height: 40px;
+      margin-bottom: 16px;
+    }
+
+    /* Botones */
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform .05s ease, background-color .2s ease, border-color .2s ease;
+      &:active { transform: translateY(1px); }
+    }
+
+    .btn--primary {
+      background: var(--pink);
+      color: #fff;
+      &:hover { background: var(--coral); }
+    }
+
+    .btn--outline-pink {
+      color: var(--pink);
+      border-color: var(--pink);
+      background: transparent;
+      &:hover { background: rgba(var(--pink,) .07); }
+    }
+
+    .btn--outline-blue {
+      color: var(--blue);
+      border-color: var(--blue);
+      background: transparent;
+      &:hover { background: rgba(var(--blue), .08); }
+    }
+
+    .btn--outline-gray {
+      color: #6b7280;
+      border-color: var(--gray);
+      background: transparent;
+      &:hover { background: rgba(var(--gray), .15); }
+    }
+  }
+
+  /* ---- Grid inferior (actividad / estadísticas) ---- */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+
+    @media (max-width: 1024px) { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.05);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+
+    &__title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 14px 0;
+    }
+  }
+
+  /* ---- Actividad reciente ---- */
+  .activity {
+    .item {
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child { border-bottom: 0; }
+
+      &__title {
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      &__desc {
+        font-size: 14px;
+        color: #6b7280;
+      }
+      &__time {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 12px;
+        color: #9ca3af;
+      }
+    }
+  }
+
+  /* ---- Estadísticas ---- */
+  .stats {
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed #eee;
+
+      &:last-child { border-bottom: 0; }
+
+      &__label { color: #374151; }
+      &__value { font-weight: 800; }
+    }
+
+    .full-btn {
+      margin-top: 16px;
+      width: 100%;
+      @extend .btn;
+      @extend .btn--outline-pink;
+    }
+  }
+}

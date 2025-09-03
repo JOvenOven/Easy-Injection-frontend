@@ -9,5 +9,7 @@ export const routes: Routes = [
     { path: 'register', component: RegisterComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register-success', component: RegisterSuccessComponent },
-    { path: 'verify-success', component: VerifySuccessComponent }
+    { path: 'verify-success', component: VerifySuccessComponent },
+    { path: 'dashboard', loadChildren: () => import('./pages/dashboard/dashboard-module').then(m => m.DashboardModule) },
+    { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
   ];  

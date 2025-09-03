@@ -1,0 +1,49 @@
+<div class="sidebar" [ngClass]="{ 'collapsed': isCollapsed }">
+    <!-- Botón toggle -->
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="fas" [ngClass]="isCollapsed ? 'fa-angle-right' : 'fa-angle-left'"></i>
+    </button>
+  
+    <!-- Logo -->
+    <div class="logo" *ngIf="!isCollapsed">
+      <img src="assets/img/logo.png" alt="EasyInjection logo">
+      <span>EasyInjection</span>
+    </div>
+  
+    <!-- Menú -->
+    <ul>
+      <li>
+        <i class="fas fa-home"></i>
+        <span *ngIf="!isCollapsed">Inicio</span>
+      </li>
+      <li>
+        <i class="fas fa-book"></i>
+        <span *ngIf="!isCollapsed">Teoría</span>
+      </li>
+      <li>
+        <i class="fas fa-bullseye"></i>
+        <span *ngIf="!isCollapsed">Nuevo Escaneo</span>
+      </li>
+      <li>
+        <i class="fas fa-list"></i>
+        <span *ngIf="!isCollapsed">Mis Escaneos</span>
+      </li>
+      <li>
+        <i class="fas fa-trophy"></i>
+        <span *ngIf="!isCollapsed">Scoreboard</span>
+      </li>
+    </ul>
+  
+    <!-- Footer -->
+    <div class="footer">
+      <li>
+        <i class="fas fa-user"></i>
+        <span *ngIf="!isCollapsed">Mi Cuenta</span>
+      </li>
+      <li>
+        <i class="fas fa-sign-out-alt"></i>
+        <span *ngIf="!isCollapsed">Cerrar Sesión</span>
+      </li>
+    </div>
+  </div>
+  

@@ -75,7 +75,7 @@ export class AuthService {
     const token = this.getToken();
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'x-auth-token': token || ''
+      'Authorization': `Bearer ${token}`
     });
   }
 

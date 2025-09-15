@@ -1,0 +1,36 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--cream, #f8f9fa);
+}
+
+.main-content {
+  flex: 1;
+  margin-top: 60px;
+  margin-left: 220px; // Default sidebar width
+  padding: 0;
+  overflow-x: auto;
+  transition: margin-left 0.3s ease;
+  
+  // When sidebar is collapsed
+  .sidebar.collapsed ~ & {
+    margin-left: 70px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .sidebar {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+}

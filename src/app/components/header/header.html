@@ -1,0 +1,34 @@
+<header class="header">
+  <div class="header-content">
+    <!-- Left side - Logo/Title -->
+    <div class="header-left">
+      <h1 class="header-title">EasyInjection</h1>
+    </div>
+
+    <!-- Right side - Search and Notifications -->
+    <div class="header-right">
+      <!-- Search Bar -->
+      <div class="search-container">
+        <button class="search-button" (click)="onSearch()">
+            <span class="search-icon">🔍</span>
+          </button>
+
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Búsqueda de escaneos"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+        >
+      </div>
+
+      <!-- Notifications Bell -->
+      <div class="notifications-container">
+        <button class="notification-button" (click)="onNotificationClick()">
+          <span class="notification-icon">🔔</span>
+          <span class="notification-badge" *ngIf="hasNotifications">{{ notificationCount }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>

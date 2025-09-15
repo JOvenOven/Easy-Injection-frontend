@@ -1,83 +1,74 @@
-<div class="p-6">
-    <h1 class="text-3xl font-bold text-center mb-2">EasyInjection</h1>
-    <p class="text-center text-gray-600 mb-8">
-      Entender las vulnerabilidades de inyección nunca fue tan fácil.
-    </p>
-  
-    <!-- Cards superiores -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-      <div class="bg-white shadow-md rounded-lg p-6 text-center">
-        <h3 class="text-lg font-semibold mb-2">Nuevo Escaneo</h3>
-        <p class="text-gray-600 mb-4">Inicia un nuevo análisis de vulnerabilidades</p>
-        <button class="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
-          Comenzar
-        </button>
-      </div>
-  
-      <div class="bg-white shadow-md rounded-lg p-6 text-center">
-        <h3 class="text-lg font-semibold mb-2">Mis Escaneos</h3>
-        <p class="text-gray-600 mb-4">Revisa tus escaneos anteriores y resultados</p>
-        <button class="border border-pink-600 text-pink-600 px-4 py-2 rounded-lg hover:bg-pink-50">
-          Ver escaneos
-        </button>
-      </div>
-  
-      <div class="bg-white shadow-md rounded-lg p-6 text-center">
-        <h3 class="text-lg font-semibold mb-2">Teoría</h3>
-        <p class="text-gray-600 mb-4">Aprende sobre vulnerabilidades y cómo prevenirlas</p>
-        <button class="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50">
-          Explorar recursos
-        </button>
-      </div>
-  
-      <div class="bg-white shadow-md rounded-lg p-6 text-center">
-        <h3 class="text-lg font-semibold mb-2">Scoreboard</h3>
-        <p class="text-gray-600 mb-4">Compite y compara tu progreso con otros usuarios</p>
-        <button class="border border-gray-400 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100">
-          Ver ranking
-        </button>
+<div class="home">
+  <!-- Hero Section -->
+  <div class="hero">
+    <img src="logo.png" alt="EasyInjection logo" class="hero__logo">
+    <h1 class="hero__title">Bienvenido a EasyInjection</h1>
+    <p class="hero__subtitle">Entender las vulnerabilidades de inyección nunca fue tan fácil</p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <div class="card">
+      <h3 class="card__title">Nuevo Escaneo</h3>
+      <p class="card__text">Inicia un nuevo análisis de vulnerabilidades</p>
+      <button class="btn btn--primary">Comenzar</button>
+    </div>
+
+    <div class="card">
+      <h3 class="card__title">Mis Escaneos</h3>
+      <p class="card__text">Revisa tus escaneos anteriores y resultados</p>
+      <button class="btn btn--outline-pink">Ver escaneos</button>
+    </div>
+
+    <div class="card">
+      <h3 class="card__title">Teoría</h3>
+      <p class="card__text">Aprende sobre vulnerabilidades y cómo prevenirlas</p>
+      <button class="btn btn--outline-blue">Explorar recursos</button>
+    </div>
+
+    <div class="card">
+      <h3 class="card__title">Scoreboard</h3>
+      <p class="card__text">Compite y compara tu progreso con otros usuarios</p>
+      <button class="btn btn--outline-gray">Ver ranking</button>
+    </div>
+  </div>
+
+  <!-- Bottom Grid -->
+  <div class="bottom-grid">
+    <!-- Recent Activity -->
+    <div class="panel">
+      <h3 class="panel__title">Actividad reciente</h3>
+      <div class="activity">
+        <div class="item" *ngFor="let item of recentActivity">
+          <div class="item__title">{{ item.title }}</div>
+          <div class="item__desc">{{ item.description }}</div>
+          <div class="item__time">{{ item.time }}</div>
+        </div>
       </div>
     </div>
-  
-    <!-- Sección inferior -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Actividad reciente -->
-      <div class="bg-white shadow-md rounded-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Actividad reciente</h3>
-        <ul class="space-y-4">
-          <li *ngFor="let item of recentActivity">
-            <p class="font-semibold">{{ item.title }}</p>
-            <p class="text-gray-600 text-sm">{{ item.description }}</p>
-            <span class="text-xs text-gray-400">{{ item.time }}</span>
-          </li>
-        </ul>
-      </div>
-  
-      <!-- Estadísticas -->
-      <div class="bg-white shadow-md rounded-lg p-6">
-        <h3 class="text-lg font-bold mb-4">Tus estadísticas</h3>
-        <ul class="text-sm space-y-2">
-          <li class="flex justify-between">
-            <span>Escaneos realizados</span>
-            <span>{{ stats.escaneos }}</span>
-          </li>
-          <li class="flex justify-between">
-            <span>Vulnerabilidades detectadas</span>
-            <span>{{ stats.vulnerabilidades }}</span>
-          </li>
-          <li class="flex justify-between">
-            <span>Puntos acumulados</span>
-            <span>{{ stats.puntos }}</span>
-          </li>
-          <li class="flex justify-between">
-            <span>Posición en el ranking</span>
-            <span>#{{ stats.ranking }}</span>
-          </li>
-        </ul>
-        <button class="mt-4 w-full border border-pink-600 text-pink-600 px-4 py-2 rounded-lg hover:bg-pink-50">
-          Ver estadísticas completas
-        </button>
+
+    <!-- Statistics -->
+    <div class="panel">
+      <h3 class="panel__title">Tus estadísticas</h3>
+      <div class="stats">
+        <div class="row">
+          <span class="row__label">Escaneos realizados</span>
+          <span class="row__value">{{ stats.escaneos }}</span>
+        </div>
+        <div class="row">
+          <span class="row__label">Vulnerabilidades detectadas</span>
+          <span class="row__value">{{ stats.vulnerabilidades }}</span>
+        </div>
+        <div class="row">
+          <span class="row__label">Puntos acumulados</span>
+          <span class="row__value">{{ stats.puntos }}</span>
+        </div>
+        <div class="row">
+          <span class="row__label">Posición en el ranking</span>
+          <span class="row__value">#{{ stats.ranking }}</span>
+        </div>
+        <button class="btn btn--outline-pink full-btn">Ver estadísticas completas</button>
       </div>
     </div>
   </div>
-  
+</div>

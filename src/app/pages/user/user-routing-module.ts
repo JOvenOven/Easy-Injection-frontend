@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardLayoutComponent } from '../../shared/components/dashboard-layout/dashboard-layout';
-import { Home } from './home/home';
+import { Account } from './account/account';
 
 const routes: Routes = [
   {
     path: '',
     component: DashboardLayoutComponent,
     children: [
-      { path: '', component: Home }, // ruta por defecto del módulo dashboard
-      // Add more dashboard routes here as children
+      { path: 'account', component: Account },
+      { path: '', redirectTo: 'account', pathMatch: 'full' }
     ]
   }
 ];
@@ -18,4 +18,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class DashboardRoutingModule { }
+export class UserRoutingModule { }

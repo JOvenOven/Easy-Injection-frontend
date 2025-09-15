@@ -1,0 +1,620 @@
+$rosa: #d63d6c;
+$gris: #c0cbcd;
+$gris-oscuro: #6b6b6b;
+$azul: #65b2c6;
+$crema: #efeded;
+
+.account {
+  padding: 2rem;
+
+  .account-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .account-subtitle {
+    color: $gris-oscuro;
+    margin-bottom: 2rem;
+  }
+
+  // Notification styles
+  .notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+
+    &.submit-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    &.submit-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  // Modal notification styles
+  .modal-notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+
+    &.submit-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    &.submit-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .account-container {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .account-sidebar {
+    width: 220px;
+    background: $crema;
+    border-radius: 12px;
+    padding: 1rem;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1.5rem;
+
+      li {
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        color: $gris-oscuro;
+
+        &.active {
+          background: white;
+          border: 1px solid $rosa;
+          color: $rosa;
+          font-weight: 600;
+        }
+
+        &:hover {
+          background: rgba($rosa, 0.1);
+        }
+      }
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: none;
+      border: 1px solid $rosa;
+      color: $rosa;
+      padding: 0.7rem;
+      border-radius: 8px;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba($rosa, 0.1);
+      }
+    }
+  }
+
+  .account-content {
+    flex: 1;
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      p {
+        color: $gris-oscuro;
+        margin: 0.4rem 0;
+      }
+
+      .profile-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .avatar {
+          width: 70px;
+          height: 70px;
+          border-radius: 50%;
+          border: 2px solid $rosa;
+        }
+      }
+
+      .session-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.8rem;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        margin: 1rem 0;
+
+        .status {
+          color: green;
+          font-weight: 600;
+        }
+      }
+
+      .btn-outline {
+        border: 1px solid $gris;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        background: none;
+
+        &:hover {
+          border-color: $rosa;
+          color: $rosa;
+        }
+
+        &.full {
+          width: 100%;
+          margin-top: 1rem;
+        }
+      }
+    }
+  }
+}
+
+
+
+// MODIFY PASSWORD MODAL STYLES
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+
+  h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: $gris-oscuro;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+      background: #f5f5f5;
+      color: #333;
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+
+  .modal-description {
+    color: $gris-oscuro;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .password-input {
+      position: relative;
+      display: flex;
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+        padding-right: 3rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+
+        &:focus {
+          outline: none;
+          border-color: $rosa;
+          box-shadow: 0 0 0 2px rgba($rosa, 0.2);
+        }
+
+        &::placeholder {
+          color: #999;
+        }
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+
+        &:hover {
+          background: #f5f5f5;
+        }
+      }
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+
+    .btn-cancel {
+      background: white;
+      border: 1px solid #ddd;
+      color: $gris-oscuro;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: $gris-oscuro;
+        background: #f9f9f9;
+      }
+    }
+
+    .btn-save {
+      background: $rosa;
+      border: none;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s;
+
+      &:hover:not(:disabled) {
+        background: adjust-color($rosa, $lightness: -10%);
+      }
+
+      &:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+
+
+// EDIT PROFILE MODAL STYLES
+.edit-profile-modal {
+  max-width: 600px;
+  width: 90%;
+
+  .profile-tabs {
+    display: flex;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 1.5rem;
+
+    .tab-button {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      color: $gris-oscuro;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+
+      &:hover {
+        color: $rosa;
+        background: rgba($rosa, 0.05);
+      }
+
+      &.active {
+        color: $rosa;
+        border-bottom-color: $rosa;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .tab-content {
+    min-height: 180px;
+  }
+
+//   .form-group {
+//     display: flex;
+//   }
+
+  .username-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $rosa;
+      box-shadow: 0 0 0 2px rgba($rosa, 0.2);
+    }
+  }
+
+  .username-requirements {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid $rosa;
+
+    h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: $gris-oscuro;
+
+      li {
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .current-avatar-section {
+    margin-bottom: 2rem;
+
+    h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .current-avatar-display {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+
+      .current-avatar-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid $rosa;
+        object-fit: cover;
+      }
+
+      .avatar-name {
+        margin: 0;
+        font-weight: 500;
+        color: #333;
+      }
+    }
+  }
+
+  .avatar-gallery {
+    h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 0.5rem;
+
+      .avatar-option {
+        position: relative;
+        cursor: pointer;
+        border-radius: 50%;
+        overflow: hidden;
+        transition: all 0.2s;
+        border: 3px solid transparent;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        &.selected {
+          border-color: $rosa;
+          box-shadow: 0 0 0 2px rgba($rosa, 0.3);
+        }
+
+        .avatar-thumbnail {
+          width: 100%;
+          height: 80px;
+          object-fit: cover;
+          display: block;
+        }
+
+        .avatar-checkmark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: $rosa;
+          color: white;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+
+    .btn-cancel,
+    .btn-save {
+      width: 100%;
+    }
+  }
+
+  .edit-profile-modal {
+    .profile-tabs {
+      .tab-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    .avatar-grid {
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 0.5rem;
+
+      .avatar-option .avatar-thumbnail {
+        height: 60px;
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -9,6 +10,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './home.scss'
 })
 export class Home {
+  constructor(private router: Router) {}
   // Mock data temporal (luego lo puedes traer del backend)
   recentActivity = [
     {
@@ -33,5 +35,21 @@ export class Home {
     vulnerabilidades: 37,
     puntos: 720,
     ranking: 5
-  };  
+  };
+
+  goToNewScan() {
+    this.router.navigate(['/dashboard/new-scan']);
+  }
+
+  goToScans() {
+    this.router.navigate(['/dashboard/scans']);
+  }
+
+  goToTheory() {
+    this.router.navigate(['/dashboard/theory']);
+  }
+
+  goToScoreboard() {
+    this.router.navigate(['/dashboard/scoreboard']);
+  }
 }

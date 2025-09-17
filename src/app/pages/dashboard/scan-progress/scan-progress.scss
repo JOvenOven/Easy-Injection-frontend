@@ -1,0 +1,914 @@
+$rosa: #d63d6c;
+$gris: #c0cbcd;
+$gris-oscuro: #6b6b6b;
+$azul: #65b2c6;
+$crema: #efeded;
+$verde: #4ecdc4;
+$rojo: #ff6b6b;
+$amarillo: #ffd93d;
+$naranja: #ff8c00;
+
+.scan-progress {
+  padding: 1rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+
+  // Top Bar
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1.5rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .scan-controls {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+
+  // Main Header
+  .main-header {
+    background: white;
+
+    .scan-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+      padding-bottom: 0.5rem;
+    }
+
+    .scan-info {
+      display: flex;
+      gap: 2rem;
+      color: $gris-oscuro;
+
+      .scan-url {
+        font-family: 'Courier New', monospace;
+        background: $crema;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+      }
+
+      .scan-types {
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Evaluation Questions Banner
+  .evaluation-banner {
+    background: $rosa;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+
+    .banner-content {
+      h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        padding-bottom: 0.5rem;
+      }
+
+      p {
+        margin: 0;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  // General Progress
+  .progress-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      padding-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: $crema;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, $azul, $verde);
+        border-radius: 6px;
+        transition: width 0.3s ease;
+      }
+    }
+
+    .progress-text {
+      font-weight: 600;
+      color: #333;
+      font-size: 1.1rem;
+    }
+  }
+
+  // Main Content Grid
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Left Column
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // Right Column
+  .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // Common Section Styles
+  .phases-section,
+  .endpoints-section,
+  .question-section,
+  .logs-section,
+  .vulnerabilities-section,
+  .stats-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  // Scan Phases
+  .phases-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .phase-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem;
+      border: 2px solid $gris;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &.completed {
+        border-color: $verde;
+        background: rgba(78, 205, 196, 0.05);
+      }
+
+      &.running {
+        border-color: $azul;
+        background: rgba(101, 178, 198, 0.05);
+      }
+
+      .phase-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+
+        .completed & {
+          background: $verde;
+          color: white;
+        }
+
+        .running & {
+          background: $azul;
+          color: white;
+        }
+
+        .pending & {
+          background: $gris;
+          color: white;
+        }
+      }
+
+      .phase-content {
+        flex: 1;
+
+        .phase-name {
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.25rem;
+        }
+
+        .phase-progress {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 0.5rem;
+
+          .phase-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: $crema;
+            border-radius: 3px;
+            overflow: hidden;
+
+            .phase-progress-fill {
+              height: 100%;
+              background: $azul;
+              border-radius: 3px;
+              transition: width 0.3s ease;
+            }
+          }
+
+          .phase-progress-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: $azul;
+          }
+        }
+
+        .phase-time {
+          font-size: 0.85rem;
+          color: $gris-oscuro;
+        }
+      }
+    }
+  }
+
+  // Discovered Endpoints
+  .endpoints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .endpoint-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border: 1px solid $gris;
+
+      &.status-pending {
+        background: #f8f9fa;
+        border-color: $gris;
+      }
+
+      &.status-analyzing {
+        background: rgba(101, 178, 198, 0.1);
+        border-color: $azul;
+      }
+
+      &.status-vulnerable {
+        background: rgba(214, 61, 108, 0.1);
+        border-color: $rosa;
+      }
+
+      &.status-safe {
+        background: rgba(78, 205, 196, 0.1);
+        border-color: $verde;
+      }
+
+      .endpoint-info {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+
+        .endpoint-path {
+          font-family: 'Courier New', monospace;
+          font-weight: 500;
+          color: #333;
+        }
+
+        .endpoint-method {
+          background: $azul;
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+      }
+
+      .endpoint-status {
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        .status-pending & { color: $gris-oscuro; }
+        .status-analyzing & { color: $azul; }
+        .status-vulnerable & { color: $rosa; }
+        .status-safe & { color: $verde; }
+      }
+    }
+
+    .endpoints-summary {
+      font-size: 0.9rem;
+      color: $gris-oscuro;
+      text-align: center;
+    }
+  }
+
+  // Evaluation Questions
+  .question-card {
+    background: $rosa;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+
+    h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .question-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+
+      .option-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+
+        &.selected {
+          background: rgba(255, 255, 255, 0.3);
+          border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        input[type="radio"] {
+          accent-color: white;
+        }
+
+        .option-text {
+          flex: 1;
+        }
+      }
+    }
+
+    .question-actions {
+      display: flex;
+      justify-content: flex-end;
+
+      .btn--verify {
+        background: white;
+        color: $rosa;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: $crema;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  // Scan Logs
+  .logs-container {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e9ecef;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .log-time {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        color: $gris-oscuro;
+        min-width: 80px;
+      }
+
+      .log-message {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #333;
+      }
+
+      .log-icon {
+        color: $verde;
+        font-weight: bold;
+      }
+
+      &.log-info .log-message { color: #333; }
+      &.log-success .log-message { color: $verde; }
+      &.log-warning .log-message { color: $naranja; }
+      &.log-error .log-message { color: $rojo; }
+    }
+  }
+
+  // Detected Vulnerabilities
+  .vulnerabilities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .vulnerability-item {
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid;
+
+      &.severity-critical {
+        background: rgba(255, 107, 107, 0.1);
+        border-left-color: $rojo;
+      }
+
+      &.severity-high {
+        background: rgba(255, 140, 0, 0.1);
+        border-left-color: $naranja;
+      }
+
+      &.severity-medium {
+        background: rgba(255, 217, 61, 0.1);
+        border-left-color: $amarillo;
+      }
+
+      &.severity-low {
+        background: rgba(78, 205, 196, 0.1);
+        border-left-color: $verde;
+      }
+
+      .vuln-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        .vuln-type {
+          font-weight: 600;
+          color: #333;
+        }
+
+        .vuln-severity {
+          font-size: 0.9rem;
+          font-weight: 600;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+
+          .severity-critical & { background: $rojo; color: white; }
+          .severity-high & { background: $naranja; color: white; }
+          .severity-medium & { background: $amarillo; color: #333; }
+          .severity-low & { background: $verde; color: white; }
+        }
+      }
+
+      .vuln-details {
+        font-size: 0.9rem;
+        color: $gris-oscuro;
+
+        div {
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+
+    .btn--view-all {
+      width: 100%;
+      background: $azul;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: darken($azul, 10%);
+      }
+    }
+  }
+
+  // Statistics
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: $crema;
+      border-radius: 8px;
+
+      .stat-value {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.25rem;
+
+        &.xss {
+          color: $naranja;
+        }
+
+        &.sqli {
+          color: $rosa;
+        }
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: $gris-oscuro;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Results Button
+  .results-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+
+    .btn--results {
+      background: $verde;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: darken($verde, 10%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+      }
+    }
+  }
+
+  // Modal Styles
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .results-modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 2px solid $crema;
+
+        h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #333;
+          margin: 0;
+        }
+
+        .modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: $gris-oscuro;
+
+          &:hover {
+            color: #333;
+          }
+        }
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+
+        .results-summary {
+          margin-bottom: 2rem;
+
+          h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+          }
+
+          .vuln-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+
+            .vuln-type-summary {
+              background: $crema;
+              padding: 1rem;
+              border-radius: 8px;
+
+              h5 {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 0.5rem;
+              }
+
+              p {
+                color: $gris-oscuro;
+                margin: 0;
+              }
+            }
+          }
+        }
+
+        .detailed-vulnerabilities {
+          h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+          }
+
+          .vuln-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            .vuln-detail-item {
+              padding: 1.5rem;
+              border-radius: 8px;
+              border-left: 4px solid;
+
+              &.severity-critical {
+                background: rgba(255, 107, 107, 0.05);
+                border-left-color: $rojo;
+              }
+
+              &.severity-high {
+                background: rgba(255, 140, 0, 0.05);
+                border-left-color: $naranja;
+              }
+
+              &.severity-medium {
+                background: rgba(255, 217, 61, 0.05);
+                border-left-color: $amarillo;
+              }
+
+              &.severity-low {
+                background: rgba(78, 205, 196, 0.05);
+                border-left-color: $verde;
+              }
+
+              .vuln-detail-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+
+                .vuln-id {
+                  font-family: 'Courier New', monospace;
+                  font-weight: 600;
+                  color: #333;
+                }
+
+                .vuln-severity-badge {
+                  padding: 0.25rem 0.75rem;
+                  border-radius: 20px;
+                  font-size: 0.8rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+
+                  .severity-critical & { background: $rojo; color: white; }
+                  .severity-high & { background: $naranja; color: white; }
+                  .severity-medium & { background: $amarillo; color: #333; }
+                  .severity-low & { background: $verde; color: white; }
+                }
+              }
+
+              .vuln-detail-content {
+                p {
+                  margin-bottom: 0.5rem;
+                  color: #333;
+
+                  strong {
+                    color: #333;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding: 1.5rem;
+        border-top: 2px solid $crema;
+
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &--outline {
+            background: white;
+            color: $azul;
+            border: 2px solid $azul;
+
+            &:hover {
+              background: $azul;
+              color: white;
+            }
+          }
+
+          &--primary {
+            background: $rosa;
+            color: white;
+            border: none;
+
+            &:hover {
+              background: darken($rosa, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Button Styles
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &--scanning {
+      background: $azul;
+      color: white;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    &--pause {
+      background: $amarillo;
+      color: #333;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    &--stop {
+      background: $rojo;
+      color: white;
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .scan-progress {
+    padding: 0.5rem;
+
+    .top-bar {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      .search-container {
+        max-width: none;
+      }
+
+      .scan-controls {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .main-header {
+      padding: 1rem;
+
+      .scan-info {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-overlay .results-modal {
+      width: 95%;
+      margin: 1rem;
+    }
+  }
+}

@@ -1,0 +1,336 @@
+<div class="my-scans">
+  <!-- Header Section -->
+  <div class="scans-header">
+    <div class="header-content">
+      <h1 class="scans-title">Mis Escaneos</h1>
+      <p class="scans-subtitle">Historial de escaneos realizados y sus resultados</p>
+    </div>
+    <div class="controls-right">
+      <button class="btn--primary" (click)="goToNewScan()">
+        <span class="btn-icon">+</span>
+        Nuevo Escaneo
+      </button>
+    </div>
+  </div>
+
+  <!-- Controls Section -->
+  <div class="scans-controls">
+    <div class="search-section">
+      <input 
+        type="text" 
+        placeholder="Buscar por alias o URL..." 
+        class="search-input"
+        [(ngModel)]="searchTerm"
+        (input)="searchScans()"
+      >
+    </div>
+
+    <div class="filters-left">
+      <div class="filter-group">
+        <select 
+          id="status-filter" 
+          class="filter-select"
+          [(ngModel)]="statusFilter"
+          (change)="applyFilters()"
+        >
+          <option value="" disabled selected>Estado</option>
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select 
+          id="type-filter" 
+          class="filter-select"
+          [(ngModel)]="typeFilter"
+          (change)="applyFilters()"
+        >
+          <option value="" disabled selected>Tipo</option>
+          <option *ngFor="let option of typeOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <!-- Results Count -->
+    <div class="results-count">
+      {{ filteredScans.length }} escaneos encontrados
+    </div>
+    
+    <div class="filters-right">
+      <div class="view-toggle">
+        <button 
+          class="toggle-btn" 
+          [class.active]="viewMode === 'grid'"
+          (click)="setViewMode('grid')"
+        >
+          ⚏
+        </button>
+        <button 
+          class="toggle-btn" 
+          [class.active]="viewMode === 'list'"
+          (click)="setViewMode('list')"
+        >
+          ☰
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Cargando escaneos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="btn--primary" (click)="loadScans()">
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Scans List -->
+  <div *ngIf="!loading && !error" class="scans-container">
+    <!-- List View -->
+    <div *ngIf="viewMode === 'list'" class="scans-list">
+      <div class="list-header">
+        <div class="header-cell alias-url">Alias / URL</div>
+        <div class="header-cell fecha">Fecha</div>
+        <div class="header-cell estado">Estado</div>
+        <div class="header-cell vulnerabilidades">Vulnerabilidades</div>
+        <div class="header-cell acciones">Acciones</div>
+      </div>
+
+      <div class="list-body">
+        <div 
+          *ngFor="let scan of filteredScans" 
+          class="scan-row"
+        >
+          <div class="scan-cell alias-url">
+            <div class="scan-alias">{{ scan.alias }}</div>
+            <div class="scan-url">{{ scan.url }}</div>
+          </div>
+
+          <div class="scan-cell fecha">
+            {{ formatDate(scan.fecha_inicio) }}
+          </div>
+
+          <div class="scan-cell estado">
+            <div class="status-indicator" [class]="getStatusClass(scan.estado)">
+              <span class="status-icon">{{ getStatusIcon(scan.estado) }}</span>
+              <span class="status-label">{{ getStatusLabel(scan.estado) }}</span>
+            </div>
+          </div>
+
+          <div class="scan-cell vulnerabilidades">
+            <div *ngIf="scan.vulnerabilidades.count > 0" class="vulnerability-info">
+              <span class="vuln-count">{{ scan.vulnerabilidades.count }}</span>
+              <div class="vuln-tags">
+                <span 
+                  *ngFor="let type of scan.vulnerabilidades.types" 
+                  class="vuln-tag"
+                >
+                  {{ type }}
+                </span>
+              </div>
+            </div>
+            <span *ngIf="scan.vulnerabilidades.count === 0" class="no-vulns">-</span>
+          </div>
+
+          <div class="scan-cell acciones">
+            <div class="actions-container">
+              <button 
+                class="actions-btn"
+                (click)="toggleActionsMenu(scan._id)"
+              >
+                ⋮
+              </button>
+              
+              <div 
+                *ngIf="showActionsMenu === scan._id" 
+                class="actions-menu"
+                (click)="$event.stopPropagation()"
+              >
+                <button 
+                  class="action-item"
+                  (click)="viewDetails(scan); closeActionsMenu()"
+                >
+                  <span class="action-icon">👁️</span>
+                  Ver detalles
+                </button>
+                <button 
+                  class="action-item"
+                  (click)="visitSite(scan.url); closeActionsMenu()"
+                >
+                  <span class="action-icon">🔗</span>
+                  Visitar sitio
+                </button>
+                <button 
+                  class="action-item danger"
+                  (click)="deleteScan(scan); closeActionsMenu()"
+                >
+                  <span class="action-icon">🗑️</span>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid View -->
+    <div *ngIf="viewMode === 'grid'" class="scans-grid">
+      <div 
+        *ngFor="let scan of filteredScans" 
+        class="scan-card"
+      >
+        <div class="card-header">
+          <h3 class="card-title">{{ scan.alias }}</h3>
+          <div class="card-status" [class]="getStatusClass(scan.estado)">
+            {{ getStatusLabel(scan.estado) }}
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="scan-url">{{ scan.url }}</div>
+          <div class="scan-date">{{ formatDate(scan.fecha_inicio) }}</div>
+          
+          <div class="scan-vulnerabilities">
+            <div *ngIf="scan.vulnerabilidades.count > 0" class="vuln-info">
+              <span class="vuln-count">{{ scan.vulnerabilidades.count }} vulnerabilidades</span>
+              <div class="vuln-tags">
+                <span 
+                  *ngFor="let type of scan.vulnerabilidades.types" 
+                  class="vuln-tag"
+                >
+                  {{ type }}
+                </span>
+              </div>
+            </div>
+            <div *ngIf="scan.vulnerabilidades.count === 0" class="no-vulns">
+              Sin vulnerabilidades
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn--outline" (click)="viewDetails(scan)">
+            Ver detalles
+          </button>
+          <button class="btn--primary" (click)="visitSite(scan.url)">
+            Visitar sitio
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && filteredScans.length === 0" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h3>No hay escaneos</h3>
+    <p>No se encontraron escaneos que coincidan con los filtros aplicados.</p>
+    <button class="btn--primary" (click)="goToNewScan()">
+      Crear primer escaneo
+    </button>
+  </div>
+
+  <!-- Scan Details Modal -->
+  <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="modal-content scan-details-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Detalles del Escaneo</h3>
+        <button class="modal-close" (click)="closeDetailsModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="loadingDetails" class="loading-details">
+          <div class="loading-spinner"></div>
+          <p>Cargando detalles...</p>
+        </div>
+
+        <div *ngIf="selectedScan && !loadingDetails" class="scan-details">
+          <!-- Scan Info -->
+          <div class="detail-section">
+            <h4>Información del Escaneo</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Alias:</label>
+                <span>{{ selectedScan.alias }}</span>
+              </div>
+              <div class="detail-item">
+                <label>URL:</label>
+                <span>{{ selectedScan.url }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Estado:</label>
+                <span [class]="getStatusClass(selectedScan.estado)">
+                  {{ getStatusLabel(selectedScan.estado) }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <label>Fecha de inicio:</label>
+                <span>{{ formatDate(selectedScan.fecha_inicio) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="selectedScan.fecha_fin">
+                <label>Fecha de finalización:</label>
+                <span>{{ formatDate(selectedScan.fecha_fin) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vulnerabilities -->
+          <div class="detail-section" *ngIf="selectedScan.vulnerabilidades.length > 0">
+            <h4>Vulnerabilidades Detectadas ({{ selectedScan.vulnerabilidades.length }})</h4>
+            <div class="vulnerabilities-list">
+              <div 
+                *ngFor="let vuln of selectedScan.vulnerabilidades" 
+                class="vulnerability-item"
+                [class]="getSeverityClass(vuln.nivel_severidad_id.nombre)"
+              >
+                <div class="vuln-header">
+                  <span class="vuln-type">{{ vuln.tipo_id.nombre }}</span>
+                  <span class="vuln-severity">{{ getSeverityLabel(vuln.nivel_severidad_id.nombre) }}</span>
+                </div>
+                <div class="vuln-content">
+                  <p *ngIf="vuln.descripcion"><strong>Descripción:</strong> {{ vuln.descripcion }}</p>
+                  <p *ngIf="vuln.parametro_afectado"><strong>Parámetro afectado:</strong> {{ vuln.parametro_afectado }}</p>
+                  <p *ngIf="vuln.url_afectada"><strong>URL afectada:</strong> {{ vuln.url_afectada }}</p>
+                  <p *ngIf="vuln.sugerencia"><strong>Sugerencia:</strong> {{ vuln.sugerencia }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="selectedScan.vulnerabilidades.length === 0" class="no-vulnerabilities">
+            <p>No se detectaron vulnerabilidades en este escaneo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn--outline" (click)="closeDetailsModal()">
+          Cerrar
+        </button>
+        <button 
+          class="btn--primary" 
+          (click)="visitSite(selectedScan.url); closeDetailsModal()"
+          *ngIf="selectedScan"
+        >
+          Visitar sitio
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

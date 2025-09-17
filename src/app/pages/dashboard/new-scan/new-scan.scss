@@ -1,0 +1,314 @@
+$rosa: #d63d6c;
+$gris: #c0cbcd;
+$gris-oscuro: #6b6b6b;
+$azul: #65b2c6;
+$crema: #efeded;
+$verde: #4ecdc4;
+$rojo: #ff6b6b;
+
+.new-scan {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .scan-header {
+    margin-bottom: 2rem;
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      border: 1px solid $gris;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: $gris-oscuro;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: $rosa;
+        color: $rosa;
+      }
+
+      .icon {
+        font-size: 1.2rem;
+      }
+    }
+
+    .scan-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .scan-subtitle {
+      color: $gris-oscuro;
+      font-size: 1.1rem;
+    }
+  }
+
+  .scan-form-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .scan-form {
+    .form-section {
+      margin-bottom: 2rem;
+
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid $crema;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          font-weight: 500;
+          color: #333;
+          margin-bottom: 0.5rem;
+        }
+
+        .url-input-container {
+          position: relative;
+          display: flex;
+
+          .url-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1rem;
+            border: 1px solid $gris;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+
+            &:focus {
+              outline: none;
+              border-color: $rosa;
+            }
+
+            &::placeholder {
+              color: $gris-oscuro;
+            }
+          }
+
+          .url-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: $gris-oscuro;
+          }
+        }
+
+        .headers-textarea {
+          box-sizing: border-box;
+          display: flex;
+          width: 100%;
+          padding: 1rem;
+          border: 1px solid $gris;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-family: 'Courier New', monospace;
+          resize: vertical;
+          min-height: 100px;
+
+          &:focus {
+            outline: none;
+            border-color: $rosa;
+          }
+
+          &::placeholder {
+            color: $gris-oscuro;
+          }
+        }
+
+        .form-help {
+          color: $gris-oscuro;
+          font-size: 0.85rem;
+          margin-top: 0.5rem;
+        }
+
+        .error-message {
+          color: $rojo;
+          font-size: 0.9rem;
+          margin-top: 0.5rem;
+        }
+      }
+    }
+
+    .scan-types {
+      display: grid;
+      gap: 1rem;
+
+      .scan-type-card {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1.5rem;
+        border: 1px solid $gris;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+
+        &:hover {
+          border-color: $azul;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        &.selected {
+          border-color: $rosa;
+          background: rgba(214, 61, 108, 0.05);
+          box-shadow: 0 4px 12px rgba(214, 61, 108, 0.2);
+        }
+
+        .scan-type-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          margin-right: 1rem;
+          flex-shrink: 0;
+        }
+
+        .scan-type-content {
+          flex: 1;
+
+          .scan-type-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+          }
+
+          .scan-type-description {
+            color: $gris-oscuro;
+            font-size: 0.9rem;
+            line-height: 1.4;
+          }
+        }
+
+        .scan-type-radio {
+          margin-left: 1rem;
+
+          input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: $rosa;
+          }
+        }
+      }
+    }
+
+    .submit-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+
+        &--primary {
+          background: $rosa;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: darken($rosa, 10%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(214, 61, 108, 0.3);
+          }
+
+          &:disabled {
+            background: $gris;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+          }
+        }
+
+        &--large {
+          padding: 1.2rem 3rem;
+          font-size: 1.2rem;
+        }
+
+        .loading-spinner {
+          width: 20px;
+          height: 20px;
+          border: 1px solid transparent;
+          border-top: 2px solid currentColor;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .new-scan {
+    padding: 1rem;
+
+    .scan-form-container {
+      padding: 1.5rem;
+    }
+
+    .scan-types {
+      .scan-type-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+
+        .scan-type-icon {
+          margin-right: 0;
+          margin-bottom: 1rem;
+        }
+
+        .scan-type-radio {
+          margin-left: 0;
+          margin-top: 1rem;
+        }
+      }
+    }
+  }
+}

@@ -8,14 +8,16 @@ $crema: #efeded;
   padding: 2rem;
 
   .account-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
-    margin-bottom: 0.2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
   }
 
   .account-subtitle {
+    font-size: 1.1rem;
     color: $gris-oscuro;
-    margin-bottom: 2rem;
+    // margin-bottom: 2rem;
   }
 
   // Notification styles
@@ -100,7 +102,7 @@ $crema: #efeded;
     width: 220px;
     background: $crema;
     border-radius: 12px;
-    padding: 1rem;
+    padding: 0rem 1rem 1rem 1rem;
 
     ul {
       list-style: none;

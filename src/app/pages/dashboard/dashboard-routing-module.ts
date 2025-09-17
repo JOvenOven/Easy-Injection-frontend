@@ -2,6 +2,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardLayoutComponent } from '../../shared/components/dashboard-layout/dashboard-layout';
 import { Home } from './home/home';
+import { NewScanComponent } from './new-scan/new-scan';
+import { ScanProgressComponent } from './scan-progress/scan-progress';
+import { MyScansComponent } from './my-scans/my-scans';
 
 const routes: Routes = [
   {
@@ -9,7 +12,12 @@ const routes: Routes = [
     component: DashboardLayoutComponent,
     children: [
       { path: '', component: Home }, // ruta por defecto del módulo dashboard
-      // Add more dashboard routes here as children
+      { path: 'new-scan', component: NewScanComponent },
+      { path: 'scan-progress', component: ScanProgressComponent },
+      { path: 'scans', component: MyScansComponent },
+      { path: 'theory', component: Home },
+      { path: 'scoreboard', component: Home },
+      { path: 'account', component: Home }
     ]
   }
 ];

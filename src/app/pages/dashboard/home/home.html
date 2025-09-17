@@ -11,25 +11,25 @@
     <div class="card">
       <h3 class="card__title">Nuevo Escaneo</h3>
       <p class="card__text">Inicia un nuevo análisis de vulnerabilidades</p>
-      <button class="btn btn--primary">Comenzar</button>
+      <button class="btn btn--primary" (click)="goToNewScan()">Comenzar</button>
     </div>
 
     <div class="card">
       <h3 class="card__title">Mis Escaneos</h3>
       <p class="card__text">Revisa tus escaneos anteriores y resultados</p>
-      <button class="btn btn--outline-pink">Ver escaneos</button>
+      <button class="btn btn--outline-pink" (click)="goToScans()">Ver escaneos</button>
     </div>
 
     <div class="card">
       <h3 class="card__title">Teoría</h3>
       <p class="card__text">Aprende sobre vulnerabilidades y cómo prevenirlas</p>
-      <button class="btn btn--outline-blue">Explorar recursos</button>
+      <button class="btn btn--outline-blue" (click)="goToTheory()">Explorar recursos</button>
     </div>
 
     <div class="card">
       <h3 class="card__title">Scoreboard</h3>
       <p class="card__text">Compite y compara tu progreso con otros usuarios</p>
-      <button class="btn btn--outline-gray">Ver ranking</button>
+      <button class="btn btn--outline-gray" (click)="goToScoreboard()">Ver ranking</button>
     </div>
   </div>
 

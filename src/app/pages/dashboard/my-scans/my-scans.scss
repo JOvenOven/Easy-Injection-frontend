@@ -1,0 +1,936 @@
+$rosa: #d63d6c;
+$gris: #c0cbcd;
+$gris-oscuro: #6b6b6b;
+$azul: #0EA5E9;
+$crema: #efeded;
+$verde: #4ecdc4;
+$rojo: #ff6b6b;
+$amarillo: #ffd93d;
+$naranja: #ff8c00;
+
+.btn--primary {
+  background: $azul;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: darken($azul, 10%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(101, 178, 198, 0.3);
+  }
+
+  .btn-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}
+
+.my-scans {
+  padding: 32px;
+  // min-height: 100vh;
+
+  // Header Section
+  .scans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    // background: white;
+    // padding: 1.5rem 2rem;
+    // border-radius: 12px;
+    margin-bottom: 1rem;
+    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .header-content {
+      .scans-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      .scans-subtitle {
+        font-size: 1.1rem;
+        color: $gris-oscuro;
+        margin: 0;
+      }
+    }
+  }
+
+  // Controls Section
+  .scans-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1.5rem 2rem 1rem 2rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0 2px rgba(0, 0, 0, 0.1);
+    gap: 3rem;
+  
+    .search-section {
+      flex: 1;
+      max-width: none;
+  
+      .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $gris;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+  
+        &:focus {
+          outline: none;
+          border-color: $azul;
+        }
+  
+        &::placeholder {
+          color: $gris-oscuro;
+        }
+      }
+    }
+  
+    .filters-left {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+  
+      .filter-group {
+        display: flex;
+  
+        .filter-select {
+          padding: 0.75rem 1rem; // igual que el input
+          border: 1px solid $gris;
+          border-radius: 8px;
+          font-size: 1rem;
+          background: white;
+          cursor: pointer;
+          transition: border-color 0.2s ease;
+          color: $gris-oscuro; // color gris para placeholder
+          min-width: 140px;
+  
+          &:focus {
+            outline: none;
+            border-color: $azul;
+          }
+  
+          option {
+            color: black; // opciones en negro
+          }
+  
+          option[disabled] {
+            color: $gris-oscuro; // placeholder en gris
+          }
+        }
+      }
+    }
+  }  
+
+  // Filters Section
+  .filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 0 2rem 1rem 2rem;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+    // Results Count
+    .results-count {
+      color: $gris-oscuro;
+      font-size: 0.9rem;
+    }
+
+    .filters-right {
+      .view-toggle {
+        display: flex;
+        gap: 0.25rem;
+
+        .toggle-btn {
+          padding: 0.5rem 0.75rem;
+          border: 1px solid $gris;
+          background: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-size: 1rem;
+
+          &:first-child {
+            border-radius: 6px 0 0 6px;
+          }
+
+          &:last-child {
+            border-radius: 0 6px 6px 0;
+          }
+
+          &.active {
+            background: $azul;
+            color: white;
+            border-color: $azul;
+          }
+
+          &:hover:not(.active) {
+            border-color: $azul;
+            color: $azul;
+          }
+        }
+      }
+    }
+  }
+
+  // Loading State
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid $gris;
+      border-top: 4px solid $azul;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: $gris-oscuro;
+      margin: 0;
+    }
+  }
+
+  // Error State
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: $rojo;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+  }
+
+  // Scans List View
+  .scans-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+
+    .list-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr 0.5fr;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      background: white;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid $gris;
+
+      .header-cell {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .list-body {
+      .scan-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr 0.5fr;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background: #f8f9fa;
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .scan-cell {
+          display: flex;
+          align-items: center;
+
+          &.alias-url {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+
+            .scan-alias {
+              font-weight: 600;
+              color: #333;
+              font-size: 1rem;
+            }
+
+            .scan-url {
+              font-family: 'Courier New', monospace;
+              color: $gris-oscuro;
+              font-size: 0.85rem;
+            }
+          }
+
+          &.fecha {
+            font-size: 0.9rem;
+            color: $gris-oscuro;
+          }
+
+          &.estado {
+            .status-indicator {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.25rem 0.75rem;
+              border-radius: 20px;
+              font-size: 0.85rem;
+              font-weight: 500;
+
+              &.status-completed {
+                background: rgba(78, 205, 196, 0.1);
+                color: $verde;
+              }
+
+              &.status-progress {
+                background: rgba(101, 178, 198, 0.1);
+                color: $azul;
+              }
+
+              &.status-error {
+                background: rgba(255, 107, 107, 0.1);
+                color: $rojo;
+              }
+
+              &.status-pending {
+                background: rgba(192, 203, 205, 0.1);
+                color: $gris-oscuro;
+              }
+
+              .status-icon {
+                font-size: 0.8rem;
+              }
+            }
+          }
+
+          &.vulnerabilidades {
+            .vulnerability-info {
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+
+              .vuln-count {
+                font-weight: 600;
+                color: #333;
+                font-size: 1rem;
+              }
+
+              .vuln-tags {
+                display: flex;
+                gap: 0.25rem;
+                flex-wrap: wrap;
+
+                .vuln-tag {
+                  background: $rosa;
+                  color: white;
+                  padding: 0.125rem 0.5rem;
+                  border-radius: 12px;
+                  font-size: 0.75rem;
+                  font-weight: 500;
+                }
+              }
+            }
+
+            .no-vulns {
+              color: $gris-oscuro;
+              font-style: italic;
+            }
+          }
+
+          &.acciones {
+            justify-content: center;
+
+            .actions-container {
+              position: relative;
+
+              .actions-btn {
+                background: none;
+                border: none;
+                font-size: 1.2rem;
+                color: $gris-oscuro;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 4px;
+                transition: all 0.2s ease;
+
+                &:hover {
+                  background: $crema;
+                  color: #333;
+                }
+              }
+
+              .actions-menu {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: white;
+                border: 1px solid $gris;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 100;
+                min-width: 150px;
+
+                .action-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                  width: 100%;
+                  padding: 0.75rem 1rem;
+                  background: none;
+                  border: none;
+                  text-align: left;
+                  cursor: pointer;
+                  transition: background-color 0.2s ease;
+                  font-size: 0.9rem;
+
+                  &:hover {
+                    background: $crema;
+                  }
+
+                  &.danger {
+                    color: $rojo;
+
+                    &:hover {
+                      background: rgba(255, 107, 107, 0.1);
+                    }
+                  }
+
+                  .action-icon {
+                    font-size: 1rem;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Scans Grid View
+  .scans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+
+    .scan-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 1.5rem 1rem;
+
+        .card-title {
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        .card-status {
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 500;
+
+          &.status-completed {
+            background: rgba(78, 205, 196, 0.1);
+            color: $verde;
+          }
+
+          &.status-progress {
+            background: rgba(101, 178, 198, 0.1);
+            color: $azul;
+          }
+
+          &.status-error {
+            background: rgba(255, 107, 107, 0.1);
+            color: $rojo;
+          }
+
+          &.status-pending {
+            background: rgba(192, 203, 205, 0.1);
+            color: $gris-oscuro;
+          }
+        }
+      }
+
+      .card-body {
+        padding: 0 1.5rem 1rem;
+
+        .scan-url {
+          font-family: 'Courier New', monospace;
+          color: $gris-oscuro;
+          font-size: 0.9rem;
+          margin-bottom: 0.5rem;
+          word-break: break-all;
+        }
+
+        .scan-date {
+          color: $gris-oscuro;
+          font-size: 0.85rem;
+          margin-bottom: 1rem;
+        }
+
+        .scan-vulnerabilities {
+          .vuln-info {
+            .vuln-count {
+              font-weight: 600;
+              color: #333;
+              font-size: 0.9rem;
+              display: block;
+              margin-bottom: 0.5rem;
+            }
+
+            .vuln-tags {
+              display: flex;
+              gap: 0.25rem;
+              flex-wrap: wrap;
+
+              .vuln-tag {
+                background: $rosa;
+                color: white;
+                padding: 0.125rem 0.5rem;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .no-vulns {
+            color: $gris-oscuro;
+            font-style: italic;
+            font-size: 0.9rem;
+          }
+        }
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #f0f0f0;
+
+        .btn {
+          flex: 1;
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &--outline {
+            background: white;
+            color: $azul;
+            border: 1px solid $azul;
+
+            &:hover {
+              background: $azul;
+              color: white;
+            }
+          }
+
+          &--primary {
+            background: $azul;
+            color: white;
+            border: none;
+
+            &:hover {
+              background: darken($azul, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Empty State
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: $gris-oscuro;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+  }
+
+  // Modal Styles
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .scan-details-modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 2px solid $crema;
+
+        h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #333;
+          margin: 0;
+        }
+
+        .modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: $gris-oscuro;
+
+          &:hover {
+            color: #333;
+          }
+        }
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+
+        .loading-details {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+
+          .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid $gris;
+            border-top: 3px solid $azul;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+          }
+
+          p {
+            color: $gris-oscuro;
+            margin: 0;
+          }
+        }
+
+        .scan-details {
+          .detail-section {
+            margin-bottom: 2rem;
+
+            h4 {
+              font-size: 1.2rem;
+              font-weight: 600;
+              color: #333;
+              margin-bottom: 1rem;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid $crema;
+            }
+
+            .detail-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 1rem;
+
+              .detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+
+                label {
+                  font-weight: 500;
+                  color: $gris-oscuro;
+                  font-size: 0.9rem;
+                }
+
+                span {
+                  color: #333;
+                  font-size: 0.95rem;
+                }
+              }
+            }
+          }
+
+          .vulnerabilities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            .vulnerability-item {
+              padding: 1rem;
+              border-radius: 8px;
+              border-left: 4px solid;
+
+              &.severity-critical {
+                background: rgba(255, 107, 107, 0.05);
+                border-left-color: $rojo;
+              }
+
+              &.severity-high {
+                background: rgba(255, 140, 0, 0.05);
+                border-left-color: $naranja;
+              }
+
+              &.severity-medium {
+                background: rgba(255, 217, 61, 0.05);
+                border-left-color: $amarillo;
+              }
+
+              &.severity-low {
+                background: rgba(78, 205, 196, 0.05);
+                border-left-color: $verde;
+              }
+
+              .vuln-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
+
+                .vuln-type {
+                  font-weight: 600;
+                  color: #333;
+                  font-size: 1rem;
+                }
+
+                .vuln-severity {
+                  padding: 0.25rem 0.75rem;
+                  border-radius: 20px;
+                  font-size: 0.8rem;
+                  font-weight: 500;
+
+                  .severity-critical & { background: $rojo; color: white; }
+                  .severity-high & { background: $naranja; color: white; }
+                  .severity-medium & { background: $amarillo; color: #333; }
+                  .severity-low & { background: $verde; color: white; }
+                }
+              }
+
+              .vuln-content {
+                p {
+                  margin-bottom: 0.5rem;
+                  color: #333;
+                  font-size: 0.9rem;
+
+                  strong {
+                    color: #333;
+                  }
+                }
+              }
+            }
+          }
+
+          .no-vulnerabilities {
+            text-align: center;
+            padding: 2rem;
+            color: $gris-oscuro;
+            font-style: italic;
+          }
+        }
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding: 1.5rem;
+        border-top: 2px solid $crema;
+
+        .btn {
+          padding: 0.75rem 1.5rem;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &--outline {
+            background: white;
+            color: $azul;
+            border: 1px solid $azul;
+
+            &:hover {
+              background: $azul;
+              color: white;
+            }
+          }
+
+          &--primary {
+            background: $azul;
+            color: white;
+            border: none;
+
+            &:hover {
+              background: darken($azul, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .my-scans {
+    padding: 1rem;
+
+    .scans-controls {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      .search-section {
+        max-width: none;
+        width: 100%;
+      }
+    }
+
+    .filters-section {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      .filters-left {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+    }
+
+    .scans-list {
+      .list-header {
+        display: none;
+      }
+
+      .list-body .scan-row {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+
+        .scan-cell {
+          &.alias-url {
+            order: 1;
+          }
+
+          &.fecha {
+            order: 2;
+          }
+
+          &.estado {
+            order: 3;
+          }
+
+          &.vulnerabilidades {
+            order: 4;
+          }
+
+          &.acciones {
+            order: 5;
+            justify-content: flex-end;
+          }
+        }
+      }
+    }
+
+    .scans-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-overlay .scan-details-modal {
+      width: 95%;
+      margin: 1rem;
+    }
+  }
+}

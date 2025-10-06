@@ -163,6 +163,14 @@
               >
                 <button 
                   class="action-item"
+                  (click)="viewReport(scan); closeActionsMenu()"
+                  *ngIf="scan.estado === 'finalizado'"
+                >
+                  <span class="action-icon">📊</span>
+                  Ver reporte completo
+                </button>
+                <button 
+                  class="action-item"
                   (click)="viewDetails(scan); closeActionsMenu()"
                 >
                   <span class="action-icon">👁️</span>
@@ -225,10 +233,13 @@
         </div>
 
         <div class="card-actions">
+          <button class="btn btn--primary" (click)="viewReport(scan)" *ngIf="scan.estado === 'finalizado'">
+            Ver reporte
+          </button>
           <button class="btn btn--outline" (click)="viewDetails(scan)">
             Ver detalles
           </button>
-          <button class="btn--primary" (click)="visitSite(scan.url)">
+          <button class="btn btn--outline" (click)="visitSite(scan.url)">
             Visitar sitio
           </button>
         </div>

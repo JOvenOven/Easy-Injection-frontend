@@ -140,4 +140,11 @@ export class ScanService {
       headers: this.getHeaders()
     });
   }
+
+  // Get scan report with vulnerabilities and quiz results
+  getScanReport(scanId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}api/scans/${scanId}/report`, {
+      headers: this.getHeaders()
+    });
+  }
 }

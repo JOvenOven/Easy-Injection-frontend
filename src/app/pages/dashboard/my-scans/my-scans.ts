@@ -246,6 +246,10 @@ export class MyScansComponent implements OnInit, OnDestroy {
     });
   }
 
+  viewReport(scan: Scan): void {
+    this.router.navigate(['/dashboard/scans', scan._id, 'report']);
+  }
+
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.selectedScan = null;

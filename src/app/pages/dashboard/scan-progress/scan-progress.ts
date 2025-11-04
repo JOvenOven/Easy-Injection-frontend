@@ -1,458 +1,564 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-export interface ScanPhase {
-  id: string;
-  name: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
-  progress: number;
-  startTime?: Date;
-  endTime?: Date;
-}
-
-export interface DiscoveredEndpoint {
-  path: string;
-  method: string;
-  status: 'pending' | 'analyzing' | 'vulnerable' | 'safe';
-  parameters?: string[];
-}
-
-export interface ScanLog {
-  timestamp: Date;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-}
-
-export interface DetectedVulnerability {
-  id: string;
-  type: 'XSS' | 'SQLi';
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  endpoint: string;
-  parameter: string;
-  detectedAt: Date;
-  description?: string;
-}
-
-export interface EvaluationQuestion {
-  id: number;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  userAnswer?: number;
-  isAnswered: boolean;
-}
-
-export interface ScanStats {
-  endpoints: number;
-  parameters: number;
-  xssFound: number;
-  sqliFound: number;
-}
+import { FormsModule } from '@angular/forms';
+import { 
+  WebsocketService, 
+  Phase, 
+  LogEntry, 
+  Endpoint, 
+  Vulnerability, 
+  Question, 
+  QuestionResult, 
+  ScanStats 
+} from '../../../services/websocket.service';
+import { ScanService } from '../../../services/scan.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-scan-progress',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './scan-progress.html',
-  styleUrl: './scan-progress.scss'
+  styleUrls: ['./scan-progress.scss']
 })
-export class ScanProgressComponent implements OnInit, OnDestroy {
+export class ScanProgressComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('logsContainer', { static: false }) logsContainer!: ElementRef<HTMLDivElement>;
+  
+  scanId: string = '';
   scanUrl: string = '';
-  scanType: string = '';
-  customHeaders: string = '';
-  scanName: string = '';
+  scanAlias: string = '';
+  scanFlags: any = {};
   
   // Scan state
-  isScanning = true;
+  isScanning = false;
   isPaused = false;
   scanComplete = false;
   scanError = false;
   errorMessage = '';
-  overallProgress = 9;
+  overallProgress = 0;
+  isConnecting = true;
 
   // Scan phases
-  scanPhases: ScanPhase[] = [];
-  currentPhaseIndex = 0;
+  scanPhases: Phase[] = [];
+  currentPhase: string = '';
+
+  // Initialize default phases structure
+  private initializeDefaultPhases(): void {
+    this.scanPhases = [
+      { id: 'init', name: 'Inicialización', status: 'pending' },
+      { id: 'discovery', name: 'Descubrimiento de endpoints y parámetros', status: 'pending' },
+      { 
+        id: 'sqli', 
+        name: 'Pruebas SQL Injection', 
+        status: 'pending', 
+        subphases: [
+          { id: 'detection', name: 'Detección de vulnerabilidad', status: 'pending' },
+          { id: 'fingerprint', name: 'Fingerprinting', status: 'pending' },
+          { id: 'technique', name: 'Selección de técnica', status: 'pending' },
+          { id: 'exploit', name: 'Explotación (POC)', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'xss', 
+        name: 'Pruebas XSS', 
+        status: 'pending', 
+        subphases: [
+          { id: 'context', name: 'Análisis de contexto', status: 'pending' },
+          { id: 'payload', name: 'Generación de payloads', status: 'pending' },
+          { id: 'fuzzing', name: 'Motor de fuzzing', status: 'pending' }
+        ]
+      },
+      { id: 'report', name: 'Generación de reporte', status: 'pending' }
+    ];
+    
+    // Filter phases based on scan flags
+    if (!this.scanFlags.sqli) {
+      this.scanPhases = this.scanPhases.filter(p => p.id !== 'sqli');
+    }
+    if (!this.scanFlags.xss) {
+      this.scanPhases = this.scanPhases.filter(p => p.id !== 'xss');
+    }
+  }
 
   // Discovered endpoints
-  discoveredEndpoints: DiscoveredEndpoint[] = [];
-  totalEndpoints = 5;
+  discoveredEndpoints: Endpoint[] = [];
 
   // Scan logs
-  scanLogs: ScanLog[] = [];
+  scanLogs: LogEntry[] = [];
+  maxLogsDisplay = 100;
+  private shouldAutoScroll = false; // Track if user is at bottom (starts false to prevent auto-scroll on load)
+  private scrollHandler: (() => void) | null = null; // Store scroll handler for cleanup
 
   // Detected vulnerabilities
-  detectedVulnerabilities: DetectedVulnerability[] = [];
+  detectedVulnerabilities: Vulnerability[] = [];
 
   // Evaluation questions
-  evaluationQuestions: EvaluationQuestion[] = [];
-  currentQuestionIndex = 0;
-  questionsAnswered = 0;
-  totalQuestions = 5;
-  showEvaluationQuestions = true;
+  currentQuestion: Question | null = null;
+  questionHistory: QuestionResult[] = [];
+  showQuestion = false;
+  selectedOption: number | null = null;
+  hasAnswered = false;
+  currentQuestionCorrect = false;
+
+  // Completion modal
+  showCompletionModal = true;
 
   // Statistics
   scanStats: ScanStats = {
-    endpoints: 0,
-    parameters: 0,
-    xssFound: 0,
-    sqliFound: 0
+    totalRequests: 0,
+    vulnerabilitiesFound: 0,
+    endpointsDiscovered: 0,
+    parametersFound: 0
   };
 
-  // Results modal
-  showResultsModal = false;
-
-  // WebSocket simulation
-  private scanInterval?: any;
+  // Subscriptions
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private websocketService: WebsocketService,
+    private scanService: ScanService
   ) {}
 
   ngOnInit(): void {
-    // Get scan parameters from query params
-    this.route.queryParams.subscribe(params => {
-      this.scanUrl = params['url'] || '';
-      this.scanType = params['scanType'] || 'both';
-      this.customHeaders = params['customHeaders'] || '';
-      this.scanName = params['scanName'] || 'Escaneo';
-      
-      this.initializeScanPhases();
-      this.initializeEvaluationQuestions();
-      this.startScan();
-    });
+    // Get scan ID from route
+    this.scanId = this.route.snapshot.params['id'];
+    
+    if (!this.scanId) {
+      this.errorMessage = 'No se especificó ID de escaneo';
+      this.scanError = true;
+      return;
+    }
+
+    // Load scan details
+    this.loadScanDetails();
+    
+    // Connect to WebSocket
+    this.connectWebSocket();
+    
+    // Set up WebSocket event listeners
+    this.setupWebSocketListeners();
+  }
+
+  ngAfterViewInit(): void {
+    // Scroll to top on initial load
+    this.scrollToTop();
+    
+    // Set up scroll listener after view is initialized
+    // Use setTimeout to ensure the view is fully rendered
+    setTimeout(() => {
+      if (this.logsContainer && this.logsContainer.nativeElement) {
+        // Store handler reference for cleanup
+        this.scrollHandler = () => this.onLogsScroll();
+        this.logsContainer.nativeElement.addEventListener('scroll', this.scrollHandler);
+        
+        // Check initial position - if container is small or already at bottom, enable auto-scroll
+        const container = this.logsContainer.nativeElement;
+        if (container.scrollHeight <= container.clientHeight) {
+          // Container doesn't need scrolling (all content visible)
+          this.shouldAutoScroll = true;
+        } else {
+          // Container has scrollable content, start at top
+          this.shouldAutoScroll = false;
+        }
+      }
+    }, 200);
   }
 
   ngOnDestroy(): void {
-    if (this.scanInterval) {
-      clearInterval(this.scanInterval);
+    // Unsubscribe from all observables
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    
+    // Remove scroll event listener
+    if (this.logsContainer && this.logsContainer.nativeElement && this.scrollHandler) {
+      this.logsContainer.nativeElement.removeEventListener('scroll', this.scrollHandler);
+    }
+    
+    // Leave scan room
+    if (this.scanId) {
+      this.websocketService.leaveScan(this.scanId);
     }
   }
 
-  initializeScanPhases(): void {
-    this.scanPhases = [
-      {
-        id: 'initialization',
-        name: 'Inicialización',
-        status: 'completed',
-        progress: 100,
-        startTime: new Date('2024-01-15T16:54:23'),
-        endTime: new Date('2024-01-15T16:54:23')
+  loadScanDetails(): void {
+    this.scanService.getScanReport(this.scanId).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.scanUrl = response.report.scan.url;
+          this.scanAlias = response.report.scan.alias;
+          this.scanFlags = response.report.scan.flags;
+          
+          // Initialize default phases after loading scan flags
+          this.initializeDefaultPhases();
+        }
       },
-      {
-        id: 'endpoint-discovery',
-        name: 'Descubrimiento de endpoints',
-        status: 'running',
-        progress: 83,
-        startTime: new Date('2024-01-15T16:54:23')
-      },
-      {
-        id: 'parameter-analysis',
-        name: 'Análisis de parámetros',
-        status: 'pending',
-        progress: 0
-      },
-      {
-        id: 'xss-tests',
-        name: 'Pruebas XSS',
-        status: 'pending',
-        progress: 0
-      },
-      {
-        id: 'sqli-tests',
-        name: 'Pruebas SQLI',
-        status: 'pending',
-        progress: 0
-      },
-      {
-        id: 'report-generation',
-        name: 'Generación de reporte',
-        status: 'pending',
-        progress: 0
+      error: (error) => {
+        console.error('Error loading scan details:', error);
+        // Initialize with default flags if error
+        this.scanFlags = { sqli: true, xss: true };
+        this.initializeDefaultPhases();
       }
-    ];
-
-    // Initialize discovered endpoints
-    this.discoveredEndpoints = [
-      { path: '/admin/login', method: 'POST', status: 'analyzing', parameters: ['username', 'password'] },
-      { path: '/admin/dashboard', method: 'GET', status: 'analyzing', parameters: ['session_id'] },
-      { path: '/admin/users', method: 'GET', status: 'pending', parameters: ['page', 'limit'] },
-      { path: '/admin/products/search', method: 'GET', status: 'vulnerable', parameters: ['q', 'category'] }
-    ];
-
-    this.scanStats.endpoints = this.discoveredEndpoints.length;
+    });
   }
 
-  initializeEvaluationQuestions(): void {
-    this.evaluationQuestions = [
-      {
-        id: 1,
-        question: '¿Cuál de las siguientes es una técnica efectiva para prevenir ataques XSS?',
-        options: [
-          'Almacenar contraseñas en texto plano',
-          'Usar validación de entrada y escapado de salida',
-          'Desactivar los mensajes de error en producción',
-          'Aumentar el tiempo de espera de las sesiones'
-        ],
-        correctAnswer: 1,
-        isAnswered: false
-      },
-      {
-        id: 2,
-        question: '¿Qué es SQL Injection?',
-        options: [
-          'Un tipo de ataque de denegación de servicio',
-          'La inyección de código SQL malicioso en aplicaciones',
-          'Un método de cifrado de datos',
-          'Una técnica de autenticación'
-        ],
-        correctAnswer: 1,
-        isAnswered: false
-      },
-      {
-        id: 3,
-        question: '¿Cuál es la diferencia entre XSS reflejado y almacenado?',
-        options: [
-          'No hay diferencia',
-          'El reflejado se ejecuta inmediatamente, el almacenado se guarda',
-          'El almacenado es más peligroso que el reflejado',
-          'Solo el reflejado puede robar cookies'
-        ],
-        correctAnswer: 1,
-        isAnswered: false
-      },
-      {
-        id: 4,
-        question: '¿Qué es la validación de entrada?',
-        options: [
-          'Verificar que los datos cumplan con un formato específico',
-          'Cifrar los datos antes de almacenarlos',
-          'Generar tokens de autenticación',
-          'Monitorear el tráfico de red'
-        ],
-        correctAnswer: 0,
-        isAnswered: false
-      },
-      {
-        id: 5,
-        question: '¿Cuál es el objetivo principal de un escaneo de vulnerabilidades?',
-        options: [
-          'Aumentar el rendimiento del servidor',
-          'Identificar y reportar vulnerabilidades de seguridad',
-          'Mejorar la experiencia del usuario',
-          'Reducir el uso de ancho de banda'
-        ],
-        correctAnswer: 1,
-        isAnswered: false
+  connectWebSocket(): void {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      this.errorMessage = 'No se encontró token de autenticación';
+      this.scanError = true;
+      return;
+    }
+  
+    this.websocketService.connect(token);
+  
+    const connectionSub = this.websocketService.isConnected$.subscribe(connected => {
+      if (connected) {
+        this.isConnecting = false;
+        this.websocketService.joinScan(this.scanId);
+  
+        // Esperar hasta que se carguen los detalles
+        const waitForDetails = setInterval(() => {
+          if (this.scanUrl && Object.keys(this.scanFlags).length > 0) {
+            clearInterval(waitForDetails);
+            this.startScan();
+          }
+        }, 500);
       }
-    ];
+    });
+  
+    this.subscriptions.push(connectionSub);
+  }  
+
+  setupWebSocketListeners(): void {
+    // Phase events
+    const phaseStartedSub = this.websocketService.onPhaseStarted$.subscribe(data => {
+      this.currentPhase = data.phase;
+      const phase = this.scanPhases.find(p => p.id === data.phase);
+      if (phase) {
+        phase.status = 'running';
+      }
+      this.isScanning = true;
+    });
+
+    const phaseCompletedSub = this.websocketService.onPhaseCompleted$.subscribe(data => {
+      const phase = this.scanPhases.find(p => p.id === data.phase);
+      if (phase) {
+        phase.status = 'completed';
+      }
+      this.updateOverallProgress();
+    });
+
+    // Subphase events
+    const subphaseStartedSub = this.websocketService.onSubphaseStarted$.subscribe(data => {
+      const phase = this.scanPhases.find(p => p.id === data.phase);
+      if (phase && phase.subphases) {
+        const subphase = phase.subphases.find(s => s.id === data.subphase);
+        if (subphase) {
+          subphase.status = 'running';
+        }
+      }
+    });
+
+    const subphaseCompletedSub = this.websocketService.onSubphaseCompleted$.subscribe(data => {
+      const phase = this.scanPhases.find(p => p.id === data.phase);
+      if (phase && phase.subphases) {
+        const subphase = phase.subphases.find(s => s.id === data.subphase);
+        if (subphase) {
+          subphase.status = 'completed';
+        }
+      }
+      this.updateOverallProgress();
+    });
+
+    // Log events
+    const logSub = this.websocketService.onLogAdded$.subscribe(log => {
+      this.scanLogs.push(log);
+      if (this.scanLogs.length > this.maxLogsDisplay) {
+        this.scanLogs.shift();
+      }
+      // Only auto-scroll if user is at the bottom
+      if (this.shouldAutoScroll) {
+        this.scrollLogsToBottom();
+      }
+    });
+
+    // Discovery events
+    const endpointSub = this.websocketService.onEndpointDiscovered$.subscribe(endpoint => {
+      this.discoveredEndpoints.push(endpoint);
+      this.scanStats.endpointsDiscovered++;
+    });
+
+    const parameterSub = this.websocketService.onParameterDiscovered$.subscribe(parameter => {
+      this.scanStats.parametersFound++;
+    });
+
+    // Vulnerability events
+    const vulnSub = this.websocketService.onVulnerabilityFound$.subscribe(vuln => {
+      this.detectedVulnerabilities.push(vuln);
+      this.scanStats.vulnerabilitiesFound++;
+    });
+
+    // Question events
+    const questionSub = this.websocketService.onQuestionAsked$.subscribe(question => {
+      this.currentQuestion = question;
+      this.showQuestion = true;
+      this.isPaused = true;
+      this.selectedOption = null;
+      this.hasAnswered = false;
+      this.currentQuestionCorrect = false;
+    });
+
+    const questionResultSub = this.websocketService.onQuestionResult$.subscribe(result => {
+      this.questionHistory.push(result);
+      this.hasAnswered = true;
+      this.currentQuestionCorrect = result.correct;
+      
+      // Only hide question and resume if answer is correct
+      // If incorrect, keep showing the question so user can try again
+      if (result.correct) {
+        this.showQuestion = false;
+        this.isPaused = false;
+        this.currentQuestion = null;
+        this.hasAnswered = false;
+        this.currentQuestionCorrect = false;
+        this.selectedOption = null;
+      } else {
+        // Keep question visible, allow user to select a new answer
+        // Reset selectedOption so user can choose again
+        // But keep hasAnswered = true to show "Intentar de nuevo" button
+      }
+    });
+
+    // Scan completion
+    const completedSub = this.websocketService.onScanCompleted$.subscribe(data => {
+      this.scanComplete = true;
+      this.isScanning = false;
+      this.scanStats = data.stats;
+      this.updateOverallProgress();
+      this.showCompletionModal = true; // Show modal when scan completes
+    });
+
+    // Error events
+    const errorSub = this.websocketService.onScanError$.subscribe(error => {
+      this.scanError = true;
+      this.isScanning = false;
+      this.errorMessage = error.message;
+    });
+
+    // Scan control events
+    const pausedSub = this.websocketService.onScanPaused$?.subscribe(() => {
+      this.isPaused = true;
+    });
+
+    const resumedSub = this.websocketService.onScanResumed$?.subscribe(() => {
+      this.isPaused = false;
+    });
+
+    const stoppedSub = this.websocketService.onScanStopped$?.subscribe(() => {
+      this.isScanning = false;
+      this.isPaused = false;
+      this.scanError = true;
+      this.errorMessage = 'Escaneo detenido por el usuario';
+    });
+
+    // Status updates
+    const statusSub = this.websocketService.onScanStatus$.subscribe(status => {
+      if (status.phases && status.phases.length > 0) {
+        // Update phases from backend status
+        this.scanPhases = status.phases;
+        this.updateOverallProgress();
+      } else if (this.scanPhases.length === 0) {
+        // If no phases received and none initialized, initialize defaults
+        this.initializeDefaultPhases();
+      }
+      if (status.currentPhase) {
+        this.currentPhase = status.currentPhase;
+      }
+      if (status.isPaused !== undefined) {
+        this.isPaused = status.isPaused;
+      }
+      if (status.discoveredEndpoints) {
+        this.discoveredEndpoints = status.discoveredEndpoints;
+      }
+      if (status.vulnerabilities) {
+        this.detectedVulnerabilities = status.vulnerabilities;
+      }
+      if (status.stats) {
+        this.scanStats = status.stats;
+      }
+      if (status.logs) {
+        this.scanLogs = status.logs;
+        // Don't auto-scroll when loading initial status - let user see from top
+        this.shouldAutoScroll = false;
+      }
+    });
+
+    // Store all subscriptions
+    this.subscriptions.push(
+      phaseStartedSub,
+      phaseCompletedSub,
+      subphaseStartedSub,
+      subphaseCompletedSub,
+      logSub,
+      endpointSub,
+      parameterSub,
+      vulnSub,
+      questionSub,
+      questionResultSub,
+      completedSub,
+      errorSub,
+      statusSub
+    );
+
+    // Add pause/resume/stop subscriptions if they exist
+    if (pausedSub) this.subscriptions.push(pausedSub);
+    if (resumedSub) this.subscriptions.push(resumedSub);
+    if (stoppedSub) this.subscriptions.push(stoppedSub);
   }
 
   startScan(): void {
+    // Retrieve additional config from localStorage (set by new-scan component)
+    const scanConfigKey = `scan_config_${this.scanId}`;
+    const storedConfig = localStorage.getItem(scanConfigKey);
+    let additionalConfig: any = {};
+    
+    if (storedConfig) {
+      try {
+        additionalConfig = JSON.parse(storedConfig);
+        // Clean up after reading
+        localStorage.removeItem(scanConfigKey);
+      } catch (e) {
+        console.error('Error parsing scan config:', e);
+      }
+    }
+
+    const config = {
+      url: this.scanUrl?.trim(),
+      flags: this.scanFlags && Object.keys(this.scanFlags).length > 0
+        ? this.scanFlags
+        : { sqli: true, xss: true },
+      dbms: additionalConfig.dbms,
+      customHeaders: additionalConfig.customHeaders
+    };    
+
+    this.websocketService.startScan(this.scanId, config);
     this.isScanning = true;
-    this.scanComplete = false;
-    this.scanError = false;
-    
-    // Initialize scan logs
-    this.addLog('Iniciando escaneo...', 'info');
-    this.addLog(`Conectando con el objetivo: ${this.scanUrl}`, 'info');
-    this.addLog('Conexión establecida', 'success');
-    this.addLog('> Iniciando descubrimiento de endpoints', 'info');
-    
-    // Simulate real-time scan progress
-    this.simulateRealTimeScan();
   }
 
-  simulateRealTimeScan(): void {
-    let logCounter = 0;
-    const logMessages = [
-      '> Endpoint descubierto: /admin/login',
-      '> Endpoint descubierto: /admin/dashboard', 
-      '> Endpoint descubierto: /admin/users',
-      '> Endpoint descubierto: /admin/products/search',
-      '> Iniciando análisis de parámetros',
-      '> Detectando vulnerabilidad XSS en /admin/products/search',
-      '> Detectando vulnerabilidad SQLi en /admin/products/search',
-      '> Generando reporte de vulnerabilidades'
-    ];
-
-    this.scanInterval = setInterval(() => {
-      if (logCounter < logMessages.length) {
-        this.addLog(logMessages[logCounter], 'info');
-        logCounter++;
-      }
-
-      // Simulate vulnerability detection
-      if (logCounter === 6) {
-        this.addVulnerability({
-          id: 'xss-001',
-          type: 'XSS',
-          severity: 'high',
-          endpoint: '/admin/products/search',
-          parameter: 'q',
-          detectedAt: new Date(),
-          description: 'XSS reflejado detectado en parámetro de búsqueda'
-        });
-        this.scanStats.xssFound++;
-      }
-
-      if (logCounter === 7) {
-        this.addVulnerability({
-          id: 'sqli-001',
-          type: 'SQLi',
-          severity: 'critical',
-          endpoint: '/admin/products/search',
-          parameter: 'category',
-          detectedAt: new Date(),
-          description: 'SQL Injection detectado en parámetro de categoría'
-        });
-        this.scanStats.sqliFound++;
-      }
-
-      // Update progress
-      this.updateScanProgress();
-
-      // Complete scan after all logs
-      if (logCounter >= logMessages.length) {
-        this.completeScan();
-      }
-    }, 2000);
-  }
-
-  addLog(message: string, type: 'info' | 'success' | 'warning' | 'error'): void {
-    this.scanLogs.push({
-      timestamp: new Date(),
-      message,
-      type
-    });
-  }
-
-  addVulnerability(vuln: DetectedVulnerability): void {
-    this.detectedVulnerabilities.push(vuln);
-  }
-
-  updateScanProgress(): void {
-    // Simulate progress updates
-    if (this.overallProgress < 100) {
-      this.overallProgress += Math.floor(Math.random() * 5) + 1;
-      if (this.overallProgress > 100) this.overallProgress = 100;
-    }
-
-    // Update current phase progress
-    const currentPhase = this.scanPhases[this.currentPhaseIndex];
-    if (currentPhase && currentPhase.status === 'running') {
-      currentPhase.progress += Math.floor(Math.random() * 10) + 5;
-      if (currentPhase.progress >= 100) {
-        currentPhase.progress = 100;
-        currentPhase.status = 'completed';
-        currentPhase.endTime = new Date();
-        this.currentPhaseIndex++;
-        
-        // Start next phase
-        if (this.currentPhaseIndex < this.scanPhases.length) {
-          this.scanPhases[this.currentPhaseIndex].status = 'running';
-          this.scanPhases[this.currentPhaseIndex].startTime = new Date();
-        }
-      }
+  onOptionChange(selectedIndex: number): void {
+    // When user changes option after incorrect answer, allow them to retry with new selection
+    if (this.hasAnswered && !this.currentQuestionCorrect) {
+      // Reset answered state when user changes selection to allow retry
+      this.hasAnswered = false;
     }
   }
 
-  completeScan(): void {
-    this.isScanning = false;
-    this.scanComplete = true;
-    this.overallProgress = 100;
+  answerQuestion(selectedAnswer: number): void {
+    if (!this.currentQuestion) return;
+
+    this.selectedOption = selectedAnswer;
     
-    if (this.scanInterval) {
-      clearInterval(this.scanInterval);
+    // Always send the answer to backend
+    // Backend will handle retries - it keeps the question active until correct
+    this.websocketService.answerQuestion(this.scanId, selectedAnswer);
+    
+    // If this is a retry after incorrect answer, reset hasAnswered state
+    // so the button shows "Responder" again while waiting for backend response
+    if (this.hasAnswered && !this.currentQuestionCorrect) {
+      this.hasAnswered = false;
     }
-
-    // Complete all phases
-    this.scanPhases.forEach(phase => {
-      if (phase.status === 'running') {
-        phase.status = 'completed';
-        phase.progress = 100;
-        phase.endTime = new Date();
-      }
-    });
-
-    this.addLog('Escaneo completado exitosamente', 'success');
   }
 
-  // Scan control methods
+  closeCompletionModal(): void {
+    this.showCompletionModal = false;
+  }
+
   pauseScan(): void {
-    this.isPaused = !this.isPaused;
     if (this.isPaused) {
-      this.addLog('Escaneo pausado', 'warning');
-      if (this.scanInterval) {
-        clearInterval(this.scanInterval);
-      }
+      // Resume if paused
+      this.websocketService.resumeScan(this.scanId);
     } else {
-      this.addLog('Escaneo reanudado', 'info');
-      this.simulateRealTimeScan();
+      // Pause if running
+      this.websocketService.pauseScan(this.scanId);
     }
   }
 
   stopScan(): void {
-    this.isScanning = false;
-    this.addLog('Escaneo detenido por el usuario', 'warning');
-    if (this.scanInterval) {
-      clearInterval(this.scanInterval);
+    if (confirm('¿Está seguro de que desea detener el escaneo? El progreso actual se perderá.')) {
+      this.websocketService.stopScan(this.scanId);
+      // Navigate away after a short delay
+      setTimeout(() => {
+        this.goToScans();
+      }, 1000);
     }
   }
 
-  // Evaluation questions methods
-  selectAnswer(questionId: number, answerIndex: number): void {
-    const question = this.evaluationQuestions.find(q => q.id === questionId);
-    if (question && !question.isAnswered) {
-      question.userAnswer = answerIndex;
-      question.isAnswered = true;
-      this.questionsAnswered++;
-      
-      if (answerIndex === question.correctAnswer) {
-        this.addLog(`Pregunta ${questionId} respondida correctamente`, 'success');
+  updateOverallProgress(): void {
+    if (this.scanPhases.length === 0) return;
+
+    let totalWeight = 0;
+    let completedWeight = 0;
+
+    this.scanPhases.forEach(phase => {
+      if (phase.subphases && phase.subphases.length > 0) {
+        const subphaseWeight = 1 / phase.subphases.length;
+        phase.subphases.forEach(subphase => {
+          totalWeight += subphaseWeight;
+          if (subphase.status === 'completed') {
+            completedWeight += subphaseWeight;
+          }
+        });
       } else {
-        this.addLog(`Pregunta ${questionId} respondida incorrectamente`, 'warning');
+        totalWeight += 1;
+        if (phase.status === 'completed') {
+          completedWeight += 1;
+        }
       }
-    }
+    });
+
+    this.overallProgress = totalWeight > 0 
+      ? Math.round((completedWeight / totalWeight) * 100) 
+      : 0;
   }
 
-  verifyAnswer(questionId: number): void {
-    const question = this.evaluationQuestions.find(q => q.id === questionId);
-    if (question && question.userAnswer !== undefined) {
-      if (question.userAnswer === question.correctAnswer) {
-        this.addLog(`¡Correcto! Pregunta ${questionId} respondida correctamente`, 'success');
-      } else {
-        this.addLog(`Incorrecto. La respuesta correcta era la opción ${question.correctAnswer + 1}`, 'warning');
+  scrollLogsToBottom(): void {
+    if (!this.shouldAutoScroll) return;
+    
+    setTimeout(() => {
+      if (this.logsContainer && this.logsContainer.nativeElement) {
+        const container = this.logsContainer.nativeElement;
+        container.scrollTop = container.scrollHeight;
       }
-    }
+    }, 100);
   }
 
-  nextQuestion(): void {
-    if (this.currentQuestionIndex < this.totalQuestions - 1) {
-      this.currentQuestionIndex++;
-    }
+  onLogsScroll(): void {
+    if (!this.logsContainer || !this.logsContainer.nativeElement) return;
+    
+    const container = this.logsContainer.nativeElement;
+    const threshold = 50; // pixels from bottom to consider "at bottom"
+    const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+    
+    this.shouldAutoScroll = isAtBottom;
   }
 
-  previousQuestion(): void {
-    if (this.currentQuestionIndex > 0) {
-      this.currentQuestionIndex--;
-    }
-  }
-
-  // Results modal methods
-  showResults(): void {
-    this.showResultsModal = true;
-  }
-
-  closeResults(): void {
-    this.showResultsModal = false;
+  scrollToTop(): void {
+    // Scroll the main page to top
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    
+    // Also ensure logs container is at top when initialized
+    setTimeout(() => {
+      if (this.logsContainer && this.logsContainer.nativeElement) {
+        this.logsContainer.nativeElement.scrollTop = 0;
+      }
+    }, 100);
   }
 
   // Utility methods
   getSeverityClass(severity: string): string {
-    switch (severity) {
+    switch (severity.toLowerCase()) {
       case 'critical': return 'severity-critical';
       case 'high': return 'severity-high';
       case 'medium': return 'severity-medium';
@@ -462,7 +568,7 @@ export class ScanProgressComponent implements OnInit, OnDestroy {
   }
 
   getSeverityLabel(severity: string): string {
-    switch (severity) {
+    switch (severity.toLowerCase()) {
       case 'critical': return 'Crítico';
       case 'high': return 'Alto';
       case 'medium': return 'Medio';
@@ -471,48 +577,71 @@ export class ScanProgressComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'pending': return 'status-pending';
-      case 'analyzing': return 'status-analyzing';
-      case 'vulnerable': return 'status-vulnerable';
-      case 'safe': return 'status-safe';
-      default: return 'status-unknown';
-    }
+  getLogLevelClass(level: string): string {
+    return `log-${level}`;
   }
 
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'pending': return 'Pendiente';
-      case 'analyzing': return 'Analizando';
-      case 'vulnerable': return 'Vulnerable';
-      case 'safe': return 'Seguro';
-      default: return 'Desconocido';
-    }
-  }
-
-  formatTime(date: Date): string {
-    return date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit' 
+  formatTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
     });
   }
 
-  goToNewScan(): void {
-    this.router.navigate(['/dashboard/new-scan']);
+  getPhaseStatusIcon(status: string): string {
+    switch (status) {
+      case 'completed': return '✓';
+      case 'running': return '⟳';
+      case 'pending': return '○';
+      default: return '?';
+    }
+  }
+
+  goToReport(): void {
+    this.router.navigate(['/dashboard/scans', this.scanId, 'report']);
   }
 
   goToScans(): void {
     this.router.navigate(['/dashboard/scans']);
   }
 
-  downloadReport(): void {
-    // TODO: Implement report download
-    console.log('Downloading report...');
+  calculateQuizScore(): number {
+    if (this.questionHistory.length === 0) return 0;
+    const correctAnswers = this.questionHistory.filter(q => q.correct).length;
+    return Math.round((correctAnswers / this.questionHistory.length) * 100);
   }
 
-  roundProgress(progress: number): number {
-    return Math.round(progress);
+  getTotalPoints(): number {
+    return this.questionHistory.reduce((sum, q) => sum + q.pointsEarned, 0);
+  }
+
+  getMaxPoints(): number {
+    // Since we don't have the original points in history, estimate based on correct answers
+    // In a real scenario, you'd want to store this separately
+    return this.questionHistory.length * 20; // Assuming average 20 points per question
+  }
+
+  getCorrectAnswersCount(): number {
+    return this.questionHistory.filter(q => q.correct).length;
+  }
+
+  getPhaseName(phaseId: string): string {
+    const phaseNames: { [key: string]: string } = {
+      'init': 'Inicialización',
+      'discovery': 'Descubrimiento',
+      'sqli': 'SQLi',
+      'sqli-detection': 'SQLi - Detección',
+      'sqli-fingerprint': 'SQLi - Fingerprint',
+      'sqli-technique': 'SQLi - Técnica',
+      'sqli-exploit': 'SQLi - Explotación',
+      'xss': 'XSS',
+      'xss-context': 'XSS - Contexto',
+      'xss-payload': 'XSS - Payloads',
+      'xss-fuzzing': 'XSS - Fuzzing',
+      'report': 'Reporte'
+    };
+    return phaseNames[phaseId] || phaseId;
   }
 }

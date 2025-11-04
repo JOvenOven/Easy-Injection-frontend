@@ -18,7 +18,7 @@ const routes: Routes = [
     children: [
       { path: '', component: Home }, // ruta por defecto del módulo dashboard
       { path: 'new-scan', component: NewScanComponent },
-      { path: 'scan-progress', component: ScanProgressComponent },
+      { path: 'scan-progress/:id', component: ScanProgressComponent },
       { path: 'scans', component: MyScansComponent },
       { path: 'scans/:id/report', component: ScanReportComponent },
       { path: 'scans/:scanId/vulnerability/:vulnId', component: VulnerabilityDetailsComponent },

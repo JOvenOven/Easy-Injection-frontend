@@ -14,6 +14,24 @@
   <div class="scan-form-container">
     <form [formGroup]="scanForm" (ngSubmit)="onSubmit()" class="scan-form">
       
+      <!-- Alias Input Section -->
+      <div class="form-section">
+        <h3 class="section-title">Información del Escaneo</h3>
+        <div class="form-group">
+          <label for="alias">Nombre del escaneo (alias)</label>
+          <input 
+            type="text" 
+            id="alias"
+            formControlName="alias"
+            placeholder="Ej: Prueba Login - Producción"
+            class="text-input"
+          >
+          <div class="error-message" *ngIf="scanForm.get('alias')?.invalid && scanForm.get('alias')?.touched">
+            El nombre del escaneo es obligatorio
+          </div>
+        </div>
+      </div>
+
       <!-- URL Input Section -->
       <div class="form-section">
         <h3 class="section-title">URL del Sitio Web</h3>
@@ -61,6 +79,27 @@
               >
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- DBMS Selection (only for SQLi scans) -->
+      <div class="form-section" *ngIf="selectedScanType === 'sql' || selectedScanType === 'both'">
+        <h3 class="section-title">Sistema Gestor de Base de Datos</h3>
+        <div class="form-group">
+          <label for="dbms">DBMS del objetivo</label>
+          <select 
+            id="dbms"
+            formControlName="dbms"
+            class="dbms-select"
+            (change)="selectDbms($any($event.target).value)"
+          >
+            <option *ngFor="let dbms of dbmsList" [value]="dbms.id">
+              {{ dbms.name }} - {{ dbms.description }}
+            </option>
+          </select>
+          <small class="form-help">
+            Selecciona el sistema de base de datos del sitio objetivo para mejorar la precisión del escaneo
+          </small>
         </div>
       </div>
 

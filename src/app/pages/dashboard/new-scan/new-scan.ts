@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ScanService, CreateScanRequest } from '../../../services/scan.service';
 
 export interface ScanType {
   id: string;
@@ -9,6 +10,12 @@ export interface ScanType {
   description: string;
   icon: string;
   color: string;
+}
+
+export interface DBMS {
+  id: string;
+  name: string;
+  description: string;
 }
 
 @Component({
@@ -48,27 +55,51 @@ export class NewScanComponent implements OnInit {
     }
   ];
 
+  // Available DBMS (supported by sqlmap)
+  dbmsList: DBMS[] = [
+    { id: 'auto', name: 'Auto-detectar', description: 'SQLmap detectará automáticamente' },
+    { id: 'MySQL', name: 'MySQL', description: 'MySQL 5.x, 8.x' },
+    { id: 'PostgreSQL', name: 'PostgreSQL', description: 'PostgreSQL 9.x, 10.x+' },
+    { id: 'Microsoft SQL Server', name: 'Microsoft SQL Server', description: 'MSSQL 2005+' },
+    { id: 'Oracle', name: 'Oracle', description: 'Oracle 10g, 11g, 12c+' },
+    { id: 'SQLite', name: 'SQLite', description: 'SQLite 3.x' },
+    { id: 'Microsoft Access', name: 'Microsoft Access', description: 'MS Access 2000+' },
+    { id: 'Firebird', name: 'Firebird', description: 'Firebird 2.x+' },
+    { id: 'Sybase', name: 'Sybase', description: 'Sybase ASE' },
+    { id: 'IBM DB2', name: 'IBM DB2', description: 'DB2 9.x+' },
+    { id: 'MariaDB', name: 'MariaDB', description: 'MariaDB 5.x, 10.x' }
+  ];
+
   selectedScanType: string = 'both';
+  selectedDbms: string = 'auto';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private scanService: ScanService
   ) {
     this.scanForm = this.fb.group({
+      alias: ['', Validators.required],
       url: ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]],
       scanType: ['both', Validators.required],
+      dbms: ['auto'],
       customHeaders: ['']
     });
   }
 
   ngOnInit(): void {
-    // Set default scan type
-    this.scanForm.patchValue({ scanType: 'both' });
+    // Set default scan type and DBMS
+    this.scanForm.patchValue({ scanType: 'both', dbms: 'auto' });
   }
 
   selectScanType(scanTypeId: string) {
     this.selectedScanType = scanTypeId;
     this.scanForm.patchValue({ scanType: scanTypeId });
+  }
+
+  selectDbms(dbmsId: string) {
+    this.selectedDbms = dbmsId;
+    this.scanForm.patchValue({ dbms: dbmsId });
   }
 
   getUrlErrorMessage(): string {
@@ -94,22 +125,40 @@ export class NewScanComponent implements OnInit {
 
       const formData = this.scanForm.value;
       
-      // Generate scan name from URL
-      const urlObj = new URL(formData.url);
-      const scanName = `Escaneo de prueba - ${urlObj.hostname}`;
-      
-      // Simulate API call delay
-      setTimeout(() => {
-        // Navigate to scan progress page with scan data
-        this.router.navigate(['/dashboard/scan-progress'], {
-          queryParams: {
-            url: formData.url,
-            scanType: formData.scanType,
-            customHeaders: formData.customHeaders || '',
-            scanName: scanName
+      // Prepare scan data for API
+      const scanData: CreateScanRequest = {
+        alias: formData.alias,
+        url: formData.url,
+        flags: {
+          xss: formData.scanType === 'xss' || formData.scanType === 'both',
+          sqli: formData.scanType === 'sql' || formData.scanType === 'both'
+        }
+      };
+
+      // Call API to create scan
+      this.scanService.createScan(scanData).subscribe({
+        next: (response) => {
+          if (response.success && response.scan) {
+            // Store additional config (DBMS and headers) in localStorage for this scan
+            const scanConfig = {
+              dbms: formData.dbms !== 'auto' ? formData.dbms : undefined,
+              customHeaders: formData.customHeaders || undefined
+            };
+            localStorage.setItem(`scan_config_${response.scan._id}`, JSON.stringify(scanConfig));
+
+            // Navigate to scan progress page with scan ID
+            this.router.navigate(['/dashboard/scan-progress', response.scan._id]);
+          } else {
+            this.submitError = 'Error al crear el escaneo. Intenta nuevamente.';
+            this.isSubmitting = false;
           }
-        });
-      }, 1000);
+        },
+        error: (error) => {
+          console.error('Error creating scan:', error);
+          this.submitError = error.error?.message || 'Error al crear el escaneo. Verifica tu conexión.';
+          this.isSubmitting = false;
+        }
+      });
     } else {
       this.scanForm.markAllAsTouched();
     }

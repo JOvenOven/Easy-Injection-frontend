@@ -9,7 +9,7 @@ $amarillo: #ffd93d;
 $naranja: #ff8c00;
 
 .btn--primary {
-  background: $azul;
+  background: $rosa;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -22,7 +22,7 @@ $naranja: #ff8c00;
   gap: 0.5rem;
 
   &:hover {
-    background: darken($azul, 10%);
+    background: darken($rosa, 10%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(101, 178, 198, 0.3);
   }
@@ -90,7 +90,7 @@ $naranja: #ff8c00;
   
         &:focus {
           outline: none;
-          border-color: $azul;
+          border-color: $rosa;
         }
   
         &::placeholder {
@@ -175,14 +175,14 @@ $naranja: #ff8c00;
           }
 
           &.active {
-            background: $azul;
+            background: $rosa;
             color: white;
-            border-color: $azul;
+            border-color: $rosa;
           }
 
           &:hover:not(.active) {
-            border-color: $azul;
-            color: $azul;
+            border-color: $rosa;
+            color: $rosa;
           }
         }
       }
@@ -244,7 +244,7 @@ $naranja: #ff8c00;
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: visible;
 
     .list-header {
       display: grid;
@@ -574,22 +574,22 @@ $naranja: #ff8c00;
 
           &--outline {
             background: white;
-            color: $azul;
-            border: 1px solid $azul;
+            color: $rosa;
+            border: 1px solid $rosa;
 
             &:hover {
-              background: $azul;
+              background: $rosa;
               color: white;
             }
           }
 
           &--primary {
-            background: $azul;
+            background: $rosa;
             color: white;
             border: none;
 
             &:hover {
-              background: darken($azul, 10%);
+              background: darken($rosa, 10%);
             }
           }
         }

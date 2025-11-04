@@ -1,0 +1,128 @@
+<div class="theory">
+  <div class="container">
+    <div class="content-wrapper">
+      
+      <!-- Encabezado -->
+      <div class="header-section">
+        <div class="header-content">
+          <h1 class="main-title">Teoría y Recursos</h1>
+          <p class="main-subtitle">
+            Aprende sobre vulnerabilidades XSS e inyección SQL con nuestros recursos educativos
+          </p>
+        </div>
+        <!--
+        <div class="search-wrapper">
+          <div class="search-container"> 
+            <img src="/lupa.svg" alt="Buscar" class="search-icon">
+            <input 
+              type="text" 
+              placeholder="Buscar recursos..." 
+              class="search-input"
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+            >
+          </div>
+        </div>
+        -->
+      </div>
+
+      <!-- Banner principal -->
+      <div class="hero-banner">
+        <div class="banner-background"></div>
+        <div class="banner-content">
+          <h2 class="banner-title">Domina la seguridad web</h2>
+          <p class="banner-description">
+            Explora nuestra colección completa de recursos sobre vulnerabilidades XSS e inyección SQL. 
+            Desde conceptos básicos hasta técnicas avanzadas de prevención.
+          </p>
+          <button class="btn-hero" (click)="navigateToSyllabus()">
+            <img src="/lesson.svg" alt="Lección" class="btn-icon">
+            Comenzar a aprender
+          </button>
+        </div>
+      </div>
+
+      <!-- Categorías destacadas -->
+      <div class="featured-section">
+        <div class="section-header">
+          <h2 class="section-title">Categorías disponibles</h2>
+          <!-- <button class="view-all-link" (click)="navigateToCategories()">
+            Ver todas <span class="chevron">›</span>
+          </button> -->
+        </div>
+
+        <div class="categories-grid">
+          <div 
+            *ngFor="let category of featuredCategories" 
+            class="category-card"
+            (click)="navigateToCategory(category.id)"
+          >
+            <div class="card-header">
+              <div class="icon-wrapper" [ngClass]="category.colorClass">
+                <img [src]="category.icon" [alt]="category.title" class="category-icon">
+              </div>
+              <h3 class="card-title">{{ category.title }}</h3>
+            </div>
+            <div class="card-content">
+              <p class="card-description">{{ category.description }}</p>
+            </div>
+            <div class="card-footer">
+              <p class="resource-count">{{ category.count }} módulos disponibles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+<!--
+      <div class="explore-section">
+        <div class="explore-grid">
+          
+          <div class="explore-card">
+            <div class="explore-header">
+              <h3 class="explore-title">Guías paso a paso</h3>
+              <p class="explore-description">
+                Tutoriales detallados para aprender a identificar y prevenir vulnerabilidades
+              </p>
+            </div>
+            <div class="explore-content">
+              <ul class="resource-list">
+                <li class="resource-item" *ngFor="let guide of stepByStepGuides">
+                  <span class="resource-icon">📄</span>
+                  <span class="resource-text">{{ guide }}</span>
+                </li>
+              </ul>
+            </div>
+            <div class="explore-footer">
+              <button class="btn-outline" (click)="navigateToGuides()">
+                Ver todas las guías
+              </button>
+            </div>
+          </div>
+
+          <div class="explore-card">
+            <div class="explore-header">
+              <h3 class="explore-title">Recursos descargables</h3>
+              <p class="explore-description">
+                Material complementario para profundizar en tus conocimientos
+              </p>
+            </div>
+            <div class="explore-content">
+              <ul class="resource-list">
+                <li class="resource-item" *ngFor="let resource of downloadableResources">
+                  <span class="resource-icon">📄</span>
+                  <span class="resource-text">{{ resource }}</span>
+                </li>
+              </ul>
+            </div>
+            <div class="explore-footer">
+              <button class="btn-outline" (click)="navigateToResources()">
+                Ver todos los recursos
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+-->
+    </div>
+  </div>
+</div>

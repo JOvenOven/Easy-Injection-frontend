@@ -1,0 +1,24 @@
+<div class="progress-indicator">
+  <div class="progress-header">
+    <h3 class="progress-title">Progreso del temario</h3>
+    <p class="progress-subtitle">{{ currentStep }} de {{ steps }} lecciones</p>
+  </div>
+  
+  <div class="steps-container">
+    <div 
+      *ngFor="let step of stepArray; let i = index" 
+      class="step-item"
+      [ngClass]="getStepClass(step)"
+    >
+      <div class="step-circle">
+        <span *ngIf="getStepClass(step) === 'completed'">✓</span>
+        <span *ngIf="getStepClass(step) !== 'completed'">{{ step }}</span>
+      </div>
+      <div class="step-line" *ngIf="i < stepArray.length - 1"></div>
+    </div>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" [style.height.%]="(currentStep / steps) * 100"></div>
+  </div>
+</div>

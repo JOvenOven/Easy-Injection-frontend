@@ -8,6 +8,8 @@ import { MyScansComponent } from './my-scans/my-scans';
 import { ScanReportComponent } from './scan-report/scan-report';
 import { VulnerabilityDetailsComponent } from './vulnerability-details/vulnerability-details';
 import { DashboardLayoutComponent } from '../../shared/components/dashboard-layout/dashboard-layout';
+import { TheoryComponent } from './theory/theory';
+import { SyllabusComponent } from './theory/syllabus/syllabus';
 
 import { DashboardRoutingModule } from './dashboard-routing-module';
 
@@ -23,7 +25,9 @@ import { DashboardRoutingModule } from './dashboard-routing-module';
     MyScansComponent,
     ScanReportComponent,
     VulnerabilityDetailsComponent,
-    DashboardLayoutComponent
+    DashboardLayoutComponent,
+    TheoryComponent,
+    SyllabusComponent,
   ]
 })
 export class DashboardModule { }

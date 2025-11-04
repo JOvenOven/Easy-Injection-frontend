@@ -1,0 +1,296 @@
+<div class="syllabus">
+  <div class="container">
+    <div class="content-wrapper">
+      
+      <!-- Navegación -->
+      <div class="navigation">
+        <button class="back-btn" (click)="navigateBack()">
+          <img src="/back.svg" alt="Volver" class="back-icon">
+          Volver a Teoría
+        </button>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="header-section">
+        <h1 class="main-title">Temario de Seguridad Web</h1>
+        <p class="main-subtitle">
+          Aprende sobre vulnerabilidades de seguridad web y cómo proteger tus aplicaciones
+        </p>
+      </div>
+
+      <!-- Progreso general -->
+      <div class="progress-card">
+        <div class="progress-content">
+          <div class="progress-info">
+            <h2 class="progress-title">Tu progreso</h2>
+            <p class="progress-description">Has completado {{ completedLessons }} de {{ totalLessons }} lecciones ({{ progressPercentage }}%)</p>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestañas de categorías -->
+      <div class="tabs-container">
+        <div class="tabs-list">
+          <button 
+            *ngFor="let tab of tabs" 
+            class="tab-trigger"
+            [class.active]="activeTab === tab.value"
+            (click)="setActiveTab(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div class="tab-content">
+          
+          <!-- Pestaña: Todo el contenido -->
+          <div *ngIf="activeTab === 'all'" class="tab-panel">
+            
+            <!-- Sección 1: Fundamentos de Seguridad -->
+            <div class="section" id="security-basics">
+              <div class="section-header">
+                <div class="section-icon bg-coral">
+                  <img src="/security.svg" alt="Introducción a la Seguridad Web" class="section-icon-img">
+                </div>
+                <h2 class="section-title">Fundamentos de Seguridad Web</h2>
+              </div>
+
+              <div class="lessons-grid">
+                <div 
+                  *ngFor="let lesson of securityBasicsLessons" 
+                  class="lesson-card"
+                  [class]="'border-coral ' + (lesson.completed ? 'completed' : '')"
+                >
+                  <div class="card-header">
+                    <div class="card-title-container">
+                      <h3 class="card-title">{{ lesson.title }}</h3>
+                      <div class="lesson-badge" [ngClass]="lesson.completed ? 'completed' : 'pending'">
+                        {{ lesson.completed ? 'Completado' : 'Pendiente' }}
+                      </div>
+                    </div>
+                    <p class="card-description">{{ lesson.description }}</p>
+                  </div>
+                  <div class="card-content">
+                    <p class="lesson-content">{{ lesson.content }}</p>
+                  </div>
+                  <div class="card-footer">
+                    <button 
+                      class="lesson-btn"
+                      [class]="lesson.completed ? 'btn-outline' : 'btn-coral'"
+                      (click)="navigateToLesson(lesson.id)"
+                    >
+                      <img src="/lesson.svg" alt="Lección" class="btn-icon">
+                      {{ lesson.completed ? 'Repasar lección' : 'Comenzar lección' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- Sección 2: Cross-Site Scripting (XSS) -->
+            <div class="section" id="xss">
+              <div class="section-header">
+                <div class="section-icon bg-azul">
+                  <img src="/code.svg" alt="XSS" class="section-icon-img">
+                </div>
+                <h2 class="section-title">Cross-Site Scripting (XSS)</h2>
+              </div>
+
+              <div class="lessons-grid">
+                <div 
+                  *ngFor="let lesson of xssLessons" 
+                  class="lesson-card"
+                  [class]="'border-azul ' + (lesson.completed ? 'completed' : '')"
+                >
+                  <div class="card-header">
+                    <div class="card-title-container">
+                      <h3 class="card-title">{{ lesson.title }}</h3>
+                      <div class="lesson-badge" [ngClass]="lesson.completed ? 'completed' : 'pending'">
+                        {{ lesson.completed ? 'Completado' : 'Pendiente' }}
+                      </div>
+                    </div>
+                    <p class="card-description">{{ lesson.description }}</p>
+                  </div>
+                  <div class="card-content">
+                    <p class="lesson-content">{{ lesson.content }}</p>
+                  </div>
+                  <div class="card-footer">
+                    <button 
+                      class="lesson-btn"
+                      [class]="lesson.completed ? 'btn-outline' : 'btn-azul'"
+                      (click)="navigateToLesson(lesson.id)"
+                    >
+                      <img src="/lesson.svg" alt="Lección" class="btn-icon">
+                      {{ lesson.completed ? 'Repasar lección' : 'Comenzar lección' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- Sección 3: SQL Injection -->
+            <div class="section" id="sql-injection">
+              <div class="section-header">
+                <div class="section-icon bg-rosa">
+                  <img src="/bd.svg" alt="Inyección SQL" class="section-icon-img">
+                </div>
+                <h2 class="section-title">Inyección SQL</h2>
+              </div>
+
+              <div class="lessons-grid">
+                <div 
+                  *ngFor="let lesson of sqlInjectionLessons" 
+                  class="lesson-card"
+                  [class]="'border-rosa ' + (lesson.completed ? 'completed' : '')"
+                >
+                  <div class="card-header">
+                    <div class="card-title-container">
+                      <h3 class="card-title">{{ lesson.title }}</h3>
+                      <div class="lesson-badge" [ngClass]="lesson.completed ? 'completed' : 'pending'">
+                        {{ lesson.completed ? 'Completado' : 'Pendiente' }}
+                      </div>
+                    </div>
+                    <p class="card-description">{{ lesson.description }}</p>
+                  </div>
+                  <div class="card-content">
+                    <p class="lesson-content">{{ lesson.content }}</p>
+                  </div>
+                  <div class="card-footer">
+                    <button 
+                      class="lesson-btn"
+                      [class]="lesson.completed ? 'btn-outline' : 'btn-rosa'"
+                      (click)="navigateToLesson(lesson.id)"
+                    >
+                      <img src="/lesson.svg" alt="Lección" class="btn-icon">
+                      {{ lesson.completed ? 'Repasar lección' : 'Comenzar lección' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recursos adicionales -->
+            <div class="resources-card">
+              <div class="resources-header">
+                <h3 class="resources-title">Recursos adicionales</h3>
+                <p class="resources-description">Material complementario para profundizar en tus conocimientos</p>
+              </div>
+              <div class="resources-content">
+                <div class="resources-grid">
+                  <div *ngFor="let resource of additionalResources" class="resource-item">
+                    <img src="/link.svg" alt="Enlace" class="resource-icon">
+                    <div class="resource-info">
+                      <p class="resource-name">{{ resource.name }}</p>
+                      <p class="resource-desc">{{ resource.description }}</p>
+                      <button class="resource-link" (click)="openExternalLink(resource.url)">
+                        Visitar sitio
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña: XSS -->
+          <div *ngIf="activeTab === 'xss'" class="tab-panel">
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon bg-azul">
+                  <img src="/code.svg" alt="XSS" class="section-icon-img">
+                </div>
+                <h2 class="section-title">Cross-Site Scripting (XSS)</h2>
+              </div>
+
+              <div class="lessons-grid">
+                <div 
+                  *ngFor="let lesson of xssLessons" 
+                  class="lesson-card"
+                  [class]="'border-azul ' + (lesson.completed ? 'completed' : '')"
+                >
+                  <div class="card-header">
+                    <div class="card-title-container">
+                      <h3 class="card-title">{{ lesson.title }}</h3>
+                      <div class="lesson-badge" [ngClass]="lesson.completed ? 'completed' : 'pending'">
+                        {{ lesson.completed ? 'Completado' : 'Pendiente' }}
+                      </div>
+                    </div>
+                    <p class="card-description">{{ lesson.description }}</p>
+                  </div>
+                  <div class="card-content">
+                    <p class="lesson-content">{{ lesson.content }}</p>
+                  </div>
+                  <div class="card-footer">
+                    <button 
+                      class="lesson-btn"
+                      [class]="lesson.completed ? 'btn-outline' : 'btn-azul'"
+                      (click)="navigateToLesson(lesson.id)"
+                    >
+                      <img src="/lesson.svg" alt="Lección" class="btn-icon">
+                      {{ lesson.completed ? 'Repasar lección' : 'Comenzar lección' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña: SQLi -->
+          <div *ngIf="activeTab === 'sqli'" class="tab-panel">
+            <div class="section">
+              <div class="section-header">
+                <div class="section-icon bg-rosa">
+                  <img src="/bd.svg" alt="Inyección SQL" class="section-icon-img">
+                </div>
+                <h2 class="section-title">Inyección SQL</h2>
+              </div>
+
+              <div class="lessons-grid">
+                <div 
+                  *ngFor="let lesson of sqlInjectionLessons" 
+                  class="lesson-card"
+                  [class]="'border-rosa ' + (lesson.completed ? 'completed' : '')"
+                >
+                  <div class="card-header">
+                    <div class="card-title-container">
+                      <h3 class="card-title">{{ lesson.title }}</h3>
+                      <div class="lesson-badge" [ngClass]="lesson.completed ? 'completed' : 'pending'">
+                        {{ lesson.completed ? 'Completado' : 'Pendiente' }}
+                      </div>
+                    </div>
+                    <p class="card-description">{{ lesson.description }}</p>
+                  </div>
+                  <div class="card-content">
+                    <p class="lesson-content">{{ lesson.content }}</p>
+                  </div>
+                  <div class="card-footer">
+                    <button 
+                      class="lesson-btn"
+                      [class]="lesson.completed ? 'btn-outline' : 'btn-rosa'"
+                      (click)="navigateToLesson(lesson.id)"
+                    >
+                      <img src="/lesson.svg" alt="Lección" class="btn-icon">
+                      {{ lesson.completed ? 'Repasar lección' : 'Comenzar lección' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -7,6 +7,9 @@ import { ScanProgressComponent } from './scan-progress/scan-progress';
 import { MyScansComponent } from './my-scans/my-scans';
 import { ScanReportComponent } from './scan-report/scan-report';
 import { VulnerabilityDetailsComponent } from './vulnerability-details/vulnerability-details';
+import { TheoryComponent } from './theory/theory';
+import { SyllabusComponent } from './theory/syllabus/syllabus';
+import { LessonComponent } from './theory/lesson/lesson';
 
 const routes: Routes = [
   {
@@ -19,7 +22,9 @@ const routes: Routes = [
       { path: 'scans', component: MyScansComponent },
       { path: 'scans/:id/report', component: ScanReportComponent },
       { path: 'scans/:scanId/vulnerability/:vulnId', component: VulnerabilityDetailsComponent },
-      { path: 'theory', component: Home },
+      { path: 'theory', component: TheoryComponent },
+      { path: 'theory/syllabus', component: SyllabusComponent },
+      { path: 'theory/lesson/:lessonId', component: LessonComponent },
       { path: 'scoreboard', component: Home },
       { path: 'account', component: Home }
     ]

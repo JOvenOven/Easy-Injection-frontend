@@ -1,0 +1,49 @@
+<div class="container mx-auto py-6">
+  <div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-rosa-mexicano">Scoreboard</h1>
+    </div>
+
+    <!-- Tabla de clasificación -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Clasificación</h2>
+      </div>
+      <div class="card-content">
+        <div class="rounded-md border">
+          <div class="grid grid-cols-12 bg-muted p-3 text-sm font-medium">
+            <div class="col-span-1 text-center">#</div>
+            <div class="col-span-5">Nombre del escaneo (Alias)</div>
+            <div class="col-span-2 text-right">Respuestas correctas</div>
+            <div class="col-span-2 text-right">Calificación de vulnerabilidades</div>
+            <div class="col-span-2 text-right">Puntaje</div>
+          </div>
+          <div class="divide-y">
+            <div
+              *ngFor="let scan of filteredScans"
+              class="grid grid-cols-12 items-center p-3"
+            >
+              <div class="col-span-1 text-center font-medium">
+                <div *ngIf="scan.rank <= 3" class="inline-flex items-center justify-center">
+                  <svg class="h-5 w-5" [ngClass]="getMedalClass(scan.rank)" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20.38C20.8 4 21.13 4.42 21.02 4.83L19.37 11.1C19.18 11.8 18.53 12.27 17.8 12.27H6.2C5.47 12.27 4.82 11.8 4.63 11.1L2.98 4.83C2.87 4.42 3.2 4 3.62 4H7Z"/>
+                  </svg>
+                </div>
+                <span *ngIf="scan.rank > 3">{{ scan.rank }}</span>
+              </div>
+              <div class="col-span-5 flex items-center gap-2">
+                <div>
+                  <div class="font-medium">{{ scan.name }}</div>
+                </div>
+              </div>
+              <div class="col-span-2 text-right font-medium">{{ scan.correctAnswers }}</div>
+              <div class="col-span-2 text-right text-muted-foreground">{{ scan.vulnerabilityScore }}</div>
+              <div class="col-span-2 text-right text-muted-foreground">{{ formatScore(scan.totalScore) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

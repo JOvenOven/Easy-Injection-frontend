@@ -20,6 +20,7 @@ interface LessonData {
   templateUrl: './lesson.html',
   styleUrl: './lesson.scss'
 })
+
 export class LessonComponent implements OnInit {
   lessonData: LessonData = {
     id: '',

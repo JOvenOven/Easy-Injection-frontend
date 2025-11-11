@@ -10,6 +10,7 @@ import { VulnerabilityDetailsComponent } from './vulnerability-details/vulnerabi
 import { DashboardLayoutComponent } from '../../shared/components/dashboard-layout/dashboard-layout';
 import { TheoryComponent } from './theory/theory';
 import { SyllabusComponent } from './theory/syllabus/syllabus';
+import { ScoreboardComponent } from './scoreboard/scoreboard';
 
 import { DashboardRoutingModule } from './dashboard-routing-module';
 
@@ -28,6 +29,7 @@ import { DashboardRoutingModule } from './dashboard-routing-module';
     DashboardLayoutComponent,
     TheoryComponent,
     SyllabusComponent,
+    ScoreboardComponent,
   ]
 })
 export class DashboardModule { }

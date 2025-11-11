@@ -230,6 +230,11 @@ export class SyllabusComponent implements OnInit {
     this.progressPercentage = this.totalLessons > 0 ? Math.round((this.completedLessons / this.totalLessons) * 100) : 0;
   }
 
+  
+  onSearchChange(): void {
+    // Lógica de búsqueda
+    }
+
   navigateToLesson(lessonId: string): void {
     // Marcar la lección como completada cuando el usuario navega a ella
     this.markLessonAsCompleted(lessonId);

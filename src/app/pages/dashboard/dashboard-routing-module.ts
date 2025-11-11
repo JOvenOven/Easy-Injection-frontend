@@ -10,6 +10,7 @@ import { VulnerabilityDetailsComponent } from './vulnerability-details/vulnerabi
 import { TheoryComponent } from './theory/theory';
 import { SyllabusComponent } from './theory/syllabus/syllabus';
 import { LessonComponent } from './theory/lesson/lesson';
+import { ScoreboardComponent } from './scoreboard/scoreboard';
 
 const routes: Routes = [
   {
@@ -25,7 +26,7 @@ const routes: Routes = [
       { path: 'theory', component: TheoryComponent },
       { path: 'theory/syllabus', component: SyllabusComponent },
       { path: 'theory/lesson/:lessonId', component: LessonComponent },
-      { path: 'scoreboard', component: Home },
+      { path: 'scoreboard', component: ScoreboardComponent },
       { path: 'account', component: Home }
     ]
   }

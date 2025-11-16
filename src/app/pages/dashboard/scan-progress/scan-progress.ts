@@ -2,6 +2,20 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faTimesCircle,
+  faSyncAlt,
+  faPause,
+  faCheckCircle,
+  faPlay,
+  faStop,
+  faFileAlt,
+  faClipboardList,
+  faChartBar,
+  faSearch,
+  faExclamationTriangle
+} from '@fortawesome/free-solid-svg-icons';
 import { 
   WebsocketService, 
   Phase, 
@@ -18,11 +32,22 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-scan-progress',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule],
   templateUrl: './scan-progress.html',
   styleUrls: ['./scan-progress.scss']
 })
 export class ScanProgressComponent implements OnInit, OnDestroy, AfterViewInit {
+  faTimesCircle = faTimesCircle;
+  faSyncAlt = faSyncAlt;
+  faPause = faPause;
+  faCheckCircle = faCheckCircle;
+  faPlay = faPlay;
+  faStop = faStop;
+  faFileAlt = faFileAlt;
+  faClipboardList = faClipboardList;
+  faChartBar = faChartBar;
+  faSearch = faSearch;
+  faExclamationTriangle = faExclamationTriangle;
   @ViewChild('logsContainer', { static: false }) logsContainer!: ElementRef<HTMLDivElement>;
   
   scanId: string = '';
@@ -195,7 +220,6 @@ export class ScanProgressComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       },
       error: (error) => {
-        console.error('Error loading scan details:', error);
         // Initialize with default flags if error
         this.scanFlags = { sqli: true, xss: true };
         this.initializeDefaultPhases();
@@ -430,7 +454,6 @@ export class ScanProgressComponent implements OnInit, OnDestroy, AfterViewInit {
         // Clean up after reading
         localStorage.removeItem(scanConfigKey);
       } catch (e) {
-        console.error('Error parsing scan config:', e);
       }
     }
 

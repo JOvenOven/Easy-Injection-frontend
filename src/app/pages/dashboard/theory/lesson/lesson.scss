@@ -1,4 +1,6 @@
+// Import highlight.js theme - will be overridden by our custom styles below
 @import "highlight.js/styles/atom-one-dark.css";
+
 $rosa: #D63D6C;
 $gris: #c0cbcd;
 $gris-oscuro: #6b6b6b;
@@ -39,7 +41,7 @@ $naranja: #D57275;
 
     @media (min-width: 768px) {
       display: block;
-      width: 240px;
+      width: 80px;
       flex-shrink: 0;
     }
 
@@ -47,10 +49,107 @@ $naranja: #D57275;
       position: sticky;
       top: 6rem;
       height: calc(100vh - 7.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-progress-bar-vertical {
+      position: relative;
+      height: 100%;
+      max-height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0;
+
+      .progress-line-vertical {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #e5e7eb;
+        transform: translateX(-50%);
+        z-index: 1;
+
+        .progress-line-fill-vertical {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          background: $rosa;
+          transition: height 0.3s ease;
+        }
+      }
+
+      .progress-steps-vertical {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        z-index: 2;
+
+        .progress-step-vertical {
+          display: grid;
+          align-items: center;
+          justify-content: center;
+
+          .step-circle {
+            width: 40px;
+            height: 40px!important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 3px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+
+            .step-number {
+              font-size: 14px;
+              font-weight: 600;
+              color: #9ca3af;
+              transition: color 0.3s ease;
+            }
+          }
+
+          &.completed .step-circle {
+            background: $rosa;
+            border-color: $rosa;
+
+            .step-number {
+              color: white;
+            }
+          }
+
+          &.current .step-circle {
+            background: white;
+            border-color: $rosa;
+            border-width: 4px;
+            box-shadow: 0 0 0 4px rgba($rosa, 0.2);
+
+            .step-number {
+              color: $rosa;
+              font-weight: 700;
+            }
+          }
+
+          &.upcoming .step-circle {
+            background: white;
+            border-color: #e5e7eb;
+
+            .step-number {
+              color: #9ca3af;
+            }
+          }
+        }
+      }
     }
   }
 
-  // Main Content
   .main-content {
     flex: 1;
     min-width: 0;
@@ -92,6 +191,14 @@ $naranja: #D57275;
 
     // Lesson Header
     .lesson-header {
+      .lesson-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
       .lesson-title {
         font-size: 2rem;
         font-weight: 700;
@@ -109,6 +216,30 @@ $naranja: #D57275;
         font-size: 1rem;
         margin: 0;
         line-height: 1.5;
+      }
+
+      .completed-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 24px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        .badge-icon {
+          font-size: 1rem;
+        }
+
+        @media (max-width: 767px) {
+          font-size: 0.8125rem;
+          padding: 0.4rem 0.875rem;
+        }
       }
     }
 
@@ -132,6 +263,7 @@ $naranja: #D57275;
     .lesson-navigation {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       gap: 1rem;
       position: relative;
       width: 100%;
@@ -145,6 +277,7 @@ $naranja: #D57275;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        border: none;
 
         &.prev-btn {
           background: white;
@@ -168,6 +301,88 @@ $naranja: #D57275;
 
           &:hover {
             background: darken($rosa, 10%);
+          }
+        }
+
+        &.complete-lesson-btn {
+          background: #65B2C6;
+          color: white;
+          border: none;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(101, 178, 198, 0.3);
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+
+          &.center-btn {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+
+            &:hover:not(:disabled) {
+              background: darken(#65B2C6, 8%);
+              box-shadow: 0 4px 12px rgba(101, 178, 198, 0.4);
+              transform: translateX(-50%) translateY(-1px);
+            }
+
+            &:active:not(:disabled) {
+              transform: translateX(-50%) translateY(0);
+            }
+          }
+
+          &.solo-btn {
+            width: 100%;
+            justify-content: center;
+            position: static;
+
+            &:hover:not(:disabled) {
+              background: darken(#65B2C6, 8%);
+              box-shadow: 0 4px 12px rgba(101, 178, 198, 0.4);
+              transform: translateY(-1px);
+            }
+
+            &:active:not(:disabled) {
+              transform: translateY(0);
+            }
+          }
+
+          // Default hover for when neither center-btn nor solo-btn
+          &:not(.center-btn):not(.solo-btn) {
+            &:hover:not(:disabled) {
+              background: darken(#65B2C6, 8%);
+              box-shadow: 0 4px 12px rgba(101, 178, 198, 0.4);
+              transform: translateY(-1px);
+            }
+
+            &:active:not(:disabled) {
+              transform: translateY(0);
+            }
+          }
+        }
+
+        &.lesson-completed-badge {
+          background: #65B2C6;
+          color: white;
+          border: none;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(101, 178, 198, 0.3);
+
+          &.center-btn {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+
+          &.solo-btn {
+            width: 100%;
+            justify-content: center;
+            position: static;
+          }
+
+          .check-icon {
+            font-size: 1.125rem;
           }
         }
 
@@ -205,8 +420,10 @@ $naranja: #D57275;
   }
 }
 
-// Prose Styles
-.prose {
+// Prose Styles - Override highlight.js defaults
+// Use ::ng-deep to style dynamically inserted HTML content
+::ng-deep .lesson-content .prose,
+::ng-deep .prose {
   max-width: none;
   color: #374151;
   line-height: 1.7;
@@ -244,32 +461,37 @@ $naranja: #D57275;
   }
 
   pre {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #282c34 !important;
+    background-color: #282c34 !important;
+    border: 1px solid #21252b !important;
     border-radius: 8px;
     padding: 1rem;
     margin: 1.5rem 0;
     overflow-x: auto;
     position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 
     code {
-      background: none;
+      background: none !important;
       padding: 0;
       font-size: 0.875rem;
-      color: #475569;
+      color: #abb2bf !important;
       white-space: pre;
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
 
       &.highlight-vulnerable {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: #1a1d23 !important;
+        border: 2px solid #dc2626;
         border-radius: 4px;
         padding: 0.75rem;
         display: block;
         position: relative;
+        color: #abb2bf !important;
 
         &::before {
-          content: "⚠️ Código Vulnerable";
+          content: "\f071 Código Vulnerable";
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
           position: absolute;
           top: -0.5rem;
           right: 0.5rem;
@@ -283,15 +505,18 @@ $naranja: #D57275;
       }
 
       &.highlight-secure {
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid rgba(34, 197, 94, 0.3);
+        background: #1a1d23 !important;
+        border: 2px solid #16a34a;
         border-radius: 4px;
         padding: 0.75rem;
         display: block;
         position: relative;
+        color: #abb2bf !important;
 
         &::before {
-          content: "✅ Código Seguro";
+          content: "\f058 Código Seguro";
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
           position: absolute;
           top: -0.5rem;
           right: 0.5rem;
@@ -307,42 +532,42 @@ $naranja: #D57275;
       // Estilos para highlight.js
       &.language-php {
         .hljs-meta {
-          color: #1976d2;
+          color: #61afef;
         }
         .hljs-variable {
-          color: #e91e63;
+          color: #e06c75;
         }
         .hljs-string {
-          color: #388e3c;
+          color: #98c379;
         }
       }
 
       &.language-html {
         .hljs-tag {
-          color: #1976d2;
+          color: #61afef;
         }
         .hljs-name {
-          color: #d32f2f;
+          color: #e06c75;
         }
         .hljs-attr {
-          color: #7b1fa2;
+          color: #d19a66;
         }
       }
 
       &.language-javascript {
         .hljs-keyword {
-          color: #1976d2;
+          color: #c678dd;
         }
         .hljs-string {
-          color: #388e3c;
+          color: #98c379;
         }
         .hljs-built_in {
-          color: #e91e63;
+          color: #e5c07b;
         }
       }
 
       &.language-bash {
-        color: #424242;
+        color: #abb2bf;
       }
     }
   }
@@ -417,9 +642,52 @@ $naranja: #D57275;
         order: 1;
       }
 
-      &.next-btn {
+      &.complete-lesson-btn,
+      &.lesson-completed-badge {
         order: 2;
+        
+        &.center-btn,
+        &.solo-btn {
+          position: static;
+          transform: none;
+        }
       }
+
+      &.next-btn {
+        order: 3;
+      }
+    }
+  }
+}
+
+// Section completion button styles
+.lesson-content {
+  button.section-completed,
+  label.section-completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    cursor: not-allowed !important;
+    opacity: 0.9;
+    
+    &:hover {
+      transform: none !important;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+    }
+  }
+}
+
+// Final override for all code blocks - must be last to take precedence
+::ng-deep .lesson-content,
+::ng-deep .prose {
+  pre {
+    background: #282c34 !important;
+    background-color: #282c34 !important;
+    color: #abb2bf !important;
+    
+    code {
+      background: transparent !important;
+      color: #abb2bf !important;
     }
   }
 }

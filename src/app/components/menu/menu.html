@@ -1,60 +1,58 @@
 <div class="sidebar" [ngClass]="{ 'collapsed': isCollapsed }">
-    <!-- Botón toggle Commmented because it doesn't work properly -->
-    <!-- <button class="toggle-btn" (click)="toggleSidebar()">
-      <span [ngClass]="isCollapsed ? 'icon-chevron-right' : 'icon-chevron-left'">‹</span>
-    </button> -->
+    <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Contraer menú'">
+      <mat-icon fontSet="material-icons">{{ isCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+    </button>
   
-    <!-- Logo -->
+    <div class="logo-container">
     <div class="logo">
       <img src="logo.png" alt="EasyInjection logo">
       <span *ngIf="!isCollapsed">EasyInjection</span>
+      </div>
     </div>
   
-    <!-- Menú -->
     <ul>
       <a routerLink="/dashboard" routerLinkActive="active">
         <li>
-          <span class="icon">🏠</span>
+          <fa-icon [icon]="faHome"></fa-icon>
           <span *ngIf="!isCollapsed">Inicio</span>
         </li>
       </a>
       <a routerLink="/dashboard/theory" routerLinkActive="active">
         <li>
-          <span class="icon">📚</span>
+          <fa-icon [icon]="faBook" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Teoría</span>
         </li>
       </a>
       <a routerLink="/dashboard/new-scan" routerLinkActive="active">
         <li>
-          <span class="icon">🎯</span>
+          <fa-icon [icon]="faBullseye" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Nuevo Escaneo</span>
         </li>
       </a>
       <a routerLink="/dashboard/scans" routerLinkActive="active">
         <li> 
-          <span class="icon">📋</span>
+          <fa-icon [icon]="faTh" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Mis Escaneos</span>
         </li>
       </a>
       <a routerLink="/dashboard/scoreboard" routerLinkActive="active">
         <li> 
-          <span class="icon">🏆</span>
+          <fa-icon [icon]="faTrophy" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Scoreboard</span>
         </li>
       </a>
     </ul>
   
-    <!-- Footer -->
     <div class="footer">
       <a routerLink="/user/account" routerLinkActive="active">
         <li>
-          <span class="icon">👤</span>
+          <fa-icon [icon]="faUser" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Mi Cuenta</span>
         </li>
       </a>
       <a href="#" (click)="logout()">
         <li>
-          <span class="icon">🚪</span>
+          <fa-icon [icon]="faSignOutAlt" class="icon"></fa-icon>
           <span *ngIf="!isCollapsed">Cerrar Sesión</span>
         </li>
       </a>

@@ -3,18 +3,62 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModul
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { UserService, User, SessionItem } from '../../../services/user.service';
-
-// Remove duplicate interfaces - they're now imported from user.service
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import {
+  faUser,
+  faLock,
+  faQuestionCircle,
+  faMapMarkerAlt,
+  faTimes,
+  faMobileAlt,
+  faTabletAlt,
+  faLaptop
+} from '@fortawesome/free-solid-svg-icons';
+import {
+  faChrome,
+  faFirefox,
+  faSafari,
+  faEdge,
+  faInternetExplorer
+} from '@fortawesome/free-brands-svg-icons';
+import { UserService, User } from '../../../services/user.service';
+import { SessionService, Session } from '../../../services/session.service';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, FontAwesomeModule],
   templateUrl: './account.html',
   styleUrl: './account.scss'
 })
 export class Account implements OnInit {
+  faUser = faUser;
+  faLock = faLock;
+  faQuestionCircle = faQuestionCircle;
+  faMapMarkerAlt = faMapMarkerAlt;
+  faTimes = faTimes;
+  
+  getDeviceIcon(device: string): IconDefinition {
+    const deviceLower = device.toLowerCase();
+    if (deviceLower.includes('mobile') || deviceLower.includes('android') || deviceLower.includes('iphone')) {
+      return faMobileAlt;
+    }
+    if (deviceLower.includes('tablet') || deviceLower.includes('ipad')) {
+      return faTabletAlt;
+    }
+    return faLaptop;
+  }
+
+  getBrowserIcon(browser: string): IconDefinition {
+    const browserLower = browser.toLowerCase();
+    if (browserLower.includes('chrome')) return faChrome;
+    if (browserLower.includes('firefox')) return faFirefox;
+    if (browserLower.includes('safari')) return faSafari;
+    if (browserLower.includes('edge')) return faEdge;
+    if (browserLower.includes('explorer') || browserLower.includes('ie')) return faInternetExplorer;
+    return faChrome;
+  }
   // User data from API
   user: User = {
     _id: '',
@@ -29,8 +73,9 @@ export class Account implements OnInit {
     }
   };
 
-  // Sesiones activas (mock)
-  sessions: SessionItem[] = [];
+  // Active sessions
+  sessions: Session[] = [];
+  currentSessionToken: string = '';
 
   // Available avatars
   availableAvatars = [
@@ -81,6 +126,7 @@ export class Account implements OnInit {
     private fb: FormBuilder, 
     private router: Router,
     private userService: UserService,
+    private sessionService: SessionService,
     private cd: ChangeDetectorRef
   ) {
     // Formulario para editar perfil
@@ -105,6 +151,7 @@ export class Account implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentSessionToken = localStorage.getItem('token') || '';
     this.loadUserData();
     this.loadSessions();
   }
@@ -121,7 +168,6 @@ export class Account implements OnInit {
         });
       },
       error: (error) => {
-        console.error('Error loading user data:', error);
         // Fallback to mock data if API fails
         this.loadMockData();
       }
@@ -129,19 +175,23 @@ export class Account implements OnInit {
   }
 
   loadSessions(): void {
-    this.userService.getSessions().subscribe({
-      next: (response) => {
-        this.sessions = response.sessions;
+    this.sessionService.getSessions().subscribe({
+      next: (sessions) => {
+        this.sessions = sessions;
       },
       error: (error) => {
-        console.error('Error loading sessions:', error);
-        // Fallback to mock data
-        this.sessions = [
-          { id: 's1', device: 'PC', browser: 'Chrome', location: 'Ciudad de México', lastActive: 'Activo ahora', isCurrent: true },
-          { id: 's2', device: 'iPhone', browser: 'Safari', location: 'Guadalajara', lastActive: 'Hace 2 días', isCurrent: false }
-        ];
+        this.showNotificationMessage('Error al cargar las sesiones', 'error');
       }
     });
+  }
+
+  isCurrentSession(session: Session): boolean {
+    return session.token === this.currentSessionToken;
+  }
+
+
+  formatLastActivity(date: Date): string {
+    return this.sessionService.formatLastActivity(date);
   }
 
   loadMockData(): void {
@@ -282,7 +332,6 @@ export class Account implements OnInit {
       },
 
       error: (error) => {
-        console.error('Error al guardar perfil', error);
 
         this.saving = false;
         this.showEditProfileNotification(
@@ -391,7 +440,6 @@ export class Account implements OnInit {
         }, 2000);
       },
       error: (error) => {
-        console.error('Error al cambiar contraseña', error);
         this.changingPassword = false;
         this.showChangePasswordNotification('Error al cambiar la contraseña: ' + (error.error?.error || 'Error desconocido'), 'error');
       },
@@ -405,31 +453,31 @@ export class Account implements OnInit {
   // Sesiones
   // =========================
   closeSession(sessionId: string) {
-    this.userService.closeSession(sessionId).subscribe({
-      next: (response) => {
-        // Remove session from UI
-        this.sessions = this.sessions.filter(s => s.id !== sessionId);
-        this.showNotificationMessage('Sesión cerrada exitosamente');
-      },
-      error: (error) => {
-        console.error('Error cerrando sesión', error);
-        this.showNotificationMessage('Error al cerrar la sesión: ' + (error.error?.error || 'Error desconocido'), 'error');
-      }
-    });
+    if (confirm('¿Estás seguro de que deseas cerrar esta sesión?')) {
+      this.sessionService.closeSession(sessionId).subscribe({
+        next: (response) => {
+          this.sessions = this.sessions.filter(s => s._id !== sessionId);
+          this.showNotificationMessage('Sesión cerrada exitosamente');
+        },
+        error: (error) => {
+          this.showNotificationMessage('Error al cerrar la sesión: ' + (error.error?.error || 'Error desconocido'), 'error');
+        }
+      });
+    }
   }
 
   closeAllSessions() {
-    this.userService.closeAllSessions().subscribe({
-      next: (response) => {
-        // Keep only current session in UI
-        this.sessions = this.sessions.filter(s => s.isCurrent);
-        this.showNotificationMessage('Todas las sesiones cerradas exitosamente');
-      },
-      error: (error) => {
-        console.error('Error cerrando todas las sesiones', error);
-        this.showNotificationMessage('Error al cerrar las sesiones: ' + (error.error?.error || 'Error desconocido'), 'error');
-      }
-    });
+    if (confirm('¿Estás seguro de que deseas cerrar todas las sesiones? Esto cerrará tu sesión en todos los dispositivos excepto este.')) {
+      this.sessionService.closeAllSessions().subscribe({
+        next: (response) => {
+          this.sessions = this.sessions.filter(s => this.isCurrentSession(s));
+          this.showNotificationMessage('Todas las sesiones cerradas exitosamente');
+        },
+        error: (error) => {
+          this.showNotificationMessage('Error al cerrar las sesiones: ' + (error.error?.error || 'Error desconocido'), 'error');
+        }
+      });
+    }
   }
 
   // =========================
@@ -443,7 +491,6 @@ export class Account implements OnInit {
         this.router.navigate(['login']);
       },
       error: (error) => {
-        console.error('Error en logout', error);
         // Even if API call fails, clear local storage and redirect
         this.userService.clearAuth();
         this.router.navigate(['login']);

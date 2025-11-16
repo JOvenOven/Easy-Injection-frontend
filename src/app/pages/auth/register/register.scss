@@ -64,17 +64,127 @@
   .generic-input {
     display: flex;
     align-items: center;
+  position: relative;
   }
   
   .generic-input input {
     flex: 1;
   }
+
+.generic-input.password-input input {
+  padding-right: 3rem;
+  }
   
   .generic-input .toggle-password {
-    margin-left: -1rem;
+  position: absolute;
+  right: 0.75rem;
     background: none;
     border: none;
     cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #6c757d;
+  border-radius: 4px;
+}
+
+.generic-input .toggle-password:hover {
+  color: var(--pink);
+  background-color: rgba(214, 61, 108, 0.1);
+}
+
+.generic-input .toggle-password mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-strength {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.strength-bar {
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 3px;
+}
+
+.strength-fill.weak {
+  background-color: #ff4444;
+}
+
+.strength-fill.medium {
+  background-color: #ffa500;
+}
+
+.strength-fill.strong {
+  background-color: #00c851;
+}
+
+.strength-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.strength-label.weak {
+  color: #ff4444;
+}
+
+.strength-label.medium {
+  color: #ffa500;
+}
+
+.strength-label.strong {
+  color: #00c851;
+}
+
+.password-requirements {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+  transition: color 0.2s;
+}
+
+.requirement:last-child {
+  margin-bottom: 0;
+}
+
+.requirement.met {
+  color: #00c851;
+}
+
+.requirement .check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
   }
   
   .checkbox {
@@ -104,14 +214,73 @@
     width: 100%;
     margin-top: 1rem;
     font-size: 1rem;
+  transition: all 0.3s ease;
   }
   
-  .btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background-color: var(--pink-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(214, 61, 108, 0.3);
+}
+
+.btn-primary:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #6c757d;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.divider span {
+  padding: 0 1rem;
+  font-size: 0.9rem;
+}
+
+.btn-google {
+  background-color: white;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  padding: 0.9rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.btn-google:hover {
+  background-color: #f8f9fa;
+  border-color: #c6c6c6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-google .google-icon {
+  width: 20px;
+  height: 20px;
   }
   
   .login-link {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     font-size: 0.9rem;
   }
   

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LessonProgressService } from '../../../services/lesson-progress.service';
+import { LESSON_IDS, LESSON_COUNTS } from '../../../constants/lessons.constants';
 
 interface FeaturedCategory {
   id: string;
@@ -21,11 +23,9 @@ interface FeaturedCategory {
 })
 export class TheoryComponent implements OnInit {
   searchTerm = '';
-
-  // Datos de lecciones (sincronizados con syllabus)
-  private securityBasicsLessons = 2; // Fundamentos de Seguridad
-  private xssLessons = 8; // Cross-Site Scripting 
-  private sqlInjectionLessons = 8; // Inyección SQL
+  hasStartedAnyContent = false;
+  buttonText = 'Comenzar a aprender';
+  loading = false;
 
   featuredCategories: FeaturedCategory[] = [
     {
@@ -34,7 +34,7 @@ export class TheoryComponent implements OnInit {
       description: 'Conceptos básicos de seguridad web que todo desarrollador debe conocer.',
       icon: '/security.svg',
       colorClass: 'bg-coral',
-      count: this.securityBasicsLessons
+      count: LESSON_COUNTS.SECURITY_BASICS
     },
     {
       id: 'xss',
@@ -42,7 +42,7 @@ export class TheoryComponent implements OnInit {
       description: 'Aprende sobre los diferentes tipos de vulnerabilidades XSS y cómo prevenirlas.',
       icon: '/code.svg',
       colorClass: 'bg-azul',
-      count: this.xssLessons
+      count: LESSON_COUNTS.XSS
     },
     {
       id: 'sql-injection',
@@ -50,9 +50,8 @@ export class TheoryComponent implements OnInit {
       description: 'Comprende cómo funcionan los ataques de inyección SQL y las mejores prácticas de protección.',
       icon: '/bd.svg',
       colorClass: 'bg-rosa',
-      count: this.sqlInjectionLessons
+      count: LESSON_COUNTS.SQL_INJECTION
     }
-
   ];
 
   stepByStepGuides = [
@@ -67,50 +66,80 @@ export class TheoryComponent implements OnInit {
     'Ejemplos de código seguro (ZIP)'
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private lessonProgressService: LessonProgressService
+  ) {}
 
   ngOnInit(): void {
+    // Set loading state
+    this.loading = true;
+    
+    // Load progress immediately on initialization
     this.updateCategoryCounts();
+    
+    // Also subscribe to progress changes for real-time updates
+    this.lessonProgressService.progress$.subscribe({
+      next: (stats) => {
+        if (stats) {
+          this.updateUIWithProgress(stats);
+        }
+      }
+    });
   }
 
   private updateCategoryCounts(): void {
-    // Obtener lecciones completadas del localStorage
-    const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-    
-    // Contar lecciones completadas por categoría
-    const completedSecurityBasics = completedLessons.filter((id: string) => 
-      ['intro-seguridad', 'owasp-top-10'].includes(id)
-    ).length;
-    
-    const completedXss = completedLessons.filter((id: string) => 
-      ['fundamentos-xss', 'tipos-xss', 'contextos-salida-xss', 'dom-xss-ejecucion-cliente', 
-       'prevencion-xss', 'csp-y-headers', 'diseno-seguro-y-procesos', 'casos-avanzados-xss'].includes(id)
-    ).length;
-    
-    const completedSql = completedLessons.filter((id: string) => 
-      ['fundamentos-sqli', 'tipos-sqli', 'fundamentos-sql-y-acceso', 'raices-sqli',
-       'prevencion-sqli', 'arquitectura-operaciones', 'analisis-priorizacion-riesgo', 'casos-avanzados-sqli'].includes(id)
-    ).length;
+    // Load all progress statistics from backend
+    this.lessonProgressService.getProgressStats().subscribe({
+      next: (stats) => {
+        this.updateUIWithProgress(stats);
+        this.loading = false;
+      },
+      error: () => {
+        // In case of error, keep default state
+        this.buttonText = 'Comenzar a aprender';
+        this.loading = false;
+      }
+    });
+  }
 
-    // Actualizar las descripciones para mostrar progreso
+  private updateUIWithProgress(stats: any): void {
+    // Update button text based on whether user has started any content
+    this.hasStartedAnyContent = stats.hasStartedAny;
+    this.buttonText = this.hasStartedAnyContent ? 'Continuar aprendiendo' : 'Comenzar a aprender';
+
+    // Update each category with its progress
     this.featuredCategories = this.featuredCategories.map(category => {
       const total = category.count;
       let completed = 0;
-      
-      if (category.id === 'security-basics') completed = completedSecurityBasics;
-      else if (category.id === 'xss') completed = completedXss;
-      else if (category.id === 'sql-injection') completed = completedSql;
-      
+
+      // Count completed lessons for this category
+      if (category.id === 'security-basics') {
+        completed = stats.completedLessons.filter((id: string) => 
+          LESSON_IDS.SECURITY_BASICS.includes(id)
+        ).length;
+      } else if (category.id === 'xss') {
+        completed = stats.completedLessons.filter((id: string) => 
+          LESSON_IDS.XSS.includes(id)
+        ).length;
+      } else if (category.id === 'sql-injection') {
+        completed = stats.completedLessons.filter((id: string) => 
+          LESSON_IDS.SQL_INJECTION.includes(id)
+        ).length;
+      }
+
+      // Preserve the original description without "(X/Y completadas)" suffix
+      const baseDescription = category.description.replace(/\s*\(\d+\/\d+\s+completadas\)$/, '');
+
       return {
         ...category,
-        description: `${category.description} (${completed}/${total} completadas)`
+        description: `${baseDescription} (${completed}/${total} completadas)`
       };
     });
   }
 
   onSearchChange(): void {
     // Lógica de búsqueda
-    console.log('Searching for:', this.searchTerm);
   }
 
   navigateToSyllabus(): void {

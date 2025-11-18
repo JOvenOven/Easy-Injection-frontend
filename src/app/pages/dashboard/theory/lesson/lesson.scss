@@ -1,0 +1,723 @@
+// Import highlight.js theme - will be overridden by our custom styles below
+@import "highlight.js/styles/atom-one-dark.css";
+
+$rosa: #D63D6C;
+$gris: #c0cbcd;
+$gris-oscuro: #6b6b6b;
+$azul: #65B2C6;
+$crema: #efeded;
+$verde: #4ecdc4;
+$rojo: #ff6b6b;
+$amarillo: #ffd93d;
+$naranja: #D57275;
+
+.lesson {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+
+    @media (min-width: 768px) {
+      padding: 1.5rem;
+    }
+  }
+
+  .lesson-layout {
+    display: flex;
+    gap: 2rem;
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  // Progress Sidebar
+  .progress-sidebar {
+    display: none;
+
+    @media (min-width: 768px) {
+      display: block;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .progress-sticky {
+      position: sticky;
+      top: 6rem;
+      height: calc(100vh - 7.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-progress-bar-vertical {
+      position: relative;
+      height: 100%;
+      max-height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0;
+
+      .progress-line-vertical {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #e5e7eb;
+        transform: translateX(-50%);
+        z-index: 1;
+
+        .progress-line-fill-vertical {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          background: $rosa;
+          transition: height 0.3s ease;
+        }
+      }
+
+      .progress-steps-vertical {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        z-index: 2;
+
+        .progress-step-vertical {
+          display: grid;
+          align-items: center;
+          justify-content: center;
+
+          .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 3px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+
+            .step-number {
+              font-size: 14px;
+              font-weight: 600;
+              color: #9ca3af;
+              transition: color 0.3s ease;
+            }
+          }
+
+          &.completed .step-circle {
+            background: $rosa;
+            border-color: $rosa;
+
+            .step-number {
+              color: white;
+            }
+          }
+
+          &.current .step-circle {
+            background: white;
+            border-color: $rosa;
+            border-width: 4px;
+            box-shadow: 0 0 0 4px rgba($rosa, 0.2);
+
+            .step-number {
+              color: $rosa;
+              font-weight: 700;
+            }
+          }
+
+          &.upcoming .step-circle {
+            background: white;
+            border-color: #e5e7eb;
+
+            .step-number {
+              color: #9ca3af;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    min-width: 0;
+
+    .navigation {
+      margin-bottom: 1.5rem;
+
+      .back-btn {
+        background: none;
+        border: none;
+        color: $gris-oscuro;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: darken($rosa, 10%);
+        }
+
+        .back-icon {
+          width: 16px;
+          height: 16px;
+          opacity: 0.8;
+        }
+      }
+    }
+
+    .content-wrapper {
+      margin-left: 10%;
+      margin-right: 10%;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    // Lesson Header
+    .lesson-header {
+      .lesson-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .lesson-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $rosa;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+
+        @media (min-width: 768px) {
+          font-size: 2.5rem;
+        }
+      }
+
+      .lesson-subtitle {
+        color: $gris-oscuro;
+        font-size: 1rem;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .completed-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 24px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        .badge-icon {
+          font-size: 1rem;
+        }
+
+        @media (max-width: 767px) {
+          font-size: 0.8125rem;
+          padding: 0.4rem 0.875rem;
+        }
+      }
+    }
+
+    // Lesson Card
+    .lesson-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+
+      .lesson-content {
+        padding: 1.5rem;
+
+        @media (min-width: 768px) {
+          padding: 2rem;
+        }
+      }
+    }
+
+    // Lesson Navigation Wrapper
+    .lesson-navigation-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    // Complete Button Row (above navigation)
+    .complete-button-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+
+      .nav-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+
+        &.complete-lesson-btn {
+          background: #65B2C6;
+          color: white;
+          border: none;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(101, 178, 198, 0.3);
+          width: 100%;
+          justify-content: center;
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+
+          &:hover:not(:disabled) {
+            background: darken(#65B2C6, 8%);
+            box-shadow: 0 4px 12px rgba(101, 178, 198, 0.4);
+            transform: translateY(-1px);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+          }
+        }
+
+        &.lesson-completed-badge {
+          background: #65B2C6;
+          color: white;
+          border: none;
+          font-weight: 600;
+          box-shadow: 0 2px 8px rgba(101, 178, 198, 0.3);
+          width: 100%;
+          justify-content: center;
+          cursor: default;
+
+          .check-icon {
+            font-size: 1.125rem;
+          }
+        }
+      }
+    }
+
+    // Lesson Navigation (Previous/Next buttons)
+    .lesson-navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+      width: 100%;
+
+      .nav-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+
+        &.prev-btn {
+          background: white;
+          color: $gris-oscuro;
+          border: 1px solid $gris;
+          position: absolute;
+          left: 0;
+
+          &:hover {
+            background: $crema;
+            border-color: darken($gris, 10%);
+          }
+        }
+
+        &.next-btn {
+          background: $rosa;
+          color: white;
+          border: 1px solid $rosa;
+          position: absolute;
+          right: 0;
+
+          &:hover {
+            background: darken($rosa, 10%);
+          }
+        }
+
+        .nav-icon {
+          width: 16px;
+          height: 16px;
+          opacity: 0.8;
+        }
+      }
+    }
+
+    // Lesson Info
+    .lesson-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba($azul, 0.1);
+      border-radius: 8px;
+      gap: 0.5rem;
+
+      .info-icon {
+        width: 20px;
+        height: 20px;
+        opacity: 0.8;
+        filter: invert(30%) sepia(74%) saturate(600%) hue-rotate(-20deg) brightness(95%) contrast(95%);
+      }
+
+      .info-text {
+        color: $azul;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Prose Styles - Override highlight.js defaults
+// Use ::ng-deep to style dynamically inserted HTML content
+::ng-deep .lesson-content .prose,
+::ng-deep .prose {
+  max-width: none;
+  color: #374151;
+  line-height: 1.7;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 2rem 0 1rem 0;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 1.5rem 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 1rem 0;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+
+    li {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+  }
+
+  pre {
+    background: #282c34 !important;
+    background-color: #282c34 !important;
+    border: 1px solid #21252b !important;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+
+    code {
+      background: none !important;
+      padding: 0;
+      font-size: 0.875rem;
+      color: #abb2bf !important;
+      white-space: pre;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+
+      &.highlight-vulnerable {
+        background: #1a1d23 !important;
+        border: 2px solid #dc2626;
+        border-radius: 4px;
+        padding: 0.75rem;
+        display: block;
+        position: relative;
+        color: #abb2bf !important;
+
+        &::before {
+          content: "\f071 Código Vulnerable";
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          position: absolute;
+          top: -0.5rem;
+          right: 0.5rem;
+          background: #dc2626;
+          color: white;
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-weight: 500;
+        }
+      }
+
+      &.highlight-secure {
+        background: #1a1d23 !important;
+        border: 2px solid #16a34a;
+        border-radius: 4px;
+        padding: 0.75rem;
+        display: block;
+        position: relative;
+        color: #abb2bf !important;
+
+        &::before {
+          content: "\f058 Código Seguro";
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          position: absolute;
+          top: -0.5rem;
+          right: 0.5rem;
+          background: #16a34a;
+          color: white;
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-weight: 500;
+        }
+      }
+
+      // Estilos para highlight.js
+      &.language-php {
+        .hljs-meta {
+          color: #61afef;
+        }
+        .hljs-variable {
+          color: #e06c75;
+        }
+        .hljs-string {
+          color: #98c379;
+        }
+      }
+
+      &.language-html {
+        .hljs-tag {
+          color: #61afef;
+        }
+        .hljs-name {
+          color: #e06c75;
+        }
+        .hljs-attr {
+          color: #d19a66;
+        }
+      }
+
+      &.language-javascript {
+        .hljs-keyword {
+          color: #c678dd;
+        }
+        .hljs-string {
+          color: #98c379;
+        }
+        .hljs-built_in {
+          color: #e5c07b;
+        }
+      }
+
+      &.language-bash {
+        color: #abb2bf;
+      }
+    }
+  }
+
+  code {
+    background: #f1f5f9;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #e11d48;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  }
+
+  strong {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .warning-box {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+
+    h4 {
+      color: #d97706;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      margin: 0.5rem 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+
+      li {
+        margin: 0.25rem 0;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 767px) {
+  .lesson .container {
+    padding: 1rem;
+  }
+
+  .lesson .main-content .lesson-card .lesson-content {
+    padding: 1rem;
+  }
+
+  .lesson .main-content .content-wrapper {
+    margin-left: 0;
+    margin-right: 0;
+    gap: 1.5rem;
+  }
+
+  .lesson .main-content .lesson-navigation-wrapper {
+    gap: 0.75rem;
+  }
+
+  .lesson .main-content .complete-button-row {
+    .nav-btn {
+      width: 100%;
+      justify-content: center;
+      position: static !important;
+      transform: none !important;
+      padding: 0.875rem 1.25rem;
+      min-height: 48px; // Better touch target
+      font-size: 0.9rem;
+
+      &.complete-lesson-btn,
+      &.lesson-completed-badge {
+        margin: 0;
+      }
+    }
+  }
+
+  .lesson .main-content .lesson-navigation {
+    flex-direction: row;
+    height: auto;
+    gap: 0.75rem;
+    align-items: stretch;
+    justify-content: space-between;
+
+    .nav-btn {
+      width: auto;
+      flex: 1;
+      justify-content: center;
+      position: static !important;
+      transform: none !important;
+      padding: 0.875rem 1.25rem;
+      min-height: 48px; // Better touch target
+      font-size: 0.9rem;
+
+      &.prev-btn {
+        margin: 0;
+      }
+
+      &.next-btn {
+        margin: 0;
+      }
+      
+      .nav-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+  
+  .lesson .main-content .lesson-info {
+    padding: 0.875rem;
+    margin-top: 0.5rem;
+    
+    .info-icon {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .info-text {
+      font-size: 0.8rem;
+      text-align: center;
+      word-wrap: break-word;
+    }
+  }
+}
+
+// Section completion button styles
+.lesson-content {
+  button.section-completed,
+  label.section-completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    cursor: not-allowed !important;
+    opacity: 0.9;
+    
+    &:hover {
+      transform: none !important;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+    }
+  }
+}
+
+// Final override for all code blocks - must be last to take precedence
+::ng-deep .lesson-content,
+::ng-deep .prose {
+  pre {
+    background: #282c34 !important;
+    background-color: #282c34 !important;
+    color: #abb2bf !important;
+    
+    code {
+      background: transparent !important;
+      color: #abb2bf !important;
+    }
+  }
+}

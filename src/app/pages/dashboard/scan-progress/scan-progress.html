@@ -1,0 +1,311 @@
+<div class="scan-progress-container">
+  <!-- Connection Status -->
+  <div class="connection-status" *ngIf="isConnecting">
+    <div class="spinner"></div>
+    <span>Conectando con el servidor...</span>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="scanError">
+    <div class="error-card">
+      <h2><fa-icon [icon]="faTimesCircle"></fa-icon> Error en el escaneo</h2>
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="goToScans()">Volver a escaneos</button>
+    </div>
+  </div>
+
+  <!-- Main Content (when connected and no error) -->
+  <div class="scan-content" *ngIf="!isConnecting && !scanError">
+    <!-- Header -->
+    <header class="scan-header">
+      <div class="header-left">
+        <h1 class="scan-title">{{ scanAlias || 'Escaneo en progreso' }}</h1>
+        <div class="scan-info">
+          <span class="scan-url">{{ scanUrl }}</span>
+          <span class="scan-type">
+            Escaneo de 
+            <span *ngIf="scanFlags.sqli && scanFlags.xss">XSS y SQLi</span>
+            <span *ngIf="scanFlags.sqli && !scanFlags.xss">SQLi</span>
+            <span *ngIf="scanFlags.xss && !scanFlags.sqli">XSS</span>
+          </span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="scan-status" [ngClass]="{
+          'status-running': isScanning && !isPaused,
+          'status-paused': isPaused,
+          'status-completed': scanComplete
+        }">
+          <span *ngIf="isScanning && !isPaused"><fa-icon [icon]="faSyncAlt" class="fa-spin"></fa-icon> Escaneando...</span>
+          <span *ngIf="isPaused"><fa-icon [icon]="faPause"></fa-icon> Pausado</span>
+          <span *ngIf="scanComplete"><fa-icon [icon]="faCheckCircle"></fa-icon> Completado</span>
+        </span>
+        <div class="header-actions" *ngIf="!scanComplete">
+          <button class="btn btn-pause" (click)="pauseScan()" [disabled]="!isScanning">
+            <fa-icon [icon]="isPaused ? faPlay : faPause"></fa-icon> {{ isPaused ? 'Reanudar' : 'Pausar' }}
+          </button>
+          <button class="btn btn-stop" (click)="stopScan()" [disabled]="!isScanning">
+            <fa-icon [icon]="faStop"></fa-icon> Detener
+          </button>
+        </div>
+        <div class="header-actions" *ngIf="scanComplete">
+          <button class="btn btn-primary" (click)="goToReport()">
+            <fa-icon [icon]="faFileAlt"></fa-icon>
+            Ver Reporte Completo
+          </button>
+          <button class="btn btn-outline" (click)="goToScans()">
+            <fa-icon [icon]="faClipboardList"></fa-icon>
+            Ver Todos los Escaneos
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>Progreso General</span>
+        <span class="progress-percentage">{{ overallProgress }}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="overallProgress"></div>
+      </div>
+    </div>
+
+    <!-- Main Layout: Two Columns -->
+    <div class="main-layout">
+      <!-- Left Column (Narrow) -->
+      <div class="left-column">
+        <!-- Phases Card -->
+        <div class="card phases-card">
+          <h2 class="card-title">
+            <fa-icon [icon]="faClipboardList"></fa-icon>
+            Fases del Escaneo
+          </h2>
+          <div class="phases-list">
+            <div *ngFor="let phase of scanPhases" class="phase-item" [ngClass]="'phase-' + phase.status">
+              <div class="phase-header">
+                <span class="phase-icon" [ngClass]="'icon-' + phase.status">
+                  <span *ngIf="phase.status === 'completed'">✓</span>
+                  <span *ngIf="phase.status === 'running'">
+                    <div class="spinner-small"></div>
+                  </span>
+                  <span *ngIf="phase.status === 'pending'">○</span>
+                </span>
+                <span class="phase-name">{{ phase.name }}</span>
+              </div>
+              
+              <!-- Subphases (for SQLi and XSS) -->
+              <div class="subphases-list" *ngIf="phase.subphases && phase.subphases.length > 0">
+                <div *ngFor="let subphase of phase.subphases" class="subphase-item" [ngClass]="'subphase-' + subphase.status">
+                  <span class="subphase-icon" [ngClass]="'icon-' + subphase.status">
+                    <span *ngIf="subphase.status === 'completed'">✓</span>
+                    <span *ngIf="subphase.status === 'running'">
+                      <div class="spinner-small"></div>
+                    </span>
+                    <span *ngIf="subphase.status === 'pending'">○</span>
+                  </span>
+                  <span class="subphase-name">{{ subphase.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="card stats-card">
+          <h2 class="card-title">
+            <fa-icon [icon]="faChartBar"></fa-icon>
+            Estadísticas
+          </h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">{{ scanStats.endpointsDiscovered }}</div>
+              <div class="stat-label">Endpoints</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ scanStats.parametersFound }}</div>
+              <div class="stat-label">Parámetros</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ scanStats.vulnerabilitiesFound }}</div>
+              <div class="stat-label">Vulnerabilidades</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column (Wide) -->
+      <div class="right-column">
+        <!-- Logs Card -->
+        <div class="card logs-card">
+          <h2 class="card-title">
+            <fa-icon [icon]="faFileAlt"></fa-icon>
+            Logs del Escaneo
+          </h2>
+          <div class="logs-container" #logsContainer>
+            <div class="log-content">
+              <div *ngFor="let log of scanLogs" class="log-entry" [ngClass]="getLogLevelClass(log.level)">
+                <span class="log-timestamp">{{ formatTimestamp(log.timestamp) }}</span>
+                <span class="log-phase" *ngIf="log.phase">{{ getPhaseName(log.phase) }}</span>
+                <span class="log-message">{{ log.message }}</span>
+              </div>
+              <div *ngIf="scanLogs.length === 0" class="no-logs">
+                <p>Esperando logs...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Endpoints Card -->
+        <div class="card endpoints-card">
+          <h2 class="card-title">
+            <fa-icon [icon]="faSearch"></fa-icon>
+            Endpoints Descubiertos
+            <span class="count-badge">{{ discoveredEndpoints.length }}</span>
+          </h2>
+          <div class="endpoints-list">
+            <div *ngFor="let endpoint of discoveredEndpoints" class="endpoint-item">
+              <span class="endpoint-method" [ngClass]="'method-' + (endpoint.method || 'get').toLowerCase()">
+                {{ endpoint.method || 'GET' }}
+              </span>
+              <span class="endpoint-url">{{ endpoint.url }}</span>
+              <span class="endpoint-params" *ngIf="endpoint.parameters && endpoint.parameters.length > 0">
+                ({{ endpoint.parameters.length }} params)
+              </span>
+            </div>
+            <div *ngIf="discoveredEndpoints.length === 0" class="empty-state">
+              <p>No se han descubierto endpoints aún...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vulnerabilities Card -->
+        <div class="card vulnerabilities-card">
+          <h2 class="card-title">
+            <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+            Vulnerabilidades Detectadas
+            <span class="count-badge alert">{{ detectedVulnerabilities.length }}</span>
+          </h2>
+          <div class="vulnerabilities-list">
+            <div *ngFor="let vuln of detectedVulnerabilities" 
+                 class="vulnerability-item" 
+                 [ngClass]="getSeverityClass(vuln.severity)">
+              <div class="vuln-header">
+                <span class="vuln-type">{{ vuln.type }}</span>
+                <span class="vuln-severity">{{ getSeverityLabel(vuln.severity) }}</span>
+              </div>
+              <div class="vuln-details">
+                <div class="vuln-info">
+                  <strong>Endpoint:</strong> {{ vuln.endpoint }}
+                </div>
+                <div class="vuln-info">
+                  <strong>Parámetro:</strong> {{ vuln.parameter }}
+                </div>
+                <div class="vuln-description">{{ vuln.description }}</div>
+              </div>
+            </div>
+            <div *ngIf="detectedVulnerabilities.length === 0" class="empty-state">
+              <p><fa-icon [icon]="faCheckCircle"></fa-icon> No se han detectado vulnerabilidades</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed Footer: Question -->
+    <footer class="question-footer" *ngIf="currentQuestion && showQuestion">
+      <div class="question-footer-content">
+        <div class="question-footer-header">
+          <fa-icon [icon]="faPause"></fa-icon>
+          <h3>Pregunta de Evaluación</h3>
+          <span class="question-phase-badge">{{ currentQuestion.phase }}</span>
+        </div>
+        <div class="question-footer-body">
+          <p class="question-text">{{ currentQuestion.question }}</p>
+          <div class="question-options">
+            <label *ngFor="let option of currentQuestion.options; let i = index" 
+                   class="option-label"
+                   [class.selected]="selectedOption === i"
+                   [class.incorrect]="hasAnswered && selectedOption === i && !currentQuestionCorrect">
+              <input type="radio" 
+                     [name]="'question-' + currentQuestion.phase" 
+                     [value]="i"
+                     [(ngModel)]="selectedOption"
+                     (change)="onOptionChange(i)"
+                     [disabled]="hasAnswered && currentQuestionCorrect && selectedOption !== i">
+              <span class="option-text">{{ option }}</span>
+              <span class="option-indicator">
+                <span *ngIf="hasAnswered && selectedOption === i && currentQuestionCorrect">✓</span>
+                <span *ngIf="hasAnswered && selectedOption === i && !currentQuestionCorrect">✗</span>
+              </span>
+            </label>
+          </div>
+          <div class="question-footer-actions">
+            <div class="question-points">
+              <span class="points-badge">{{ currentQuestion.points }} puntos</span>
+              <span class="question-hint" *ngIf="hasAnswered && !currentQuestionCorrect">
+                Respuesta incorrecta. Por favor, selecciona la respuesta correcta para continuar.
+              </span>
+            </div>
+            <button class="btn btn-primary" 
+                    (click)="answerQuestion(selectedOption!)"
+                    [disabled]="selectedOption === null || (hasAnswered && currentQuestionCorrect)">
+              <span *ngIf="!hasAnswered">Responder</span>
+              <span *ngIf="hasAnswered && currentQuestionCorrect">Continuar</span>
+              <span *ngIf="hasAnswered && !currentQuestionCorrect">Intentar de nuevo</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Completion Modal -->
+    <div class="completion-modal" *ngIf="scanComplete && showCompletionModal">
+      <div class="completion-card">
+        <button class="completion-close" (click)="closeCompletionModal()" aria-label="Cerrar">×</button>
+        <div class="completion-icon"><fa-icon [icon]="faCheckCircle"></fa-icon></div>
+        <h2>Escaneo Completado</h2>
+        <p>El escaneo ha finalizado exitosamente</p>
+        <div class="completion-stats">
+          <div class="completion-stat">
+            <span class="stat-number">{{ scanStats.vulnerabilitiesFound }}</span>
+            <span class="stat-text">Vulnerabilidades encontradas</span>
+          </div>
+          <div class="completion-stat">
+            <span class="stat-number">{{ questionHistory.length }}</span>
+            <span class="stat-text">Preguntas respondidas</span>
+          </div>
+          <div class="completion-stat">
+            <span class="stat-number">{{ calculateQuizScore() }}%</span>
+            <span class="stat-text">Puntuación del quiz</span>
+          </div>
+        </div>
+        <div class="completion-buttons">
+          <button class="btn btn-primary btn-lg" (click)="goToReport()">
+            <fa-icon [icon]="faFileAlt"></fa-icon>
+            Ver Reporte Completo
+          </button>
+          <button class="btn btn-outline" (click)="goToScans()">
+            <fa-icon [icon]="faClipboardList"></fa-icon>
+            Ver Todos los Escaneos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion Actions Footer -->
+    <div class="completion-footer" *ngIf="scanComplete">
+      <div class="completion-footer-content">
+        <button class="btn btn-primary btn-lg" (click)="goToReport()">
+          <fa-icon [icon]="faFileAlt"></fa-icon>
+          Ver Reporte Completo
+        </button>
+        <button class="btn btn-outline btn-lg" (click)="goToScans()">
+          <fa-icon [icon]="faClipboardList"></fa-icon>
+          Ver Todos los Escaneos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

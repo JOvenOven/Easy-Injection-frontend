@@ -1,0 +1,67 @@
+<div class="mobile-overlay" [class.show]="isMobileOpen" (click)="closeMobileMenu()"></div>
+<!-- Mobile-only toggle button -->
+<button class="mobile-toggle-btn" [class.sidebar-open]="isMobileOpen" (click)="toggleSidebar()" [attr.aria-label]="isMobileOpen ? 'Cerrar menú' : 'Abrir menú'">
+  <mat-icon fontSet="material-icons">{{ isMobileOpen ? 'close' : 'menu' }}</mat-icon>
+</button>
+<div class="sidebar" [ngClass]="{ 'collapsed': isCollapsed, 'mobile-open': isMobileOpen }">
+    <!-- Desktop/Tablet toggle button -->
+    <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Contraer menú'">
+      <mat-icon fontSet="material-icons">{{ isCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+    </button>
+  
+    <div class="logo-container">
+    <div class="logo">
+      <img src="logo.png" alt="EasyInjection logo">
+      <span *ngIf="!isCollapsed || isMobileOpen">EasyInjection</span>
+      </div>
+    </div>
+  
+    <ul>
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li>
+          <fa-icon [icon]="faHome"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Inicio</span>
+        </li>
+      </a>
+      <a routerLink="/dashboard/theory" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li>
+          <fa-icon [icon]="faBook" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Teoría</span>
+        </li>
+      </a>
+      <a routerLink="/dashboard/new-scan" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li>
+          <fa-icon [icon]="faBullseye" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Nuevo Escaneo</span>
+        </li>
+      </a>
+      <a routerLink="/dashboard/scans" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li> 
+          <fa-icon [icon]="faTh" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Mis Escaneos</span>
+        </li>
+      </a>
+      <a routerLink="/dashboard/scoreboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li> 
+          <fa-icon [icon]="faTrophy" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Scoreboard</span>
+        </li>
+      </a>
+    </ul>
+  
+    <div class="footer">
+      <a routerLink="/user/account" routerLinkActive="active" (click)="closeMobileMenu()">
+        <li>
+          <fa-icon [icon]="faUser" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Mi Cuenta</span>
+        </li>
+      </a>
+      <a href="#" (click)="logout(); closeMobileMenu()">
+        <li>
+          <fa-icon [icon]="faSignOutAlt" class="icon"></fa-icon>
+          <span *ngIf="!isCollapsed || isMobileOpen">Cerrar Sesión</span>
+        </li>
+      </a>
+    </div>
+  </div>
+  

@@ -1,0 +1,293 @@
+<div class="scan-report-container" *ngIf="!loading && report">
+  <!-- Header -->
+  <header class="report-header">
+    <div class="header-content">
+      <button class="back-button" (click)="goBack()">
+        <span>←</span> Volver a Mis Escaneos
+      </button>
+      <h1>Escaneo sitio web corporativo</h1>
+      <p class="url">
+        <fa-icon [icon]="faLink"></fa-icon>
+        {{ report.scan.url }}
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="exportReport()">
+        <fa-icon [icon]="faFileAlt"></fa-icon> Exportar informe
+      </button>
+      <button class="btn-primary" (click)="visitSite()">
+        <span>↗</span> Visitar sitio
+      </button>
+    </div>
+  </header>
+
+  <!-- Scan Info -->
+  <div class="scan-info">
+    <div class="info-item">
+      <span class="label">Fecha</span>
+      <span class="value"><fa-icon [icon]="faCalendar"></fa-icon> {{ formatDate(report.scan.fecha_inicio) }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Duración</span>
+      <span class="value"><fa-icon [icon]="faClock"></fa-icon> {{ getDuration() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Tipo de escaneo</span>
+      <span class="badges">
+        <span class="badge badge-xss" *ngIf="report.scan.flags.xss">XSS</span>
+        <span class="badge badge-sqli" *ngIf="report.scan.flags.sqli">SQLi</span>
+      </span>
+    </div>
+    <div class="info-item score-item">
+      <span class="label">Puntuación General</span>
+      <span class="score-badge" [ngClass]="getScoreClass(report.puntuacion.puntuacion_final)">
+        {{ report.puntuacion.puntuacion_final }}/100
+      </span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'resumen'"
+      (click)="setActiveTab('resumen')">
+      Resumen
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'vulnerabilidades'"
+      (click)="setActiveTab('vulnerabilidades')">
+      Vulnerabilidades
+    </button>
+    <button 
+      class="tab" 
+      [class.active]="activeTab === 'cuestionario'"
+      (click)="setActiveTab('cuestionario')">
+      Cuestionario
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Resumen Tab -->
+    <div *ngIf="activeTab === 'resumen'" class="resumen-section">
+      <div class="section-card">
+        <h2>Resumen del escaneo</h2>
+        <p class="subtitle">Visión general de los resultados del escaneo</p>
+
+        <div class="summary-stats">
+          <div class="stat-card">
+            <div class="stat-number">{{ report.resumen_vulnerabilidades.total }}</div>
+            <div class="stat-label">Escaneos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ report.cuestionario.length }}</div>
+            <div class="stat-label">Parámetros</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number xss-color">{{ report.resumen_vulnerabilidades.por_severidad.critica }}</div>
+            <div class="stat-label">XSS</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number sqli-color">{{ report.resumen_vulnerabilidades.por_severidad.alta + report.resumen_vulnerabilidades.por_severidad.media + report.resumen_vulnerabilidades.por_severidad.baja }}</div>
+            <div class="stat-label">SQLi</div>
+          </div>
+        </div>
+
+        <!-- Score Details -->
+        <div class="score-details">
+          <h3>Detalles de Puntuación</h3>
+          <div class="score-breakdown">
+            <div class="score-row">
+              <span class="score-label">Cuestionario</span>
+              <div class="score-bar-container">
+                <div class="score-bar" [style.width.%]="(report.puntuacion.puntos_cuestionario / report.puntuacion.total_puntos_cuestionario) * 100"></div>
+              </div>
+              <span class="score-value">{{ report.puntuacion.puntos_cuestionario }}/{{ report.puntuacion.total_puntos_cuestionario }}</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">Vulnerabilidades</span>
+              <div class="score-bar-container vulnerability-bar">
+                <div class="score-bar vulnerability" [style.width.%]="(report.puntuacion.vulnerabilidades_encontradas / 10) * 100"></div>
+              </div>
+              <span class="score-value">{{ report.puntuacion.vulnerabilidades_encontradas }} encontradas</span>
+            </div>
+          </div>
+          <div class="final-score">
+            <span>Calificación Final:</span>
+            <span class="grade" [ngClass]="getScoreClass(report.puntuacion.puntuacion_final)">
+              {{ report.puntuacion.calificacion }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Vulnerabilities by Severity -->
+        <div class="vulnerabilities-chart">
+          <h3>Vulnerabilidades por severidad</h3>
+          <div class="severity-bars">
+            <div class="severity-row">
+              <span class="severity-label critical">Crítica</span>
+              <div class="severity-bar-container">
+                <div class="severity-bar critical" [style.width]="report.resumen_vulnerabilidades.por_severidad.critica > 0 ? 'auto' : '0'">
+                  {{ report.resumen_vulnerabilidades.por_severidad.critica }}
+                </div>
+              </div>
+            </div>
+            <div class="severity-row">
+              <span class="severity-label high">Alta</span>
+              <div class="severity-bar-container">
+                <div class="severity-bar high" [style.width]="report.resumen_vulnerabilidades.por_severidad.alta > 0 ? 'auto' : '0'">
+                  {{ report.resumen_vulnerabilidades.por_severidad.alta }}
+                </div>
+              </div>
+            </div>
+            <div class="severity-row">
+              <span class="severity-label medium">Media</span>
+              <div class="severity-bar-container">
+                <div class="severity-bar medium" [style.width]="report.resumen_vulnerabilidades.por_severidad.media > 0 ? 'auto' : '0'">
+                  {{ report.resumen_vulnerabilidades.por_severidad.media }}
+                </div>
+              </div>
+            </div>
+            <div class="severity-row">
+              <span class="severity-label low">Baja</span>
+              <div class="severity-bar-container">
+                <div class="severity-bar low" [style.width]="report.resumen_vulnerabilidades.por_severidad.baja > 0 ? 'auto' : '0'">
+                  {{ report.resumen_vulnerabilidades.por_severidad.baja }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="critical-notice" *ngIf="report.resumen_vulnerabilidades.por_severidad.critica > 0">
+          <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+          <div>
+            <strong>Vulnerabilidades críticas detectadas</strong>
+            <p>Se han detectado {{ report.resumen_vulnerabilidades.por_severidad.critica }} vulnerabilidades críticas que requieren atención inmediata. Estas vulnerabilidades pueden permitir a un atacante comprometer completamente el sistema.</p>
+          </div>
+        </div>
+
+        <button class="btn-view-all" (click)="setActiveTab('vulnerabilidades')">
+          Ver todas las vulnerabilidades
+        </button>
+      </div>
+    </div>
+
+    <!-- Vulnerabilidades Tab -->
+    <div *ngIf="activeTab === 'vulnerabilidades'" class="vulnerabilidades-section">
+      <div class="section-card">
+        <h2>Vulnerabilidades destacadas</h2>
+        <p class="subtitle">Las vulnerabilidades más críticas encontradas</p>
+
+        <div class="vulnerability-list">
+          <div 
+            class="vulnerability-card" 
+            *ngFor="let vuln of report.vulnerabilidades"
+            [ngClass]="getSeverityClass(vuln.nivel_severidad_id.nombre)"
+            (click)="viewVulnerabilityDetails(vuln)">
+            <div class="vuln-header">
+              <div class="vuln-type">
+                <fa-icon [icon]="faSearch"></fa-icon>
+                <span class="type-name">{{ vuln.tipo_id.nombre }}</span>
+              </div>
+              <span class="severity-badge" [ngClass]="getSeverityClass(vuln.nivel_severidad_id.nombre)">
+                {{ vuln.nivel_severidad_id.nombre }}
+              </span>
+            </div>
+            <div class="vuln-details">
+              <div class="vuln-field" *ngIf="vuln.parametro_afectado">
+                <strong>Endpoint:</strong> {{ vuln.parametro_afectado }}
+              </div>
+              <div class="vuln-field" *ngIf="vuln.url_afectada">
+                <strong>Parámetro:</strong> {{ vuln.url_afectada }}
+              </div>
+              <div class="vuln-description" *ngIf="vuln.descripcion">
+                {{ vuln.descripcion }}
+              </div>
+              <div class="vuln-suggestion" *ngIf="vuln.sugerencia">
+                <strong>Sugerencia:</strong> {{ vuln.sugerencia }}
+              </div>
+              <div class="vuln-reference" *ngIf="vuln.referencia">
+                <strong>Referencia:</strong> 
+                <a [href]="vuln.referencia" target="_blank" (click)="$event.stopPropagation()">{{ vuln.referencia }}</a>
+              </div>
+            </div>
+            <div class="vuln-action">
+              <span class="view-details-link">Ver detalles completos →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuestionario Tab -->
+    <div *ngIf="activeTab === 'cuestionario'" class="cuestionario-section">
+      <div class="section-card">
+        <h2>Resultados del Cuestionario</h2>
+        <p class="subtitle">Respuestas del cuestionario de seguridad</p>
+
+        <div class="quiz-summary">
+          <div class="quiz-stat">
+            <span class="quiz-label">Preguntas Contestadas:</span>
+            <span class="quiz-value">{{ report.cuestionario.length }}</span>
+          </div>
+          <div class="quiz-stat">
+            <span class="quiz-label">Respuestas Correctas:</span>
+            <span class="quiz-value correct">{{ correctAnswersCount }}</span>
+          </div>
+          <div class="quiz-stat">
+            <span class="quiz-label">Respuestas Incorrectas:</span>
+            <span class="quiz-value incorrect">{{ incorrectAnswersCount }}</span>
+          </div>
+          <div class="quiz-stat">
+            <span class="quiz-label">Puntuación:</span>
+            <span class="quiz-value">{{ report.puntuacion.puntos_cuestionario }}/{{ report.puntuacion.total_puntos_cuestionario }}</span>
+          </div>
+        </div>
+
+        <div class="question-list">
+          <div 
+            class="question-card" 
+            *ngFor="let quiz of report.cuestionario; let i = index"
+            [class.correct]="quiz.es_correcta"
+            [class.incorrect]="!quiz.es_correcta">
+            <div class="question-header">
+              <span class="question-number">Pregunta {{ i + 1 }}</span>
+              <span class="question-difficulty">{{ quiz.pregunta.dificultad }}</span>
+              <span class="question-points">{{ quiz.puntos_obtenidos }}/{{ quiz.pregunta.puntos }} puntos</span>
+            </div>
+            <div class="question-text">
+              {{ quiz.pregunta.texto_pregunta }}
+            </div>
+            <div class="answers-list">
+              <div 
+                class="answer-option" 
+                *ngFor="let answer of quiz.respuestas"
+                [class.selected]="answer._id === quiz.respuesta_seleccionada?._id"
+                [class.correct]="answer._id === quiz.respuesta_correcta?._id">
+                <span class="answer-icon">
+                  <span *ngIf="answer._id === quiz.respuesta_correcta?._id">✓</span>
+                  <span *ngIf="answer._id === quiz.respuesta_seleccionada?._id && !quiz.es_correcta">✗</span>
+                </span>
+                <span class="answer-text">{{ answer.texto_respuesta }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Cargando reporte...</p>
+</div>
+
+<div class="error-container" *ngIf="error && !loading">
+  <p>{{ error }}</p>
+  <button class="btn-primary" (click)="goBack()">Volver a Mis Escaneos</button>
+</div>

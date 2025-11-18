@@ -1,0 +1,122 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$rose-palette,
+      tertiary: mat.$red-palette,
+    ),
+    typography: Montserrat,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
+/* You can add global styles to this file, and also import other style files */
+:root {
+    --pink: #D63D6C;
+    --pink-hover: #D81B60;
+    --coral: #D57275;
+    --pale: #D5C2BC;
+    --gray: #C0CBCD;
+    --blue: #0EA5E9;
+    --cream: #EFEDED;
+    --red: #FF0000;
+    --text: #333;
+    --dark: #111827;
+    --white: #FFFFFF;
+  }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--cream); /* Blanco crema */
+    margin: 0;
+    padding: 0;
+  }
+
+  
+html, body { height: 100%; }
+body { margin: 0; font-family: Montserrat, "Helvetica Neue", sans-serif; }
+
+// Global mobile improvements
+* {
+  box-sizing: border-box;
+}
+
+// Better touch targets for mobile
+@media (max-width: 768px) {
+  // Better scrolling
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  // Prevent horizontal scroll
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+  
+  // Better text rendering
+  body,
+  input,
+  textarea,
+  select,
+  button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  // Prevent iOS zoom on input focus (only for text inputs that need it)
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  textarea {
+    font-size: 16px; // Prevents zoom on iOS when focused
+  }
+}
+
+// Text overflow handling
+@media (max-width: 480px) {
+  h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  // Prevent long URLs from breaking layout
+  a[href^="http"],
+  a[href^="https"] {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+}

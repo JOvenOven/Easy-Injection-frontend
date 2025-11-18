@@ -1,0 +1,403 @@
+<div class="account">
+    <h1 class="account-title">Mi cuenta</h1>
+    <p class="account-subtitle">
+      Gestiona tu información de cuenta y preferencias de seguridad
+    </p>
+
+    <!-- Notification Display -->
+    <div *ngIf="showNotification" 
+         class="notification" 
+         [ngClass]="notificationType === 'error' ? 'submit-error' : 'submit-success'">
+      <span>{{ notificationMessage }}</span>
+      <button class="notification-close" (click)="hideNotification()">&times;</button>
+    </div>
+  
+    <div class="account-container">
+      <!-- Menú lateral -->
+      <aside class="account-sidebar">
+        <ul>
+          <li [class.active]="activeTab === 'info'" (click)="scrollToSection('perfil')">
+            <fa-icon [icon]="faUser"></fa-icon> Información
+          </li>
+          <li [class.active]="activeTab === 'security'" (click)="navigateToSecurity()">
+            <fa-icon [icon]="faLock"></fa-icon> Seguridad
+          </li>
+          <li (click)="downloadHelp()">
+            <fa-icon [icon]="faQuestionCircle"></fa-icon> Ayuda
+          </li>
+        </ul>
+        <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+      </aside>
+  
+      <!-- Panel principal -->
+      <div class="account-content">
+        <!-- Información personal -->
+        <div class="card" id="perfil" *ngIf="activeTab === 'info'">
+          <div class="card-header">
+            <h3>Perfil</h3>
+            <button class="btn-outline" (click)="openEditProfileModal()">Editar perfil</button>
+          </div>
+          <div class="profile-info">
+            <img [src]="getAvatarPath(user.perfil?.avatarId || 'avatar1')" alt="Avatar" class="avatar" />
+            <div>
+              <p><strong>Nombre de usuario:</strong> {{ user.username }}</p>
+              <p><strong>Correo electrónico:</strong> {{ user.email }}</p>
+              <p><strong>Último inicio de sesión:</strong> {{ formatDateTime(user.ultimo_login) }}</p>
+              <p><strong>Cuenta creada el:</strong> {{ formatDate(user.fecha_registro) }}</p>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Sesiones activas -->
+        <div class="card" *ngIf="activeTab === 'info'">
+          <div class="card-header">
+            <h3>Sesiones activas</h3>
+            <button class="btn-outline" (click)="closeAllSessions()" *ngIf="sessions.length > 1">
+              Cerrar todas
+            </button>
+          </div>
+          <p class="text-muted">Dispositivos donde tu cuenta está actualmente iniciada</p>
+          
+          <div class="sessions-list" *ngIf="sessions.length > 0">
+            <div class="session-item" *ngFor="let session of sessions">
+              <div class="session-icon">
+                <fa-icon [icon]="getDeviceIcon(session.device)"></fa-icon>
+              </div>
+              <div class="session-info">
+                <div class="session-header">
+                  <strong>{{ session.device || 'Dispositivo desconocido' }}</strong>
+                  <span class="current-badge" *ngIf="isCurrentSession(session)">Activo ahora</span>
+                </div>
+                <div class="session-details">
+                  <span><fa-icon [icon]="getBrowserIcon(session.browser)"></fa-icon> {{ session.browser || 'Navegador desconocido' }}</span>
+                  <span class="separator">•</span>
+                  <span><fa-icon [icon]="faMapMarkerAlt"></fa-icon> {{ session.location || 'Ubicación desconocida' }}</span>
+                </div>
+                <div class="session-meta">
+                  <span>{{ formatLastActivity(session.lastActivity) }}</span>
+                </div>
+              </div>
+                <button 
+                class="btn-close-session" 
+                (click)="closeSession(session._id)"
+                [title]="isCurrentSession(session) ? 'Cerrar sesión (desconectar)' : 'Cerrar sesión'">
+                <fa-icon [icon]="faTimes"></fa-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="sessions-actions" *ngIf="sessions.length > 0">
+            <button class="btn-danger-outline" (click)="closeAllSessionsAndLogout()">
+              Cerrar todas las sesiones
+            </button>
+          </div>
+
+          <div class="empty-sessions" *ngIf="sessions.length === 0">
+            <p>No hay sesiones activas</p>
+          </div>
+        </div>
+
+        <!-- Seguridad -->
+        <div class="card" id="seguridad" *ngIf="activeTab === 'security'">
+          <div class="card-header">
+            <h3>Seguridad</h3>
+          </div>
+          <p class="text-muted">Gestiona tu contraseña y autenticación de dos factores</p>
+
+          <!-- Change Password Section -->
+          <div class="security-section">
+            <div class="security-item">
+              <div class="security-icon">
+                <fa-icon [icon]="faLock"></fa-icon>
+              </div>
+              <div class="security-info">
+                <h4>Contraseña</h4>
+                <p>Cambia tu contraseña regularmente para mayor seguridad</p>
+              </div>
+              <button class="btn-outline" (click)="openChangePasswordModal()">
+                Cambiar contraseña
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Eliminar cuenta -->
+        <div class="card danger-zone" *ngIf="activeTab === 'info'">
+          <div class="card-header">
+            <h3>Eliminar cuenta</h3>
+          </div>
+          <p class="text-muted">
+            Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, asegúrate de que realmente deseas hacer esto.
+          </p>
+          <button type="button" class="btn-danger" (click)="openDeleteAccountModal()">
+            Eliminar mi cuenta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="modal-overlay" *ngIf="showPasswordModal" (click)="closeChangePasswordModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Cambiar contraseña</h3>
+          <button class="modal-close" (click)="closeChangePasswordModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-description">
+            Crea una nueva contraseña segura que no uses en otros sitios
+          </p>
+
+          <!-- Password Change Notification -->
+          <div *ngIf="showChangePasswordMessage" 
+               class="modal-notification" 
+               [ngClass]="changePasswordMessageType === 'error' ? 'submit-error' : 'submit-success'">
+            <span>{{ changePasswordMessage }}</span>
+            <button class="notification-close" (click)="hideChangePasswordNotification()">&times;</button>
+          </div>
+          
+          <form [formGroup]="changePasswordForm" (ngSubmit)="changePassword()">
+            <div class="form-group">
+              <label for="currentPassword">Contraseña actual</label>
+              <div class="password-input">
+                <input 
+                  [type]="showCurrentPassword ? 'text' : 'password'" 
+                  id="currentPassword"
+                  formControlName="currentPassword"
+                  placeholder="Ingresa tu contraseña actual"
+                >
+                <!-- <button type="button" class="password-toggle" (click)="togglePasswordVisibility('current')">
+                  {{ showCurrentPassword ? '🙈' : '👁️' }}
+                </button> -->
+              </div>
+              <div class="error-message" *ngIf="changePasswordForm.get('currentPassword')?.invalid && changePasswordForm.get('currentPassword')?.touched">
+                La contraseña actual es requerida
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">Nueva contraseña</label>
+              <div class="password-input">
+                <input 
+                  [type]="showNewPassword ? 'text' : 'password'" 
+                  id="newPassword"
+                  formControlName="newPassword"
+                  placeholder="Ingresa tu nueva contraseña"
+                >
+                <!-- <button type="button" class="password-toggle" (click)="togglePasswordVisibility('new')">
+                  {{ showNewPassword ? '🙈' : '👁️' }}
+                </button> -->
+              </div>
+              <div class="error-message" *ngIf="changePasswordForm.get('newPassword')?.invalid && changePasswordForm.get('newPassword')?.touched">
+                <div *ngIf="changePasswordForm.get('newPassword')?.errors?.['required']">La nueva contraseña es requerida</div>
+                <div *ngIf="changePasswordForm.get('newPassword')?.errors?.['minlength']">La contraseña debe tener al menos 8 caracteres</div>
+                <div *ngIf="changePasswordForm.get('newPassword')?.errors?.['pattern']">La contraseña debe contener al menos una mayúscula, una minúscula y un número</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirmar nueva contraseña</label>
+              <div class="password-input">
+                <input 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  id="confirmPassword"
+                  formControlName="confirmNewPassword"
+                  placeholder="Confirma tu nueva contraseña"
+                >
+                <!-- <button type="button" class="password-toggle" (click)="togglePasswordVisibility('confirm')">
+                  {{ showConfirmPassword ? '🙈' : '👁️' }}
+                </button> -->
+              </div>
+              <div class="error-message" *ngIf="changePasswordForm.get('confirmNewPassword')?.invalid && changePasswordForm.get('confirmNewPassword')?.touched">
+                <div *ngIf="changePasswordForm.get('confirmNewPassword')?.errors?.['required']">Confirma tu nueva contraseña</div>
+              </div>
+              <div class="error-message" *ngIf="changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.touched">
+                Las contraseñas no coinciden
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" (click)="closeChangePasswordModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-save" [disabled]="changePasswordForm.invalid || changingPassword">
+                <span *ngIf="changingPassword">Guardando...</span>
+                <span *ngIf="!changingPassword">Guardar cambios</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" *ngIf="showEditProfileModal" (click)="closeEditProfileModal()">
+      <div class="modal-content edit-profile-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Editar perfil</h3>
+          <button class="modal-close" (click)="closeEditProfileModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-description">
+            Actualiza tu información de perfil
+          </p>
+
+          <!-- Edit Profile Notification -->
+          <div *ngIf="showEditProfileMessage" 
+               class="modal-notification" 
+               [ngClass]="editProfileMessageType === 'error' ? 'submit-error' : 'submit-success'">
+            <span>{{ editProfileMessage }}</span>
+            <button class="notification-close" (click)="hideEditProfileNotification()">&times;</button>
+          </div>
+          
+          <form [formGroup]="editForm" (ngSubmit)="saveProfile()">
+            <!-- Tabs -->
+            <div class="profile-tabs">
+              <button type="button" 
+                      class="tab-button" 
+                      [class.active]="activeEditTab === 'username'"
+                      (click)="setActiveEditTab('username')">
+                Nombre de usuario
+              </button>
+              <button type="button" 
+                      class="tab-button" 
+                      [class.active]="activeEditTab === 'avatar'"
+                      (click)="setActiveEditTab('avatar')">
+                Avatar
+              </button>
+            </div>
+
+            <!-- Username Tab Content -->
+            <div class="tab-content" *ngIf="activeEditTab === 'username'">
+              <div class="form-group">
+                <label for="username">Nombre de usuario</label>
+                <input 
+                  type="text" 
+                  id="username"
+                  formControlName="username"
+                  placeholder="Ingresa tu nombre de usuario"
+                  class="username-input"
+                >
+                <div class="error-message" *ngIf="editForm.get('username')?.invalid && editForm.get('username')?.touched">
+                  {{ getUsernameErrorMessage() }}
+                </div>
+              </div>
+
+              <div class="username-requirements">
+                <h4>Requisitos del nombre de usuario:</h4>
+                <ul>
+                  <li>Debe tener entre 3 y 20 caracteres</li>
+                  <li>Solo puede contener letras, números y guiones bajos</li>
+                  <li>No puede contener espacios ni caracteres especiales</li>
+                  <li>Debe ser único</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Avatar Tab Content -->
+            <div class="tab-content" *ngIf="activeEditTab === 'avatar'">
+              <div class="current-avatar-section">
+                <h4>Avatar actual</h4>
+                <div class="current-avatar-display">
+                  <img [src]="getAvatarPath(selectedAvatar) || 'avatar1.png'" alt="Avatar actual" class="current-avatar-image">
+                  <p class="avatar-name">{{ getAvatarName(selectedAvatar) }}</p>
+                </div>
+              </div>
+
+              <div class="avatar-gallery">
+                <h4>Selecciona un avatar de la galería</h4>
+                <div class="avatar-grid">
+                  <div class="avatar-option" 
+                       *ngFor="let avatar of availableAvatars" 
+                       [class.selected]="selectedAvatar === avatar.id"
+                       (click)="selectAvatar(avatar.id)">
+                    <img [src]="avatar.path" [alt]="avatar.name" class="avatar-thumbnail">
+                    <div class="avatar-checkmark" *ngIf="selectedAvatar === avatar.id">✓</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" (click)="closeEditProfileModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving">
+                {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+              </button>              
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal-overlay" *ngIf="showDeleteAccountModal" (click)="closeDeleteAccountModal()">
+      <div class="modal-content delete-account-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Eliminar cuenta</h3>
+          <button class="modal-close" (click)="closeDeleteAccountModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="warning-message">
+            <fa-icon [icon]="faExclamationTriangle" class="warning-icon"></fa-icon>
+            <p>
+              Esta acción es permanente e irreversible. Se eliminarán todos tus datos, escaneos y progreso de aprendizaje.
+            </p>
+          </div>
+
+          <!-- Delete Account Notification -->
+          <div *ngIf="showDeleteAccountMessage" 
+               class="modal-notification" 
+               [ngClass]="deleteAccountMessageType === 'error' ? 'submit-error' : 'submit-success'">
+            <span>{{ deleteAccountMessage }}</span>
+            <button class="notification-close" (click)="hideDeleteAccountNotification()">&times;</button>
+          </div>
+          
+          <form [formGroup]="deleteAccountForm" (ngSubmit)="confirmDeleteAccount()">
+            <div class="form-group">
+              <label for="deletePassword">Ingresa tu contraseña para confirmar</label>
+              <div class="password-input">
+                <input 
+                  [type]="showDeletePassword ? 'text' : 'password'" 
+                  id="deletePassword"
+                  formControlName="password"
+                  placeholder="Contraseña"
+                >
+              </div>
+              <div class="error-message" *ngIf="deleteAccountForm.get('password')?.invalid && deleteAccountForm.get('password')?.touched">
+                La contraseña es requerida para eliminar la cuenta
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input 
+                  type="checkbox"
+                  formControlName="confirmDelete"
+                >
+                <span>Confirmo que deseo eliminar mi cuenta permanentemente</span>
+              </label>
+              <div class="error-message" *ngIf="deleteAccountForm.get('confirmDelete')?.invalid && deleteAccountForm.get('confirmDelete')?.touched">
+                Debes confirmar que deseas eliminar tu cuenta
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" (click)="closeDeleteAccountModal()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-danger" [disabled]="deleteAccountForm.invalid || deletingAccount">
+                <span *ngIf="deletingAccount">Eliminando...</span>
+                <span *ngIf="!deletingAccount">Eliminar mi cuenta</span>
+              </button>              
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>

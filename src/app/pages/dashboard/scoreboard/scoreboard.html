@@ -1,0 +1,174 @@
+<div class="scoreboard-container">
+  <!-- Header -->
+  <div class="scoreboard-header">
+    <h1><fa-icon [icon]="faTrophy"></fa-icon> Mis Puntuaciones</h1>
+    <p class="subtitle">Ranking de tus escaneos por puntuación</p>
+  </div>
+
+  <!--
+  <div class="faq-accordion">
+    <button class="accordion-button" (click)="toggleAccordion()">
+      <span>¿Cómo funciona?</span>
+      <span class="accordion-icon">{{ isAccordionOpen ? '−' : '+' }}</span>
+    </button>
+    <div class="accordion-content" [class.open]="isAccordionOpen">
+      <ul>
+        <li>Cada pregunta correcta vale <strong>10 puntos</strong></li>
+        <li>Las omisiones <strong>no cuentan</strong></li>
+        <li>Cada vulnerabilidad encontrada resta <strong>2 puntos</strong></li>
+      </ul>
+    </div>
+  </div>
+-->
+  <div class="user-stats-card" *ngIf="userStats">
+    <div class="stats-header">
+      <h2>Resumen General</h2>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-icon"><fa-icon [icon]="faStar"></fa-icon></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatScore(userStats.totalPoints) }}</div>
+          <div class="stat-label">Puntos Totales</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><fa-icon [icon]="faBullseye"></fa-icon></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ userStats.totalScans }}</div>
+          <div class="stat-label">Escaneos</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><fa-icon [icon]="faBug"></fa-icon></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ userStats.totalVulnerabilities }}</div>
+          <div class="stat-label">Vulnerabilidades</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><fa-icon [icon]="faChartBar"></fa-icon></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatScore(userStats.avgScore) }}</div>
+          <div class="stat-label">Promedio</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon"><fa-icon [icon]="faMedal"></fa-icon></div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatScore(userStats.bestScore) }}</div>
+          <div class="stat-label">Mejor Puntaje</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeframe Selector -->
+  <div class="timeframe-selector">
+    <button 
+      class="timeframe-btn" 
+      [class.active]="timeframe === 'all'"
+      (click)="changeTimeframe('all')">
+      Todo el tiempo
+    </button>
+    <button 
+      class="timeframe-btn" 
+      [class.active]="timeframe === 'month'"
+      (click)="changeTimeframe('month')">
+      Este mes
+    </button>
+    <button 
+      class="timeframe-btn" 
+      [class.active]="timeframe === 'week'"
+      (click)="changeTimeframe('week')">
+      Esta semana
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando scoreboard...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error && !loading">
+    <div class="error-icon"><fa-icon [icon]="faExclamationTriangle"></fa-icon></div>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="loadScoreboard()">Reintentar</button>
+  </div>
+
+  <!-- Scoreboard Table -->
+  <div class="scoreboard-table" *ngIf="!loading && !error">
+    <div class="table-header">
+      <div class="col-rank">Posición</div>
+      <div class="col-scan">Escaneo</div>
+      <div class="col-score">Puntuación</div>
+      <div class="col-questions">Respuestas</div>
+      <div class="col-vulns">Vulnerabilidades</div>
+      <div class="col-grade">Calificación</div>
+      <div class="col-date">Fecha</div>
+    </div>
+
+    <div class="table-body">
+      <div 
+        *ngFor="let entry of scoreboard; let i = index" 
+        class="table-row">
+        
+        <!-- Rank -->
+        <div class="col-rank" data-label="Posición">
+          <span class="rank-badge" [class.medal]="entry.rank <= 3">
+            <span *ngIf="entry.rank <= 3" class="medal-icon">{{ getMedalIcon(entry.rank) }}</span>
+            <span *ngIf="entry.rank > 3">{{ entry.rank }}</span>
+          </span>
+        </div>
+
+        <!-- Scan -->
+        <div class="col-scan" data-label="Escaneo">
+          <div class="scan-info">
+            <div class="scan-alias">{{ entry.scanAlias }}</div>
+            <div class="scan-url">{{ entry.scanUrl }}</div>
+          </div>
+        </div>
+
+        <!-- Score -->
+        <div class="col-score" data-label="Puntuación">
+          <span class="score-value">{{ formatScore(entry.score) }}</span>
+          <span class="score-label">pts</span>
+        </div>
+
+        <!-- Questions -->
+        <div class="col-questions" data-label="Respuestas">
+          <span class="correct">{{ entry.correctAnswers }}</span> / {{ entry.totalQuestions }}
+          <div class="question-label">Correctas</div>
+        </div>
+
+        <!-- Vulnerabilities -->
+        <div class="col-vulns" data-label="Vulnerabilidades">
+          <span class="vuln-count" [class.has-vulns]="entry.vulnerabilitiesFound > 0">
+            {{ entry.vulnerabilitiesFound }}
+          </span>
+        </div>
+
+        <!-- Grade -->
+        <div class="col-grade" data-label="Calificación">
+          <span class="grade-badge" [ngClass]="getGradeClass(entry.grade)">
+            {{ entry.grade }}
+          </span>
+        </div>
+
+        <!-- Date -->
+        <div class="col-date" data-label="Fecha">
+          {{ formatDate(entry.completedAt) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="scoreboard.length === 0">
+      <div class="empty-icon"><fa-icon [icon]="faChartBar"></fa-icon></div>
+      <h3>No hay puntuaciones disponibles</h3>
+      <p>Completa algunos escaneos para ver tus puntuaciones aquí</p>
+    </div>
+  </div>
+</div>

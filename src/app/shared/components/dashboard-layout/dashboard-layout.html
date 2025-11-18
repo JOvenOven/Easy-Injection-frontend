@@ -1,0 +1,12 @@
+<div class="dashboard-layout" [ngClass]="{ 'sidebar-collapsed': isSidebarCollapsed }">
+  <!-- Sidebar Menu -->
+  <app-menu></app-menu>
+  
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

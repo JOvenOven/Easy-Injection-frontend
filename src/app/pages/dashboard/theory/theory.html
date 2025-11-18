@@ -1,0 +1,61 @@
+<div class="theory">
+  <div class="container">
+    <div class="content-wrapper">
+      
+      <!-- Encabezado -->
+      <div class="header-section">
+        <div class="header-content">
+          <h1 class="main-title">Teoría y Recursos</h1>
+          <p class="main-subtitle">
+            Aprende sobre vulnerabilidades XSS e inyección SQL con nuestros recursos educativos
+          </p>
+        </div>
+      </div>
+
+      <!-- Banner principal -->
+      <div class="hero-banner" [ngClass]="{ 'banner-continued': hasStartedAnyContent }">
+        <div class="banner-background"></div>
+        <div class="banner-content">
+          <span class="badge" *ngIf="hasNewContent">Nuevo contenido</span>
+          <h2 class="banner-title">{{ bannerTitle }}</h2>
+          <p class="banner-description">{{ bannerDescription }}</p>
+          <button class="btn-hero" (click)="navigateToSyllabus()">
+            <img src="/lesson.svg" alt="Lección" class="btn-icon">
+            {{ buttonText }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Categorías destacadas -->
+      <div class="featured-section">
+        <div class="section-header">
+          <h2 class="section-title">Categorías disponibles</h2>
+          <!-- <button class="view-all-link" (click)="navigateToCategories()">
+            Ver todas <span class="chevron">›</span>
+          </button> -->
+        </div>
+
+        <div class="categories-grid">
+          <div 
+            *ngFor="let category of featuredCategories" 
+            class="category-card"
+            (click)="navigateToCategory(category.id)"
+          >
+            <div class="card-header">
+              <div class="icon-wrapper" [ngClass]="category.colorClass">
+                <img [src]="category.icon" [alt]="category.title" class="category-icon">
+              </div>
+              <h3 class="card-title">{{ category.title }}</h3>
+            </div>
+            <div class="card-content">
+              <p class="card-description">{{ category.description }}</p>
+            </div>
+            <div class="card-footer">
+              <p class="resource-count">{{ category.count }} módulos disponibles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

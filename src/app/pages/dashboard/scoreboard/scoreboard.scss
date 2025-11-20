@@ -340,7 +340,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 80px 2fr 120px 140px 120px 140px 120px;
+  grid-template-columns: 80px minmax(0, 2fr) 120px 140px 120px 140px 120px;
   gap: clamp(12px, 2vw, 16px);
   padding: clamp(14px, 2vw, 16px) clamp(16px, 2.5vw, 20px);
   background: #f9fafb;
@@ -364,7 +364,7 @@
 .table-body {
   .table-row {
     display: grid;
-    grid-template-columns: 80px 2fr 120px 140px 120px 140px 120px;
+    grid-template-columns: 80px minmax(0, 2fr) 120px 140px 120px 140px 120px;
     gap: clamp(12px, 2vw, 16px);
     padding: clamp(14px, 2vw, 16px) clamp(16px, 2.5vw, 20px);
     align-items: center;
@@ -419,15 +419,22 @@
 
 // Scan column styles
 .col-scan {
+  min-width: 0;
+  overflow: hidden;
+  
   .scan-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0; // Permite que el contenedor se contraiga correctamente
 
     .scan-alias {
       font-weight: 600;
       color: #111827;
       font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .scan-url {
@@ -705,13 +712,26 @@
   }
 
   .col-scan {
-    flex-direction: column;
     align-items: flex-start !important;
     gap: 4px;
 
+    &::before {
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+
     .scan-info {
-      width: 100%;
       flex: 1;
+      min-width: 0;
+      max-width: calc(100vw - 180px); // Deja espacio para el label y padding
+
+      .scan-alias,
+      .scan-url {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 
@@ -778,12 +798,22 @@
 
   .col-scan .scan-alias {
     font-size: 13px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .col-scan .scan-url {
     font-size: 11px;
-    word-break: break-all;
-    white-space: normal;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .col-scan .scan-info {
+    max-width: calc(100vw - 160px); // Menos espacio en móviles pequeños
   }
 
   .col-score .score-value {

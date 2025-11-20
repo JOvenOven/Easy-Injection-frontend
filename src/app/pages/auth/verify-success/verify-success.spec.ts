@@ -1,18 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { VerifySuccessComponent } from './verify-success';
 
-import { VerifySuccess } from './verify-success';
-
-describe('VerifySuccess', () => {
-  let component: VerifySuccess;
-  let fixture: ComponentFixture<VerifySuccess>;
+describe('VerifySuccessComponent', () => {
+  let component: VerifySuccessComponent;
+  let fixture: ComponentFixture<VerifySuccessComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VerifySuccess]
+      imports: [VerifySuccessComponent, HttpClientTestingModule, RouterTestingModule]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(VerifySuccess);
+    fixture = TestBed.createComponent(VerifySuccessComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { Menu } from './menu';
 
 describe('Menu', () => {
@@ -8,7 +9,7 @@ describe('Menu', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Menu]
+      imports: [Menu, HttpClientTestingModule, RouterTestingModule]
     })
     .compileComponents();
 

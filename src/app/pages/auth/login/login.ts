@@ -65,13 +65,6 @@ export class LoginComponent implements OnInit {
           next: (res: any) => {
             this.isSubmitting = false;
 
-            if (res.requires2FA) {
-              this.router.navigate(['/verify-2fa'], {
-                queryParams: { email: res.email }
-              });
-              return;
-            }
-
             if (res.token) {
               localStorage.setItem('authToken', res.token);
             }

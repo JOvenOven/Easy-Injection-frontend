@@ -713,25 +713,11 @@ $crema: #efeded;
       font-weight: 600;
       color: #1e293b;
       font-size: 0.95rem;
-      
-      // Special styling for 2FA code input label
-      &[for="token"] {
-        text-align: center;
-        font-size: 1rem;
-        color: #475569;
-        margin-bottom: 1rem;
-      }
-      
-      // Special styling for disable 2FA password label
-      &[for="disablePassword"] {
-        font-size: 1rem;
-        color: #475569;
-        margin-bottom: 0.875rem;
-      }
     }
-    
-    // Password input in disable 2FA modal
-    input[type="password"][id="disablePassword"] {
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
       width: 100%;
       padding: 0.875rem 1rem;
       font-size: 1rem;
@@ -1578,11 +1564,6 @@ $crema: #efeded;
       background: #fff5f8;
       border-radius: 12px;
 
-      &.twofa-icon {
-        color: #10b981;
-        background: #d1fae5;
-      }
-
       fa-icon {
         font-size: 1.5rem;
       }
@@ -1603,28 +1584,6 @@ $crema: #efeded;
         color: $gris-oscuro;
         font-size: 0.9rem;
         line-height: 1.5;
-      }
-
-      .twofa-status {
-        margin-top: 0.5rem;
-
-        .status-badge {
-          display: inline-block;
-          padding: 0.25rem 0.75rem;
-          border-radius: 12px;
-          font-size: 0.85rem;
-          font-weight: 600;
-
-          &.enabled {
-            background: #d1fae5;
-            color: #065f46;
-          }
-
-          &.disabled {
-            background: #fee2e2;
-            color: #991b1b;
-          }
-        }
       }
     }
 
@@ -1677,37 +1636,7 @@ $crema: #efeded;
   color: $gris-oscuro;
 }
 
-// 2FA Code Input Container - Additional form styles
-.modal-body {
-  .form-group {
-    // Special container for 2FA code input
-    .code-input {
-      margin-bottom: 0;
-    }
-
-    // Responsive form inputs
-    input[type="text"],
-    input[type="password"],
-    input[type="email"] {
-      @media (max-width: 768px) {
-        font-size: clamp(0.95rem, 2vw, 1rem);
-        padding: clamp(0.7rem, 2vw, 0.875rem) clamp(0.875rem, 2vw, 1rem);
-        min-height: 44px;
-      }
-    }
-
-    label {
-      @media (max-width: 768px) {
-        font-size: clamp(0.9rem, 2vw, 0.95rem);
-        margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
-      }
-    }
-  }
-}
-
-.code-input {
-  width: 100%;
-  max-width: 300px;
+.success-message {
   margin: 0 auto;
   padding: 1.25rem 1.5rem;
   text-align: center;
@@ -1773,24 +1702,6 @@ $crema: #efeded;
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-8px); }
     75% { transform: translateX(8px); }
-  }
-}
-
-// Responsive adjustments for 2FA input
-@media (max-width: 768px) {
-  .code-input {
-    max-width: 100%;
-    font-size: 1.5rem;
-    padding: 1rem 1.25rem;
-    letter-spacing: 0.5rem;
-    
-    &::placeholder {
-      letter-spacing: 0.5rem;
-    }
-    
-    &:focus {
-      letter-spacing: 0.5rem;
-    }
   }
 }
 

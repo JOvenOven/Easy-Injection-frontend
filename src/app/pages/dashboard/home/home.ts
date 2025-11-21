@@ -57,7 +57,7 @@ export class Home implements OnInit {
   loadActivities() {
     this.activityService.getActivities().subscribe({
       next: (activities) => {
-        this.recentActivity = activities.slice(0, 5);
+        this.recentActivity = activities.slice(0, 3);
       },
       error: (error) => {
       }

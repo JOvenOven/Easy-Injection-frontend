@@ -6,27 +6,32 @@
 export const LESSON_IDS = {
   SECURITY_BASICS: [
     'intro-seguridad',
-    'owasp-top-10'
+    'amenazas-vulnerabilidades',
+    'fundamentos-tecnicos',
+    'owasp-top-10',
+    'modelo-amenazas-vectores',
+    'impacto-operacional',
+    'ciclo-seguro-devsecops'
   ],
   XSS: [
     'fundamentos-xss',
     'tipos-xss',
-    'contextos-salida-xss',
-    'dom-xss-ejecucion-cliente',
+    'contextos-vectores-xss',
+    'ejemplos-xss',
+    'evasion-xss',
     'prevencion-xss',
-    'csp-y-headers',
-    'diseno-seguro-y-procesos',
-    'casos-avanzados-xss'
+    'impacto-xss',
+    'diseño-seguro-xss'
   ],
   SQL_INJECTION: [
     'fundamentos-sqli',
     'tipos-sqli',
-    'fundamentos-sql-y-acceso',
-    'raices-sqli',
+    'ejemplos-sqli',
+    'fingerprinting-dbms',
+    'evasion-sqli',
     'prevencion-sqli',
-    'arquitectura-operaciones',
-    'analisis-priorizacion-riesgo',
-    'casos-avanzados-sqli'
+    'impacto-sqli',
+    'diseño-seguro-sqli'
   ]
 };
 

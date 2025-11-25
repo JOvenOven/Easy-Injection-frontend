@@ -38,8 +38,8 @@ export class SyllabusComponent implements OnInit {
   progressPercentage = 0;
   completedLessons = 0;
   totalLessons = 0;
-  completedIndividualLessons = 0; // Individual lesson count
-  totalIndividualLessons = 0; // Total individual lessons (18)
+  completedIndividualLessons = 0;
+  totalIndividualLessons = 0;
   loading = false;
   
   // Filtered lessons for search
@@ -56,17 +56,57 @@ export class SyllabusComponent implements OnInit {
   securityBasicsLessons: Lesson[] = [
     {
       id: 'intro-seguridad',
-      title: 'Introducción a la Seguridad Web',
-      description: 'Conceptos básicos y terminología de seguridad',
-      content: 'Aprende los conceptos fundamentales de seguridad web, incluyendo los principios de defensa en profundidad, mínimo privilegio y superficie de ataque.',
+      title: 'Conceptos clave de seguridad, contexto y retos en web',
+      description: 'Principios fundamentales de la seguridad en aplicaciones web.',
+      content: 'Explora los conceptos esenciales de seguridad web, su contexto histórico y los retos actuales.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'amenazas-vulnerabilidades',
+      title: 'Amenazas y vulnerabilidades',
+      description: 'Los riesgos más frecuentes y sus implicaciones en el entorno web moderno.',
+      content: 'Conoce las amenazas más relevantes, la explotación de vulnerabilidades y su impacto.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'fundamentos-tecnicos',
+      title: 'Fundamentos técnicos',
+      description: 'Estructura del protocolo HTTP, mecanismos de autenticación y gestión de sesiones.',
+      content: 'Presenta el funcionamiento de HTTP, la importancia de las sesiones, cookies y los métodos de autenticación.',
       completed: false,
       started: false
     },
     {
       id: 'owasp-top-10',
       title: 'OWASP Top 10',
-      description: 'Las vulnerabilidades más críticas según OWASP',
+      description: 'Las vulnerabilidades más críticas según OWASP.',
       content: 'Conoce las diez vulnerabilidades más críticas según el Open Web Application Security Project (OWASP) y por qué son importantes.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'modelo-amenazas-vectores',
+      title: 'Modelo de amenazas y vectores de ataque frecuentes',
+      description: 'Cómo se identifican y clasifican las amenazas en la web.',
+      content: 'Analiza los modelos y metodologías para entender, mapear y categorizar los vectores de ataque más comunes.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'impacto-operacional',
+      title: 'Impacto operativo de los ataques web',
+      description: 'Consecuencias reales de incidentes de seguridad en organizaciones.',
+      content: 'Examina los efectos de violaciones de seguridad en empresas u organismos, considerando casos reales y estudios recientes.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'ciclo-seguro-devsecops',
+      title: 'Introducción al ciclo seguro de desarrollo (DevSecOps)',
+      description: 'Metodologías integradas para el desarrollo seguro de software.',
+      content: 'Describe el enfoque DevSecOps para incorporar seguridad en todas las fases del ciclo de desarrollo.',
       completed: false,
       started: false
     }
@@ -77,63 +117,63 @@ export class SyllabusComponent implements OnInit {
       id: 'fundamentos-xss',
       title: 'Fundamentos de XSS',
       description: '¿Qué es XSS y cómo funciona?',
-      content: 'Aprende qué es Cross-Site Scripting, cómo funciona y por qué sigue siendo una de las vulnerabilidades más comunes en aplicaciones web modernas.',
+      content: 'Aprende qué es Cross-Site Scripting, cómo funciona y por qué representa un riesgo crítico en el desarrollo de aplicaciones web.',
       completed: false,
       started: false
     },
     {
       id: 'tipos-xss',
       title: 'Tipos de XSS',
-      description: 'Reflejado, Almacenado y DOM-based XSS',
-      content: 'Explora los tres tipos principales de XSS: reflejado, almacenado y basado en DOM, comprendiendo cómo se manifiestan y qué los diferencia.',
+      description: 'Clasificación y características de los distintos tipos de XSS.',
+      content: 'Explora los tres tipos principales de XSS: reflejado, almacenado y basado en DOM, comprendiendo sus mecanismos y casos relevantes.',
       completed: false,
       started: false
     },
     {
-      id: 'contextos-salida-xss',
-      title: 'Contextos de salida y su importancia',
-      description: 'HTML, atributos, JavaScript, URLs y JSON',
-      content: 'Descubre cómo el contexto donde se inserta la información determina el tipo de protección necesaria y aprende a reconocer los más comunes.',
+      id: 'contextos-vectores-xss',
+      title: 'Contextos y vectores de inyección',
+      description: '¿Dónde y cómo puede inyectarse código malicioso mediante XSS?',
+      content: 'Examina los diferentes contextos de inyección de XSS, , explicando cómo se aprovechan estos vectores en ataques reales.',
       completed: false,
       started: false
     },
     {
-      id: 'dom-xss-ejecucion-cliente',
-      title: 'XSS basado en DOM',
-      description: 'Vulnerabilidades en el lado del cliente',
-      content: 'Comprende cómo los scripts que manipulan el DOM pueden generar vulnerabilidades y aprende a manejar los datos del navegador de forma segura.',
+      id: 'ejemplos-xss',
+      title: 'Ejemplos clásicos de explotación: payloads y escenarios',
+      description: 'Demostraciones y análisis de casos prácticos de XSS.',
+      content: 'Conzca ejemplos concretos de explotación de XSS para ilustrar el impacto de la vulnerabilidad en aplicaciones web.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'evasion-xss',
+      title: 'Técnicas de evasión y bypass de defensas',
+      description: 'Métodos utilizados para evadir controles de seguridad contra XSS.',
+      content: 'Explica las estrategias más empleadas para saltarse filtros y mecanismos de defensa.',
       completed: false,
       started: false
     },
     {
       id: 'prevencion-xss',
-      title: 'Prevención de XSS',
-      description: 'Técnicas y mejores prácticas',
-      content: 'Conoce las estrategias más efectivas para prevenir ataques XSS, como el escapado por contexto, la validación de entradas y el uso de APIs seguras.',
+      title: 'Estrategias de prevención y mitigación',
+      description: '¿Cómo proteger aplicaciones web frente a XSS?',
+      content: 'Explica las mejores prácticas, enfoques y herramientas utilizados para prevenir y mitigar XSS.',
       completed: false,
       started: false
     },
     {
-      id: 'csp-y-headers',
-      title: 'Content Security Policy y cabeceras HTTP',
-      description: 'Defensa en profundidad contra XSS',
-      content: 'Aprende cómo aplicar Content Security Policy y otras cabeceras de seguridad para reforzar la protección de tu aplicación frente a ataques XSS.',
+      id: 'impacto-xss',
+      title: 'Impacto y riesgos reales del XSS en organizaciones',
+      description: 'Consecuencias y daños atribuibles a la explotación de XSS.',
+      content: 'Analiza el efecto de ataques XSS sobre la confidencialidad, integridad y disponibilidad de datos.',
       completed: false,
       started: false
     },
     {
-      id: 'diseno-seguro-y-procesos',
-      title: 'Diseño seguro y ciclo de desarrollo',
-      description: 'Buenas prácticas en el desarrollo web',
-      content: 'Descubre cómo integrar medidas de seguridad contra XSS en cada etapa del desarrollo, desde el diseño hasta las revisiones de código.',
-      completed: false,
-      started: false
-    },
-    {
-      id: 'casos-avanzados-xss',
-      title: 'Casos avanzados de XSS',
-      description: 'Aplicaciones modernas y nuevos desafíos',
-      content: 'Analiza escenarios complejos como aplicaciones SPA, uso de terceros y editores enriquecidos, y cómo adaptar las defensas a entornos modernos.',
+      id: 'diseño-seguro-xss',
+      title: 'Diseño seguro y buenas prácticas frente a XSS',
+      description: 'Recomendaciones para el desarrollo seguro respecto a XSS.',
+      content: 'Analiza pautas y ejemplos de diseño seguro que ayudan a evitar la introducción de XSS en el código.',
       completed: false,
       started: false
     }
@@ -143,64 +183,64 @@ export class SyllabusComponent implements OnInit {
     {
       id: 'fundamentos-sqli',
       title: 'Fundamentos de Inyección SQL',
-      description: '¿Qué es la Inyección SQL y por qué importa?',
-      content: 'Aprende qué es la inyección SQL, cómo un dato no confiable puede alterar una consulta y qué impactos puede tener sobre la confidencialidad e integridad de la base de datos.',
+      description: '¿Qué es la Inyección SQL y cómo amenaza la seguridad?',
+      content: 'Explica qué es la inyección SQL, cómo se produce y presenta ejemplos para entender su naturaleza y el alcance del riesgo.',
       completed: false,
       started: false
     },
     {
       id: 'tipos-sqli',
       title: 'Tipos de Inyección SQL',
-      description: 'In-band, inferencial y out-of-band',
-      content: 'Conoce las familias principales de Inyección SQL: in-band, inferencial (blind) y out-of-band, y entiende cómo difieren en visibilidad y método de explotación.',
+      description: 'Clasificación de variantes de ataques SQL injection',
+      content: 'Detalla las principales variantes de inyección SQL incluyendo sus diferencias técnicas, escenarios típicos y métodos empleados en auditorías y ataques.',
       completed: false,
       started: false
     },
     {
-      id: 'fundamentos-sql-y-acceso',
-      title: 'Fundamentos de SQL y acceso a datos',
-      description: 'Consultas, drivers, y ORMs',
-      content: 'Revisa las bases del lenguaje SQL, cómo las aplicaciones construyen consultas y el papel de drivers y ORMs en la seguridad de las consultas.',
+      id: 'ejemplos-sqli',
+      title: 'Ejemplos y técnicas comunes de explotación',
+      description: 'Payloads, queries y métodos frecuentes utilizados en la inyección SQL.',
+      content: 'Ejemplos de consultas maliciosas, manipulación de parámetros y extracción de información mediante inyección SQL, destacando la lógica detrás de cada técnica.',
       completed: false,
       started: false
     },
     {
-      id: 'raices-sqli',
-      title: '¿Por qué ocurren las inyecciones SQL?',
-      description: 'Patrones de código y diseño vulnerables',
-      content: 'Explora las causas comunes: concatenación de cadenas, falta de validación, uso indebido de APIs y su relación con decisiones de diseño inseguras.',
+      id: 'fingerprinting-dbms',
+      title: 'Reconocimiento y fingerprinting de bases de datos (DBMS)',
+      description: '¿Cómo identificar el tipo y versión de servidor en ataques de inyección SQL?',
+      content: 'Explica los métodos para reconocer el sistema gestor de base de datos (DBMS) objetivo en auditorías y ataques.',
+      completed: false,
+      started: false
+    },
+    {
+      id: 'evasion-sqli',
+      title: 'Técnicas avanzadas de evasión y manipulación',
+      description: 'Métodos para saltar filtros y controles tradicionales en SQLi.',
+      content: 'Describe las estrategias avanzadas que emplean los atacantes para evadir defensas, manipular entradas y explotar consultas SQL robustas.',
       completed: false,
       started: false
     },
     {
       id: 'prevencion-sqli',
-      title: 'Prevención de Inyección SQL',
-      description: 'Prepared statements, parametrización y validación',
-      content: 'Aprende las defensas efectivas: consultas parametrizadas, uso correcto de ORMs, validación por whitelist y separación de responsabilidades entre código y datos.',
+      title: 'Estrategias de defensa y prevención',
+      description: 'Buenas prácticas para proteger aplicaciones frente a la inyección SQL.',
+      content: 'Detalla las recomendaciones técnicas y de diseño seguro para impedir la explotación de inyección SQL.',
       completed: false,
       started: false
     },
     {
-      id: 'arquitectura-operaciones',
-      title: 'Arquitectura y operaciones seguras',
-      description: 'Principios operativos y detección',
-      content: 'Descubre medidas a nivel de arquitectura y operación: controles de acceso a la BD, monitoreo de consultas, WAF como capa adicional y planes de respuesta ante incidentes.',
+      id: 'impacto-sqli',
+      title: 'Impacto y consecuencias de la inyección SQL',
+      description: 'Efectos y daños derivados de ataques exitosos de inyección SQL.',
+      content: 'Expone los daños potenciales que pueden derivarse para una organización tras la explotación de inyección SQL.',
       completed: false,
       started: false
     },
     {
-      id: 'analisis-priorizacion-riesgo',
-      title: 'Análisis y priorización de riesgo',
-      description: 'Cómo valorar hallazgos y decidir acciones',
-      content: 'Aprende a evaluar severidad según datos expuestos, privilegios y exposición pública, y a priorizar correcciones basadas en impacto y probabilidad.',
-      completed: false,
-      started: false
-    },
-    {
-      id: 'casos-avanzados-sqli',
-      title: 'Casos avanzados y consideraciones modernas',
-      description: 'Procedimientos almacenados, ORMs complejos y NoSQL',
-      content: 'Analiza escenarios complejos como SQL dinámico, procedimientos almacenados, limitaciones de ORMs y riesgos comparativos en bases NoSQL, con estrategias para mitigarlos.',
+      id: 'diseño-seguro-sqli',
+      title: 'Arquitectura segura y buenas prácticas contra la inyección SQL',
+      description: 'Principios y recomendaciones para minimizar riesgos desde el diseño.',
+      content: 'Describe los enfoques arquitectónicos y recomendaciones de desarrollo seguro que permiten minimizar o eliminar la exposición a SQL Injection.',
       completed: false,
       started: false
     }
@@ -300,7 +340,7 @@ export class SyllabusComponent implements OnInit {
     ];
 
     // Count individual completed lessons
-    this.totalIndividualLessons = LESSON_COUNTS.TOTAL; // 18 total
+    this.totalIndividualLessons = LESSON_COUNTS.TOTAL;
     this.completedIndividualLessons = allLessons.filter(lesson => lesson.completed).length;
 
     // Count how many categories are fully completed (all lessons in category are done)

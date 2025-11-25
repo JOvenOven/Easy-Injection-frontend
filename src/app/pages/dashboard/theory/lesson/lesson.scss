@@ -474,7 +474,7 @@ $naranja: #D57275;
         color: #abb2bf !important;
 
         &::before {
-          content: "\f071 Código Vulnerable";
+          content: "Código Vulnerable";
           font-family: "Font Awesome 6 Free";
           font-weight: 900;
           position: absolute;
@@ -499,7 +499,7 @@ $naranja: #D57275;
         color: #abb2bf !important;
 
         &::before {
-          content: "\f058 Código Seguro";
+          content: "Código Seguro";
           font-family: "Font Awesome 6 Free";
           font-weight: 900;
           position: absolute;
@@ -691,7 +691,27 @@ $naranja: #D57275;
 }
 
 // Section completion button styles
-.lesson-content {
+::ng-deep .lesson-content {
+  text-align: justify;
+  text-justify: inter-word;
+
+  a[href] {
+    color: $rosa !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+
+    &:hover {
+      color: darken($rosa, 10%) !important;
+      border-bottom-color: $rosa;
+    }
+
+    &:visited {
+      color: darken($rosa, 5%) !important;
+    }
+  }
+
   button.section-completed,
   label.section-completed {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
